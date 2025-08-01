@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -133,23 +132,11 @@ const EarningCard = ({ label, value, icon, subtext, cta }: { label: string, valu
 
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({
+  const stats = {
     totalPatients: 1500,
     todayPatients: 65,
     appointments: 85,
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStats((prevStats) => ({
-        totalPatients: prevStats.totalPatients + 1,
-        todayPatients: prevStats.todayPatients + (Math.random() > 0.5 ? 1 : 0),
-        appointments: prevStats.appointments + (Math.random() > 0.7 ? 1 : -1),
-      }));
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
+  };
 
   return (
     <div className="space-y-6">
