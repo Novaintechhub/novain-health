@@ -7,26 +7,30 @@ import {
   Brain,
   HeartPulse,
   Search,
-  Stethoscope,
   ChevronRight,
+  CheckCircle2,
+  Calendar,
+  Clock,
+  MapPin,
+  ChevronLeft,
 } from "lucide-react";
 
 const DentistIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="48"
+    height="48"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M10.2 2.5c-.2.2-.4.5-.5.8l-2.2 4.4c-.1.2-.2.4-.2.6v8.4c0 .8.7 1.5 1.5 1.5h8.4c.8 0 1.5-.7 1.5-1.5v-8.4c0-.2-.1-.4-.2-.6L16.3 3.3c-.1-.3-.3-.6-.5-.8-.3-.3-.7-.5-1.1-.5h-3c-.4 0-.8.2-1.1.5Z" />
-    <path d="M12 18v-4" />
-    <path d="M12 2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+    <path d="M12.485 2.49a.5.5 0 0 0-.485.51v.002l-2.999 6c-.03.06-.06.12-.08.18L8.9 9.2a.5.5 0 0 0-.02.2v8.1a1.5 1.5 0 0 0 1.5 1.5h4.24a1.5 1.5 0 0 0 1.5-1.5V9.4a.5.5 0 0 0-.02-.2l-.022-.04-2.999-6a.5.5 0 0 0-.485-.51Z" />
+    <path d="M12.485 18v-4.5" />
+    <path d="M12.485 2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
   </svg>
 );
 
@@ -34,12 +38,12 @@ const UrologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="48"
+    height="48"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -49,26 +53,40 @@ const UrologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const OncologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
+const CardiologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="48"
+    height="48"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M14.5 17.5C12.5863 17.5 11 15.9137 11 14C11 12.0863 12.5863 10.5 14.5 10.5C16.4137 10.5 18 12.0863 18 14C18 15.9137 16.4137 17.5 14.5 17.5Z" />
-    <path d="M12.5 7.5C10.5863 7.5 9 5.91371 9 4C9 2.08629 10.5863 0.5 12.5 0.5C14.4137 0.5 16 2.08629 16 4C16 5.91371 14.4137 7.5 12.5 7.5Z" />
-    <path d="M6 14C7.65685 14 9 12.6569 9 11C9 9.34315 7.65685 8 6 8C4.34315 8 3 9.34315 3 11C3 12.6569 4.34315 14 6 14Z" />
-    <path d="M19 12C20.6569 12 22 10.6569 22 9C22 7.34315 20.6569 6 19 6C17.3431 6 16 7.34315 16 9C16 10.6569 17.3431 12 19 12Z" />
-    <path d="M6 22C7.65685 22 9 20.6569 9 19C9 17.3431 7.65685 16 6 16C4.34315 16 3 17.3431 3 19C3 20.6569 4.34315 22 6 22Z" />
+    <path d="M12 20.84l-1.41-1.41C5.63 14.47 2 11.25 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.75-3.63 6.97-8.59 11.93L12 20.84z" />
   </svg>
 );
+
+const OrthopedicsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg 
+    {...props}
+    width="48"
+    height="48"
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="1.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round">
+        <path d="M10 6.605a1 1 0 0 1 1.638-.77l4 5a1 1 0 0 1 0 1.54l-4 5A1 1 0 0 1 10 16.605V6.605z" />
+        <path d="M6 7h1" />
+        <path d="M6 12h1" />
+        <path d="M6 17h1" />
+    </svg>
+);
+
 
 export default function LandingPage() {
   return (
@@ -129,99 +147,141 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
+        
         <section className="py-16 px-4 sm:px-8 lg:px-16">
-          <div className="text-center">
-            <h3 className="text-3xl font-bold">
-              Hospitals, Clinics and Specialists
-            </h3>
-            <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-              Because we believe in the importance of health, at Hovain we have gathered the best professionals from different areas to take care of you. You will find more than 1000 doctors from different specialties, and top-tier clinics and hospitals to choose from.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="md:col-span-1">
+              <p className="text-sm font-semibold text-blue-500">SERVICES</p>
+              <h3 className="text-4xl font-bold mt-2">
+                Hospitals, Clinics and Specialists
+              </h3>
+            </div>
+            <div className="md:col-span-2">
+                 <p className="text-muted-foreground">
+                Access our extensive network of accredited medical facilities offering specialized treatments, routine check-ups, and personalized care. Find the best healthcare options tailored to your needs, ensuring convenience, reliability, and expert medical attention.
+                </p>
+            </div>
           </div>
           <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 text-center">
             {[
               { icon: DentistIcon, label: "Dentist" },
               { icon: Brain, label: "Neurology" },
               { icon: UrologyIcon, label: "Urology" },
-              { icon: OncologyIcon, label: "Oncology" },
-              { icon: Stethoscope, label: "Cardiologist" },
+              { icon: CardiologyIcon, label: "Cardiology" },
+              { icon: OrthopedicsIcon, label: "Orthopedics" },
             ].map((item, index) => (
               <div key={index} className="flex flex-col items-center gap-3">
                 <div className="w-24 h-24 rounded-full border-2 flex items-center justify-center bg-card">
-                  <item.icon className="w-10 h-10 text-cyan-500" />
+                  <item.icon className="w-12 h-12 text-gray-700" />
                 </div>
-                <p className="font-semibold">{item.label}</p>
+                 <div className="w-4 h-4 rounded-full bg-cyan-400 -mt-4" />
+                <p className="font-semibold mt-2">{item.label}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section className="py-16 px-4 sm:px-8 lg:px-16 bg-pink-50">
-          <div className="text-center">
-            <h3 className="text-3xl font-bold">
-              Trained, Skilled Medical Experts at Your Fingertips
-            </h3>
-            <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-              Our team of skilled physicians and specialists provides you with the best medical advice and care. With their vast knowledge and experience, we ensure that you are in good hands.
-            </p>
-          </div>
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Dr. Ben Carson",
-                specialty: "Neurology",
-                rating: 5,
-                image: "https://placehold.co/100x100.png",
-                hint: "male doctor"
-              },
-              {
-                name: "Dr. John Doe",
-                specialty: "Urology",
-                rating: 5,
-                image: "https://placehold.co/100x100.png",
-                hint: "doctor portrait"
-              },
-              {
-                name: "Dr. Emily Taylor",
-                specialty: "Cardiology",
-                rating: 5,
-                image: "https://placehold.co/100x100.png",
-                hint: "female doctor"
-              },
-            ].map((doctor, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center"
-              >
-                <img
-                  src={doctor.image}
-                  alt={doctor.name}
-                  className="w-24 h-24 rounded-full"
-                  data-ai-hint={doctor.hint}
-                />
-                <h4 className="mt-4 text-xl font-bold">{doctor.name}</h4>
-                <p className="text-muted-foreground">{doctor.specialty}</p>
-                <div className="flex mt-2">
-                  {[...Array(doctor.rating)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5 text-yellow-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.539 1.118l-3.368-2.448a1 1 0 00-1.176 0l-3.368 2.448c-.783.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.24 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" />
-                    </svg>
-                  ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div className="lg:col-span-1">
+                <h3 className="text-3xl font-bold">
+                Trusted, Verified Medical Experts at Your Fingertips
+                </h3>
+                <p className="mt-4 text-muted-foreground text-sm">
+                Our network includes certified doctors and healthcare professionals with diverse expertise, from general practitioners to specialists, ready to help you on your journey to living a healthy life. Our medical professionals are rigorously vetted to ensure you receive the highest standard of care; each doctor is fully licensed and certified in their field, bringing years of experience and dedication to patient well-being.
+                </p>
+                <Button className="mt-6" style={{ backgroundColor: '#38bdf8' }}>Read More</Button>
+            </div>
+
+            <div className="lg:col-span-2 relative">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10">
+                    <Button variant="ghost" size="icon" className="bg-white rounded-full shadow-md w-8 h-8 flex items-center justify-center">
+                        <ChevronLeft className="h-5 w-5" />
+                    </Button>
                 </div>
-                <div className="mt-6 flex gap-4 w-full">
-                  <Button variant="outline" className="w-full">
-                    View Profile
-                  </Button>
-                  <Button className="w-full" style={{ backgroundColor: '#0ea5e9' }}>Book Now</Button>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {[
+                      {
+                        name: "Blossom Efe",
+                        specialty: "MDS - Periodontology and oral implantology, 2015",
+                        image: "https://placehold.co/250x250.png",
+                        hint: "male doctor",
+                        verified: true,
+                        rating: 5,
+                        reviews: 29,
+                        location: "Florida, USA",
+                        availability: "Available on Friday, 22nd March",
+                        price: "$200 - $500"
+                      },
+                      {
+                        name: "Leke Alder",
+                        specialty: "MDS - Periodontology and oral implantology, 2015",
+                        image: "https://placehold.co/250x250.png",
+                        hint: "doctor portrait",
+                        verified: true,
+                        rating: 5,
+                        reviews: 97,
+                        location: "Florida, USA",
+                        availability: "Available on Friday, 22nd March",
+                        price: "$200 - $500"
+                      },
+                      {
+                        name: "Chiaom Agu",
+                        specialty: "MDS - Periodontology and oral implantology, 2015",
+                        image: "https://placehold.co/250x250.png",
+                        hint: "female doctor",
+                        verified: true,
+                        rating: 5,
+                        reviews: 97,
+                        location: "Florida, USA",
+                        availability: "Available on Friday, 22nd March",
+                        price: "$200 - $500"
+                      },
+                    ].map((doctor, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-lg shadow-md p-4 flex flex-col"
+                      >
+                        <img
+                          src={doctor.image}
+                          alt={doctor.name}
+                          className="w-full h-40 object-cover rounded-md"
+                          data-ai-hint={doctor.hint}
+                        />
+                        <div className="flex items-center mt-3">
+                            <h4 className="text-md font-bold">{doctor.name}</h4>
+                            {doctor.verified && <CheckCircle2 className="w-4 h-4 text-green-500 ml-1" />}
+                        </div>
+                        <p className="text-muted-foreground text-xs mt-1">{doctor.specialty}</p>
+                        <div className="flex items-center mt-2">
+                          <div className="flex text-yellow-400">
+                            {[...Array(doctor.rating)].map((_, i) => (
+                              <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" ><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.539 1.118l-3.368-2.448a1 1 0 00-1.176 0l-3.368 2.448c-.783.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.24 9.384c-.783-.57-.38-1.81.588-.81h4.162a1 1 0 00.95-.69L9.049 2.927z" /></svg>
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground ml-1">({doctor.reviews})</span>
+                        </div>
+                         <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /><span>{doctor.location}</span></div>
+                            <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /><span>{doctor.availability}</span></div>
+                            <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /><span>{doctor.price}</span></div>
+                        </div>
+
+                        <div className="mt-4 flex gap-2 w-full">
+                          <Button variant="outline" className="w-full text-cyan-500 border-cyan-500">
+                            View Profile
+                          </Button>
+                          <Button className="w-full" style={{ backgroundColor: '#38bdf8' }}>Book Now</Button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
-              </div>
-            ))}
+                 <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10">
+                    <Button variant="ghost" size="icon" className="bg-white rounded-full shadow-md w-8 h-8 flex items-center justify-center">
+                        <ChevronRight className="h-5 w-5" />
+                    </Button>
+                </div>
+            </div>
           </div>
         </section>
 
@@ -235,27 +295,29 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 px-4 sm:px-8 lg:px-16">
+        <section className="py-16 px-4 sm:px-8 lg:px-16 bg-gray-50">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold">Get Urgent Medical Help, Fast</h3>
             <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">
-              Medicine should not be a long-term issue. Get access to emergency services in minutes - 24/7 across your network.
+              Avoid the chaos and long lines. Our app connects you to emergency-certified doctors in minutes - 24/7 access, zero hassle.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              "Allergy and immunology", "Emergency medicine", "General practice",
-              "Anesthesiology", "Hospice and palliative medicine", "Medical genetics",
-              "Dermatology", "Internal medicine", "Neurological surgery",
-              "Diagnostic radiology", "Neurology", "Family medicine",
-              "Nuclear medicine", "Obstetrics and gynecology"
+              "Abdominal pain", "Mental health concerns", "Ear infection",
+              "Anxieties/stress", "Red eye", "Pain relief",
+              "Allergy", "Prescription refill", "Chest infection",
+              "Nausea/Vomiting", "Asthma attack", "Malaria",
+              "Diarrhea", "Migraine/Headaches", "Others",
             ].map((service, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-4 border rounded-lg bg-card shadow-sm"
+                className="flex justify-between items-center p-4 border rounded-lg bg-white shadow-sm"
               >
                 <span>{service}</span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                <button className="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                    <ChevronRight className="h-5 w-5" />
+                </button>
               </div>
             ))}
           </div>
