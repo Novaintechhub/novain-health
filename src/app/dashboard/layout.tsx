@@ -129,13 +129,13 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/transactions" isActive tooltip="Transactions">
+                <SidebarMenuButton href="/dashboard/transactions" tooltip="Transactions">
                    <CreditCard />
                    Transactions
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Reviews">
+                <SidebarMenuButton href="/dashboard/reviews" isActive tooltip="Reviews">
                   <Star />
                   Reviews
                 </SidebarMenuButton>
