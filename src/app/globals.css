@@ -82,3 +82,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .sidebar-active {
+    @apply bg-primary text-primary-foreground;
+  }
+}
