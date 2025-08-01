@@ -156,10 +156,10 @@ export default function Dashboard() {
       </div>
 
       <Card className="bg-white rounded-lg shadow-sm">
-        <CardContent className="p-4 flex justify-between items-center">
+        <CardContent className="p-4 flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
             <EarningCard label="Wallet Balance" value="150,000.00" icon={<span className="text-2xl font-normal">₦</span>} subtext="One hundred and fifty thousand naira" cta="View payouts"/>
             <EarningCard label="Total Withdrawal" value="65,000" icon={<span className="text-2xl font-normal">₦</span>} subtext="" />
-            <div className="flex justify-between items-center w-1/3">
+            <div className="flex justify-between items-center w-full md:w-1/3">
               <EarningCard label="Total Earnings" value="172,000" icon={<span className="text-2xl font-normal">₦</span>} subtext="After 20% commission" />
               <Button variant="ghost" size="icon">...</Button>
             </div>
@@ -175,56 +175,58 @@ export default function Dashboard() {
               <Button variant="ghost" className="rounded-full">Today</Button>
             </div>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Patient Name</TableHead>
-                <TableHead>Appointment</TableHead>
-                <TableHead>Purpose</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Paid Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {patientData.map((patient, index) => (
-                <TableRow key={index} className="hover:bg-gray-50">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={`https://placehold.co/40x40.png?text=${patient.name.charAt(0)}`} alt={patient.name} />
-                        <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{patient.name}</div>
-                        <div className="text-xs text-muted-foreground">{patient.id}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>{patient.appointmentDate}</div>
-                    <div className="text-cyan-500">{patient.appointmentTime}</div>
-                  </TableCell>
-                  <TableCell>{patient.purpose}</TableCell>
-                  <TableCell>{patient.type}</TableCell>
-                  <TableCell>{patient.paidAmount}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex gap-2 justify-end">
-                        <Button variant="ghost" size="sm" className="text-cyan-500 hover:bg-cyan-50">
-                            <Eye className="h-4 w-4 mr-1"/> View
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-green-500 hover:bg-green-50">
-                            <Check className="h-4 w-4 mr-1"/> Accept
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50">
-                            <X className="h-4 w-4 mr-1"/> Cancel
-                        </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Patient Name</TableHead>
+                  <TableHead>Appointment</TableHead>
+                  <TableHead className="hidden md:table-cell">Purpose</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead>Paid Amount</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {patientData.map((patient, index) => (
+                  <TableRow key={index} className="hover:bg-gray-50">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={`https://placehold.co/40x40.png?text=${patient.name.charAt(0)}`} alt={patient.name} />
+                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{patient.name}</div>
+                          <div className="text-xs text-muted-foreground">{patient.id}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>{patient.appointmentDate}</div>
+                      <div className="text-cyan-500">{patient.appointmentTime}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{patient.purpose}</TableCell>
+                    <TableCell className="hidden md:table-cell">{patient.type}</TableCell>
+                    <TableCell>{patient.paidAmount}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                          <Button variant="ghost" size="sm" className="text-cyan-500 hover:bg-cyan-50">
+                              <Eye className="h-4 w-4 mr-1"/> View
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-green-500 hover:bg-green-50">
+                              <Check className="h-4 w-4 mr-1"/> Accept
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50">
+                              <X className="h-4 w-4 mr-1"/> Cancel
+                          </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
