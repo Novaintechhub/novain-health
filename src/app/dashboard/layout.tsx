@@ -1,4 +1,8 @@
+
+"use client";
+
 import type { Metadata } from "next";
+import { usePathname } from 'next/navigation'
 import {
   SidebarProvider,
   Sidebar,
@@ -38,11 +42,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-
-export const metadata: Metadata = {
-  title: "Doctor Dashboard",
-  description: "Doctor Dashboard for NovainHealth",
-};
 
 const NovainLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} width="124" height="34" viewBox="0 0 124 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -89,6 +88,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isMessagePage = pathname === '/dashboard/messages';
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-gray-50/50 w-full">
@@ -142,7 +144,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Message">
+                <SidebarMenuButton href="/dashboard/messages" tooltip="Message">
                   <MessageSquare />
                   Message
                 </SidebarMenuButton>
@@ -173,67 +175,69 @@ export default function DashboardLayout({
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <h2 className="text-xl font-semibold hidden md:block">Dashboard</h2>
-            </div>
+          {!isMessagePage && (
+            <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger />
+                <h2 className="text-xl font-semibold hidden md:block">Dashboard</h2>
+              </div>
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
-                Emergency
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Bell />
-              </Button>
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src="https://placehold.co/40x40.png" alt="Dr. Susan Mandible" data-ai-hint="female doctor" />
-                        <AvatarFallback>SM</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">Dr. Susan Mandible</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          susan.m@novain.com
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/profile-settings" legacyBehavior passHref>
-                        <a className="flex items-center w-full">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
-                        </a>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      <span>Billing</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/change-password" legacyBehavior passHref>
-                        <a className="flex items-center w-full">
-                          <Lock className="mr-2 h-4 w-4" />
-                          <span>Change Password</span>
-                        </a>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-          </header>
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+              <div className="flex items-center gap-2 sm:gap-4">
+                <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
+                  Emergency
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Bell />
+                </Button>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src="https://placehold.co/40x40.png" alt="Dr. Susan Mandible" data-ai-hint="female doctor" />
+                          <AvatarFallback>SM</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">Dr. Susan Mandible</p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            susan.m@novain.com
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link href="/dashboard/profile-settings" legacyBehavior passHref>
+                          <a className="flex items-center w-full">
+                            <User className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                          </a>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        <span>Billing</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link href="/dashboard/change-password" legacyBehavior passHref>
+                          <a className="flex items-center w-full">
+                            <Lock className="mr-2 h-4 w-4" />
+                            <span>Change Password</span>
+                          </a>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+              </div>
+            </header>
+          )}
+          <main className={`flex-1 ${isMessagePage ? '' : 'p-4 sm:p-6'}`}>{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
