@@ -111,13 +111,13 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/appointments" isActive tooltip="Appointments">
+                <SidebarMenuButton href="/dashboard/appointments" tooltip="Appointments">
                   <Calendar />
                   Appointments
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="My Patients">
+                <SidebarMenuButton href="/dashboard/my-patients" isActive tooltip="My Patients">
                   <Users />
                   My Patients
                 </SidebarMenuButton>
