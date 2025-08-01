@@ -98,7 +98,7 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gray-50/50">
+      <div className="flex min-h-screen bg-gray-50/50 w-full">
         <Sidebar className="bg-white">
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
@@ -191,12 +191,6 @@ export default function DashboardLayout({
               <h1 className="text-2xl font-semibold">Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">
-              <nav className="hidden lg:flex items-center gap-6 text-sm">
-                <a href="#" className="text-gray-600 hover:text-primary">Home</a>
-                <a href="#" className="text-gray-600 hover:text-primary">Blog</a>
-                <a href="#" className="text-gray-600 hover:text-primary">About Us</a>
-                <a href="#" className="text-gray-600 hover:text-primary">Contact Us</a>
-              </nav>
               <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>Emergency</Button>
               <Avatar className="h-9 w-9">
                   <AvatarImage src="https://placehold.co/36x36.png" alt="User" data-ai-hint="user portrait" />
