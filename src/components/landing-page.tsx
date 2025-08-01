@@ -194,7 +194,7 @@ export default function LandingPage() {
           <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
             Emergency
           </Button>
-          <Link href="/login" passHref>
+          <Link href="/general-login" passHref>
             <Button style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', padding: '0 24px' }} asChild>
               <span>LOGIN/SIGN UP</span>
             </Button>
