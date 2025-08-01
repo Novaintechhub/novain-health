@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import {
   SidebarProvider,
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarFooter,
   SidebarMenu,
@@ -36,7 +35,6 @@ import {
   LogOut,
   ChevronDown,
   Bell,
-  Search,
 } from "lucide-react";
 
 
@@ -93,7 +91,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-gray-50/50 w-full">
-        <Sidebar className="bg-white border-r">
+        <Sidebar className="bg-white border-r" collapsible="icon">
           <SidebarContent className="p-4">
             <SidebarGroup>
               <div className="flex flex-col items-center p-4">
@@ -183,7 +181,7 @@ export default function DashboardLayout({
         <SidebarInset>
           <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-6">
             <div className="flex items-center gap-4">
-              <SidebarTrigger className="md:hidden" />
+              <SidebarTrigger />
               <h2 className="text-xl font-semibold">Dashboard</h2>
             </div>
 
