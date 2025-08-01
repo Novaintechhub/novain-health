@@ -89,7 +89,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isMessagePage = pathname === '/dashboard/messages';
 
   return (
     <SidebarProvider>
@@ -108,57 +107,48 @@ export default function DashboardLayout({
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" tooltip="Dashboard">
-                  <LayoutDashboard />
-                  Dashboard
+                <SidebarMenuButton asChild href="/dashboard" tooltip="Dashboard" isActive={pathname === '/dashboard'}>
+                  <Link href="/dashboard"><LayoutDashboard />Dashboard</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/appointments" tooltip="Appointments">
-                  <Calendar />
-                  Appointments
+                <SidebarMenuButton asChild href="/dashboard/appointments" tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
+                  <Link href="/dashboard/appointments"><Calendar />Appointments</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/my-patients" tooltip="My Patients">
-                  <Users />
-                  My Patients
+                <SidebarMenuButton asChild href="/dashboard/my-patients" tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
+                  <Link href="/dashboard/my-patients"><Users />My Patients</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/schedule-timings" tooltip="Schedule Timings">
-                  <Clock />
-                  Schedule Timings
+                <SidebarMenuButton asChild href="/dashboard/schedule-timings" tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
+                  <Link href="/dashboard/schedule-timings"><Clock />Schedule Timings</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/transactions" tooltip="Transactions">
-                   <CreditCard />
-                   Transactions
+                <SidebarMenuButton asChild href="/dashboard/transactions" tooltip="Transactions" isActive={pathname === '/dashboard/transactions'}>
+                   <Link href="/dashboard/transactions"><CreditCard />Transactions</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/reviews" tooltip="Reviews">
-                  <Star />
-                  Reviews
+                <SidebarMenuButton asChild href="/dashboard/reviews" tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
+                  <Link href="/dashboard/reviews"><Star />Reviews</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/messages" tooltip="Message">
-                  <MessageSquare />
-                  Message
+                <SidebarMenuButton asChild href="/dashboard/messages" tooltip="Message" isActive={pathname === '/dashboard/messages'}>
+                  <Link href="/dashboard/messages"><MessageSquare />Message</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/profile-settings" tooltip="Profile Settings">
-                  <User />
-                  Profile settings
+                <SidebarMenuButton asChild href="/dashboard/profile-settings" tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
+                  <Link href="/dashboard/profile-settings"><User />Profile settings</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/social-media" tooltip="Social Media">
-                  <Share2 />
-                  Social Media
+                <SidebarMenuButton asChild href="/dashboard/social-media" tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
+                  <Link href="/dashboard/social-media"><Share2 />Social Media</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -208,7 +198,7 @@ export default function DashboardLayout({
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/profile-settings" className="flex items-center w-full">
+                      <Link href="/dashboard/profile-settings">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </Link>
@@ -218,7 +208,7 @@ export default function DashboardLayout({
                       <span>Billing</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/change-password" className="flex items-center w-full">
+                      <Link href="/dashboard/change-password">
                         <Lock className="mr-2 h-4 w-4" />
                         <span>Change Password</span>
                       </Link>
@@ -231,7 +221,7 @@ export default function DashboardLayout({
                 </DropdownMenu>
             </div>
           </header>
-          <main className={`flex-1 ${isMessagePage ? '' : 'p-4 sm:p-6'}`}>{children}</main>
+          <main className={`flex-1 p-4 sm:p-6`}>{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
