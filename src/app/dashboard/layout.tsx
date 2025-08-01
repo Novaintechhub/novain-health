@@ -154,7 +154,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Social Media">
+                <SidebarMenuButton href="/dashboard/social-media" tooltip="Social Media">
                   <Share2 />
                   Social Media
                 </SidebarMenuButton>
