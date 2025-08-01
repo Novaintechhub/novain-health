@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -97,20 +100,38 @@ const EarningCard = ({ label, value, icon, subtext, cta }: { label: string, valu
 
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalPatients: 1500,
+    todayPatients: 65,
+    appointments: 85,
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStats((prevStats) => ({
+        totalPatients: prevStats.totalPatients + 1,
+        todayPatients: prevStats.todayPatients + (Math.random() > 0.5 ? 1 : 0),
+        appointments: prevStats.appointments + (Math.random() > 0.7 ? 1 : -1),
+      }));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard 
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>} 
-            label="Total Patient" value="1500" subtext="Till today" 
+            label="Total Patient" value={stats.totalPatients.toString()} subtext="Till today" 
             iconBgColor="bg-pink-100" />
         <StatCard 
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>}
-            label="Today Patient" value="65" subtext="12, Nov 2024" 
+            label="Today Patient" value={stats.todayPatients.toString()} subtext="12, Nov 2024" 
             iconBgColor="bg-green-100" />
         <StatCard 
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>}
-            label="Appointment" value="85" subtext="06, Dec 2024"
+            label="Appointment" value={stats.appointments.toString()} subtext="06, Dec 2024"
             iconBgColor="bg-blue-100" />
       </div>
 
