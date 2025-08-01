@@ -85,12 +85,32 @@ export default function ProfileSettings() {
       yearCompleted: "",
     },
   ]);
+  const [workExperience, setWorkExperience] = useState([
+    {
+      hospital: "",
+      designation: "",
+      from: "",
+      to: "",
+    },
+  ]);
+  const [awards, setAwards] = useState([{ name: "", year: "" }]);
 
   const addEducationField = () => {
     setEducationFields([
       ...educationFields,
       { college: "", degree: "", yearStarted: "", yearCompleted: "" },
     ]);
+  };
+
+  const addWorkExperienceField = () => {
+    setWorkExperience([
+      ...workExperience,
+      { hospital: "", designation: "", from: "", to: "" },
+    ]);
+  };
+
+  const addAwardField = () => {
+    setAwards([...awards, { name: "", year: "" }]);
   };
 
 
@@ -313,6 +333,65 @@ export default function ProfileSettings() {
             </CardContent>
           </Card>
           
+          <Card>
+            <CardHeader>
+              <CardTitle>Work Experience</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {workExperience.map((field, index) => (
+                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>Hospital</Label>
+                      <Input />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Designation</Label>
+                      <Input />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>From</Label>
+                      <Input type="date" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>To</Label>
+                      <Input type="date" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" onClick={addWorkExperienceField} className="text-cyan-500 hover:text-cyan-600">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add more
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Awards</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {awards.map((award, index) => (
+                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>Name of Award</Label>
+                      <Input />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Year</Label>
+                      <Input type="number" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" onClick={addAwardField} className="text-cyan-500 hover:text-cyan-600">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add more
+              </Button>
+            </CardContent>
+          </Card>
 
           <div>
              <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Save Changes</Button>
