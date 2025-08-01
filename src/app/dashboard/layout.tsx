@@ -94,73 +94,73 @@ export default function DashboardLayout({
         <Sidebar className="bg-white border-r" collapsible="icon">
           <SidebarContent className="p-4">
             <SidebarGroup>
-              <div className="flex flex-col items-center p-4">
+              <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
                 <Avatar className="h-24 w-24 border-2 border-white rounded-full shadow-lg">
                   <AvatarImage src="https://placehold.co/96x96.png" alt="Dr. Susan Mandible" data-ai-hint="female doctor" />
                   <AvatarFallback>SM</AvatarFallback>
                 </Avatar>
                 <h3 className="mt-4 text-xl font-semibold">Dr. Susan Mandible</h3>
-                <p className="text-sm text-center text-muted-foreground">BDS, MDS - Oral & Maxillofacial Surgery</p>
+                <p className="text-sm text-muted-foreground">BDS, MDS - Oral & Maxillofacial Surgery</p>
               </div>
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" isActive>
+                <SidebarMenuButton href="/dashboard" isActive tooltip="Dashboard">
                   <LayoutDashboard />
                   Dashboard
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Appointments">
                   <Calendar />
                   Appointments
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="My Patients">
                   <Users />
                   My Patients
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Schedule Timings">
                   <Clock />
                   Schedule Timings
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Transactions">
                    <CreditCard />
                    Transactions
                    <ChevronDown className="ml-auto h-4 w-4" />
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Reviews">
                   <Star />
                   Reviews
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Message">
                   <MessageSquare />
                   Message
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Profile Settings">
                   <User />
                   Profile settings
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Social Media">
                   <Share2 />
                   Social Media
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Change Password">
                   <Lock />
                   Change Password
                 </SidebarMenuButton>
@@ -170,7 +170,7 @@ export default function DashboardLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
+                <SidebarMenuButton href="#" tooltip="Logout">
                   <LogOut />
                   Logout
                 </SidebarMenuButton>
