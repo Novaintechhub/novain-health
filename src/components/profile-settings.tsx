@@ -13,6 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UploadCloud, Trash2 } from "lucide-react";
+import Image from "next/image";
+
 
 export default function ProfileSettings() {
   return (
@@ -35,7 +38,7 @@ export default function ProfileSettings() {
             </CardContent>
           </Card>
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
@@ -77,7 +80,7 @@ export default function ProfileSettings() {
               </div>
             </CardContent>
           </Card>
-          <Card className="mt-8">
+          <Card>
             <CardHeader>
               <CardTitle>About Me</CardTitle>
             </CardHeader>
@@ -85,7 +88,78 @@ export default function ProfileSettings() {
               <Textarea placeholder="Say something about yourself" rows={5} />
             </CardContent>
           </Card>
-          <div className="mt-8">
+           <Card>
+            <CardHeader>
+              <CardTitle>Clinic Info</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="clinic-name">Clinic Name</Label>
+                  <Input id="clinic-name" placeholder="NovainHealth Clinic" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="clinic-address">Clinic Address</Label>
+                  <Input id="clinic-address" placeholder="123 Health St, MedCity" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Clinic Images</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
+                  <p className="mt-2 text-sm text-muted-foreground">Drag files here to upload</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                  <div className="relative">
+                    <Image src="https://placehold.co/100x100.png" alt="Clinic Image 1" width={100} height={100} className="rounded-md" data-ai-hint="mri machine" />
+                    <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
+                      <Trash2 className="h-4 w-4"/>
+                    </Button>
+                  </div>
+                  <div className="relative">
+                    <Image src="https://placehold.co/100x100.png" alt="Clinic Image 2" width={100} height={100} className="rounded-md" data-ai-hint="pharmacy shelves" />
+                    <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
+                      <Trash2 className="h-4 w-4"/>
+                    </Button>
+                  </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="address1">Address Line 1</Label>
+                <Input id="address1" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address2">Address Line 2</Label>
+                <Input id="address2" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input id="city" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State/Province</Label>
+                <Input id="state" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input id="country" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="postal-code">Postal Code</Label>
+                <Input id="postal-code" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div>
              <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Save Changes</Button>
           </div>
         </div>
