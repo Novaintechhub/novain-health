@@ -4,8 +4,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Mail } from "lucide-react";
 
 const NovainLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} width="124" height="34" viewBox="0 0 124 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -55,70 +55,77 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-export default function Login() {
+const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <path d="M15.29,3.68A6.4,6.4,0,0,0,12,2a6.4,6.4,0,0,0-3.29,1.68,6.86,6.86,0,0,0-2,5.22,7.21,7.21,0,0,0,3.33,6.23,6.75,6.75,0,0,0,7.34-.1,1.52,1.52,0,0,0,.61-1.16,1.43,1.43,0,0,0-1.5-1.42,1.38,1.38,0,0,0-1.15.56,3.64,3.64,0,0,1-2.63,1.36,3.48,3.48,0,0,1-3.62-3.65,4.6,4.6,0,0,1,1.2-3.17,4.3,4.3,0,0,1,3.12-1.3,3.7,3.7,0,0,1,2.83,1.21,1.4,1.4,0,0,0,1,.45,1.46,1.46,0,0,0,1.42-1.45A6.93,6.93,0,0,0,15.29,3.68Z" fill="currentColor"/>
+        <path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" fill="currentColor"/>
+    </svg>
+);
+
+
+export default function Signup() {
   return (
     <div className="flex h-screen">
       <div className="hidden lg:block lg:w-1/2 relative">
+        <div className="absolute top-4 left-4 text-white font-bold text-lg z-10">DOCTORS Sign up</div>
         <Image
           src="https://placehold.co/800x1200.png"
-          alt="Doctor smiling"
+          alt="Smiling doctor"
           layout="fill"
           objectFit="cover"
-          data-ai-hint="female doctor"
+          data-ai-hint="male doctor smiling"
         />
       </div>
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 overflow-y-auto">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 overflow-y-auto bg-white">
+        <div className="w-full max-w-sm">
           <div className="flex justify-center mb-8">
             <NovainLogo />
           </div>
-          <h1 className="text-3xl font-bold text-center mb-2">Login</h1>
-          <p className="text-center text-muted-foreground mb-6">Hello Doc, welcome back!</p>
+          <h1 className="text-2xl font-bold text-center mb-6">Create an account</h1>
 
-          <div className="flex flex-col items-center mb-6">
-            <Avatar className="h-20 w-20 mb-3">
-              <AvatarImage src="https://placehold.co/80x80.png" alt="Dr. Susan" data-ai-hint="woman doctor"/>
-              <AvatarFallback>DS</AvatarFallback>
-            </Avatar>
-            <p className="font-medium">susanmandible@gmail.com</p>
+          <div className="space-y-3">
+            <Button variant="outline" className="w-full justify-center">
+              <GoogleIcon className="mr-2 h-5 w-5" />
+              Continue with Google
+            </Button>
+            <Button variant="outline" className="w-full justify-center">
+              <AppleIcon className="mr-2 h-5 w-5" />
+              Continue with Apple
+            </Button>
+            <Button variant="outline" className="w-full justify-center">
+              <Mail className="mr-2 h-5 w-5" />
+              Continue with Email
+            </Button>
           </div>
 
-          <Button variant="outline" className="w-full mb-4">
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center">
-                    <Avatar className="h-6 w-6 mr-2">
-                        <AvatarImage src="https://placehold.co/24x24.png" alt="Dr. Susan" data-ai-hint="woman doctor"/>
-                        <AvatarFallback>DS</AvatarFallback>
-                    </Avatar>
-                    <div className="text-left">
-                        <p className="text-sm font-semibold">Continue as Dr. Susan</p>
-                        <p className="text-xs text-muted-foreground">susanmandible@gmail.com</p>
-                    </div>
-                </div>
-                <GoogleIcon className="h-6 w-6" />
-            </div>
-          </Button>
-
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-muted-foreground text-sm">Or</span>
-            <div className="flex-grow border-t border-gray-300"></div>
+          <div className="flex items-start mt-6 space-x-2">
+            <Checkbox id="promotions" className="mt-1" />
+            <label htmlFor="promotions" className="text-sm text-muted-foreground">
+              I do not wish to receive news and promotions from Novain Health by email.
+            </label>
           </div>
-          
-          <form className="space-y-4">
-            <Input type="email" placeholder="Email Address" />
-            <Input type="password" placeholder="Input password" />
-            <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit">Sign In</Button>
-          </form>
 
-          <p className="text-center text-sm mt-4">
-            Not you? <Link href="#" className="text-cyan-500 hover:underline">Use another account</Link>
+          <p className="text-xs text-muted-foreground text-center mt-6">
+            By continuing, you agree to Novain Health's{" "}
+            <Link href="#" className="text-cyan-500 hover:underline">
+              Terms of Use
+            </Link>{" "}
+            and{" "}
+            <Link href="#" className="text-cyan-500 hover:underline">
+              Privacy Policy
+            </Link>
+            .
           </p>
 
-          <div className="border-t border-gray-300 my-8"></div>
+          <div className="flex items-center my-6">
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
 
           <p className="text-center text-sm">
-            Don't have an account? <Link href="/signup" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
+            Already have an account?{" "}
+            <Link href="/login" className="text-cyan-500 font-semibold hover:underline">
+              Log in
+            </Link>
           </p>
 
            <div className="flex justify-between text-xs text-muted-foreground mt-12">
@@ -126,7 +133,6 @@ export default function Login() {
             <Link href="#" className="hover:underline">Privacy policy</Link>
             <Link href="#" className="hover:underline">Cookies settings</Link>
           </div>
-
         </div>
       </div>
     </div>
