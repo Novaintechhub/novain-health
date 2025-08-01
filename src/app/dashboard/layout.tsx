@@ -105,13 +105,13 @@ export default function DashboardLayout({
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" isActive tooltip="Dashboard">
+                <SidebarMenuButton href="/dashboard" tooltip="Dashboard">
                   <LayoutDashboard />
                   Dashboard
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Appointments">
+                <SidebarMenuButton href="/dashboard/appointments" isActive tooltip="Appointments">
                   <Calendar />
                   Appointments
                 </SidebarMenuButton>
