@@ -36,6 +36,7 @@ import {
   ChevronDown,
   Bell,
 } from "lucide-react";
+import Link from "next/link";
 
 
 export const metadata: Metadata = {
@@ -135,7 +136,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/reviews" isActive tooltip="Reviews">
+                <SidebarMenuButton href="/dashboard/reviews" tooltip="Reviews">
                   <Star />
                   Reviews
                 </SidebarMenuButton>
@@ -213,8 +214,12 @@ export default function DashboardLayout({
                       <span>Billing</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Lock className="mr-2 h-4 w-4" />
-                      <span>Change Password</span>
+                      <Link href="/dashboard/change-password" legacyBehavior passHref>
+                        <a className="flex items-center w-full">
+                          <Lock className="mr-2 h-4 w-4" />
+                          <span>Change Password</span>
+                        </a>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <LogOut className="mr-2 h-4 w-4" />
