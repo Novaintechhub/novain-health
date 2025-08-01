@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -13,11 +15,85 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UploadCloud, Trash2 } from "lucide-react";
+import { UploadCloud, Trash2, X, PlusCircle } from "lucide-react";
 import Image from "next/image";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+
+const TagInput = ({
+  tags,
+  setTags,
+  placeholder,
+  note,
+}: {
+  tags: string[];
+  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+  placeholder: string;
+  note: string;
+}) => {
+  const [inputValue, setInputValue] = useState("");
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && inputValue.trim()) {
+      e.preventDefault();
+      setTags([...tags, inputValue.trim()]);
+      setInputValue("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-2 rounded-md border border-input p-2">
+        {tags.map((tag, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-1 rounded-md bg-cyan-400 px-2 py-1 text-sm text-white"
+          >
+            <span>{tag}</span>
+            <button onClick={() => removeTag(tag)}>
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+        <Input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="flex-1 border-0 shadow-none focus-visible:ring-0"
+        />
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{note}</p>
+    </div>
+  );
+};
 
 
 export default function ProfileSettings() {
+  const [services, setServices] = useState(["Tooth Cleaning", "Teeth Whitening"]);
+  const [specializations, setSpecializations] = useState(["Children Care", "Dental Care"]);
+  const [educationFields, setEducationFields] = useState([
+    {
+      college: "",
+      degree: "",
+      yearStarted: "",
+      yearCompleted: "",
+    },
+  ]);
+
+  const addEducationField = () => {
+    setEducationFields([
+      ...educationFields,
+      { college: "", degree: "", yearStarted: "", yearCompleted: "" },
+    ]);
+  };
+
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Profile Settings</h1>
@@ -158,6 +234,85 @@ export default function ProfileSettings() {
               </div>
             </CardContent>
           </Card>
+
+           <Card>
+            <CardHeader>
+              <CardTitle>Pricing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup defaultValue="free" className="flex items-center gap-8">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="free" id="free" />
+                  <Label htmlFor="free">Free</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="custom" id="custom" />
+                  <Label htmlFor="custom">Custom price (per hour)</Label>
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Services and Specialization</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Services</Label>
+                <TagInput
+                  tags={services}
+                  setTags={setServices}
+                  placeholder="Add Services"
+                  note="NB: Type and Press Enter to add new service"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Specialization</Label>
+                <TagInput
+                  tags={specializations}
+                  setTags={setSpecializations}
+                  placeholder="Add Specialization"
+                  note="NB: Type and Press Enter to add new specialization"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Education</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {educationFields.map((field, index) => (
+                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>College/Institute</Label>
+                      <Input placeholder="e.g. University of Medical Sciences" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Degree Obtained</Label>
+                      <Input placeholder="e.g. Bachelor of Dental Surgery" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Year Started</Label>
+                      <Input type="number" placeholder="e.g. 2010" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Year of Completion</Label>
+                      <Input type="number" placeholder="e.g. 2015" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" onClick={addEducationField} className="text-cyan-500 hover:text-cyan-600">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add more
+              </Button>
+            </CardContent>
+          </Card>
+          
 
           <div>
              <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Save Changes</Button>
