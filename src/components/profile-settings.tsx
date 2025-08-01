@@ -94,6 +94,8 @@ export default function ProfileSettings() {
     },
   ]);
   const [awards, setAwards] = useState([{ name: "", year: "" }]);
+  const [memberships, setMemberships] = useState([{ organization: "" }]);
+  const [registrations, setRegistrations] = useState([{ registration: "", year: "" }]);
 
   const addEducationField = () => {
     setEducationFields([
@@ -111,6 +113,14 @@ export default function ProfileSettings() {
 
   const addAwardField = () => {
     setAwards([...awards, { name: "", year: "" }]);
+  };
+
+  const addMembershipField = () => {
+    setMemberships([...memberships, { organization: "" }]);
+  };
+
+  const addRegistrationField = () => {
+    setRegistrations([...registrations, { registration: "", year: "" }]);
   };
 
 
@@ -392,6 +402,61 @@ export default function ProfileSettings() {
               </Button>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Memberships</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {memberships.map((field, index) => (
+                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
+                   <div className="space-y-2">
+                    <Label>Name of Organization</Label>
+                    <Input />
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" onClick={addMembershipField} className="text-cyan-500 hover:text-cyan-600">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add more
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Registrations and Licenses</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {registrations.map((field, index) => (
+                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>Registration</Label>
+                      <Input />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Year</Label>
+                      <Input type="number" />
+                    </div>
+                  </div>
+                  <div className="space-y-2 mt-4">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <p className="text-sm text-muted-foreground">Drag to upload licensing document</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-between items-center">
+                <Button variant="ghost" onClick={addRegistrationField} className="text-cyan-500 hover:text-cyan-600">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add more
+                </Button>
+                <Button variant="link" className="text-cyan-500">See all (4)</Button>
+              </div>
+            </CardContent>
+          </Card>
+
 
           <div>
              <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Save Changes</Button>
