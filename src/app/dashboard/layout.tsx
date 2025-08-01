@@ -123,16 +123,15 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard/schedule-timings" isActive tooltip="Schedule Timings">
+                <SidebarMenuButton href="/dashboard/schedule-timings" tooltip="Schedule Timings">
                   <Clock />
                   Schedule Timings
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Transactions">
+                <SidebarMenuButton href="/dashboard/transactions" isActive tooltip="Transactions">
                    <CreditCard />
                    Transactions
-                   <ChevronDown className="ml-auto h-4 w-4" />
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
