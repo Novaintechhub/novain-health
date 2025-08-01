@@ -108,47 +108,74 @@ export default function DashboardLayout({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard" tooltip="Dashboard" isActive={pathname === '/dashboard'}>
-                  <Link href="/dashboard"><LayoutDashboard />Dashboard</Link>
+                  <Link href="/dashboard">
+                    <LayoutDashboard />
+                    Dashboard
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/appointments" tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
-                  <Link href="/dashboard/appointments"><Calendar />Appointments</Link>
+                  <Link href="/dashboard/appointments">
+                    <Calendar />
+                    Appointments
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/my-patients" tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
-                  <Link href="/dashboard/my-patients"><Users />My Patients</Link>
+                  <Link href="/dashboard/my-patients">
+                    <Users />
+                    My Patients
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/schedule-timings" tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
-                  <Link href="/dashboard/schedule-timings"><Clock />Schedule Timings</Link>
+                  <Link href="/dashboard/schedule-timings">
+                    <Clock />
+                    Schedule Timings
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/transactions" tooltip="Transactions" isActive={pathname === '/dashboard/transactions'}>
-                   <Link href="/dashboard/transactions"><CreditCard />Transactions</Link>
+                   <Link href="/dashboard/transactions">
+                    <CreditCard />
+                    Transactions
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/reviews" tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
-                  <Link href="/dashboard/reviews"><Star />Reviews</Link>
+                  <Link href="/dashboard/reviews">
+                    <Star />
+                    Reviews
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/messages" tooltip="Message" isActive={pathname === '/dashboard/messages'}>
-                  <Link href="/dashboard/messages"><MessageSquare />Message</Link>
+                  <Link href="/dashboard/messages">
+                    <MessageSquare />
+                    Message
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/profile-settings" tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
-                  <Link href="/dashboard/profile-settings"><User />Profile settings</Link>
+                  <Link href="/dashboard/profile-settings">
+                    <User />
+                    Profile settings
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/social-media" tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
-                  <Link href="/dashboard/social-media"><Share2 />Social Media</Link>
+                  <Link href="/dashboard/social-media">
+                    <Share2 />
+                    Social Media
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -221,9 +248,11 @@ export default function DashboardLayout({
                 </DropdownMenu>
             </div>
           </header>
-          <main className={`flex-1 p-4 sm:p-6`}>{children}</main>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
   );
 }
+
+    
