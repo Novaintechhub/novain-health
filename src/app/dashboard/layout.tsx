@@ -158,12 +158,6 @@ export default function DashboardLayout({
                   Social Media
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Change Password">
-                  <Lock />
-                  Change Password
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>
@@ -217,6 +211,10 @@ export default function DashboardLayout({
                     <DropdownMenuItem>
                       <CreditCard className="mr-2 h-4 w-4" />
                       <span>Billing</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Lock className="mr-2 h-4 w-4" />
+                      <span>Change Password</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <LogOut className="mr-2 h-4 w-4" />
