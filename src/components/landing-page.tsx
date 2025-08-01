@@ -3,6 +3,7 @@
  */
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import {
   Brain,
   HeartPulse,
@@ -193,9 +194,11 @@ export default function LandingPage() {
           <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
             Emergency
           </Button>
-          <Button style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', padding: '0 24px' }}>
-            LOGIN/SIGN UP
-          </Button>
+          <Link href="/login" passHref>
+            <Button style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', padding: '0 24px' }} asChild>
+              <span>LOGIN/SIGN UP</span>
+            </Button>
+          </Link>
         </div>
       </header>
 

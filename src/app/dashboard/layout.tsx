@@ -207,24 +207,20 @@ export default function DashboardLayout({
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/profile-settings" legacyBehavior passHref>
-                        <a className="flex items-center w-full">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
-                        </a>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile-settings" className="flex items-center w-full">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <CreditCard className="mr-2 h-4 w-4" />
                       <span>Billing</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/change-password" legacyBehavior passHref>
-                        <a className="flex items-center w-full">
-                          <Lock className="mr-2 h-4 w-4" />
-                          <span>Change Password</span>
-                        </a>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/change-password" className="flex items-center w-full">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Change Password</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
