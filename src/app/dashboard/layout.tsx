@@ -148,7 +148,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Profile Settings">
+                <SidebarMenuButton href="/dashboard/profile-settings" tooltip="Profile Settings">
                   <User />
                   Profile settings
                 </SidebarMenuButton>
@@ -206,8 +206,12 @@ export default function DashboardLayout({
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <Link href="/dashboard/profile-settings" legacyBehavior passHref>
+                        <a className="flex items-center w-full">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Profile</span>
+                        </a>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <CreditCard className="mr-2 h-4 w-4" />
