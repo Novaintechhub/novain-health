@@ -163,8 +163,8 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Lab Tests">
-                  <Link href="#" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Lab Tests" isActive={pathname === '/patients/lab-tests'}>
+                  <Link href="/patients/lab-tests" className="flex items-center gap-3">
                     <FlaskConical />
                     <span className="group-data-[collapsible=icon]:hidden">Lab Tests</span>
                   </Link>
