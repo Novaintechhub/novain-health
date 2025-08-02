@@ -243,13 +243,17 @@ export default function PatientLayout({
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                    <DropdownMenuItem asChild>
+                      <Link href="/patients/profile">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Lock className="mr-2 h-4 w-4" />
-                      <span>Change Password</span>
+                    <DropdownMenuItem asChild>
+                      <Link href="/patients/change-password">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Change Password</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <LogOut className="mr-2 h-4 w-4" />
