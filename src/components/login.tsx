@@ -108,7 +108,9 @@ export default function Login() {
           <form className="space-y-4">
             <Input type="email" placeholder="Email Address" />
             <Input type="password" placeholder="Input password" />
-            <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit">Sign In</Button>
+            <Link href="/doctor" className="w-full block">
+              <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="button">Sign In</Button>
+            </Link>
           </form>
 
           <p className="text-center text-sm mt-4">
