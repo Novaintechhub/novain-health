@@ -13,7 +13,7 @@ export default function SocialMedia() {
         <div>
           <h1 className="text-2xl font-bold">Social Media</h1>
           <p className="text-sm text-muted-foreground">
-            <Link href="/dashboard">Home</Link> / Social Media
+            <Link href="/doctor">Home</Link> / Social Media
           </p>
         </div>
       </div>

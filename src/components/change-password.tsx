@@ -13,7 +13,7 @@ export default function ChangePassword() {
         <div>
           <h1 className="text-2xl font-bold">Change Password</h1>
           <p className="text-sm text-muted-foreground">
-            <Link href="/dashboard">Home</Link> / Change Password
+            <Link href="/doctor">Home</Link> / Change Password
           </p>
         </div>
       </div>

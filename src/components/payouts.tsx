@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
 
 const EarningCard = ({ label, value, icon, subtext }: { label: string, value: string, icon?: React.ReactNode, subtext: string }) => (
     <div className="flex flex-col p-4 rounded-lg bg-gray-50 flex-1">
@@ -37,7 +38,7 @@ export default function Payouts() {
   return (
     <div className="space-y-6">
         <div>
-            <p className="text-sm text-muted-foreground">Home / Payouts</p>
+            <p className="text-sm text-muted-foreground"><Link href="/doctor">Home</Link> / Payouts</p>
             <h1 className="text-2xl font-bold">Payouts</h1>
         </div>
         <div className="flex flex-col md:flex-row gap-4">

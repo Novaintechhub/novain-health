@@ -92,12 +92,14 @@ export default function Signup() {
               <AppleIcon className="mr-2 h-5 w-5" />
               Continue with Apple
             </Button>
-            <Link href="/doctor-registration" passHref className="mt-3">
-              <Button variant="outline" className="w-full justify-center">
-                <Mail className="mr-2 h-5 w-5" />
-                Continue with Email
-              </Button>
-            </Link>
+            <div className="pt-1">
+              <Link href="/doctor/register" passHref>
+                <Button variant="outline" className="w-full justify-center">
+                  <Mail className="mr-2 h-5 w-5" />
+                  Continue with Email
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="flex items-start mt-6 space-x-2">
@@ -125,7 +127,7 @@ export default function Signup() {
 
           <p className="text-center text-sm">
             Already have an account?{" "}
-            <Link href="/login" className="text-cyan-500 font-semibold hover:underline">
+            <Link href="/doctor/login" className="text-cyan-500 font-semibold hover:underline">
               Log in
             </Link>
           </p>
