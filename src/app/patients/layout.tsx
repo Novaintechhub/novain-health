@@ -179,8 +179,8 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/patients/profile'}>
-                  <Link href="/patients/profile" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/patients/profile-settings'}>
+                  <Link href="/patients/profile-settings" className="flex items-center gap-3">
                     <User />
                     <span className="group-data-[collapsible=icon]:hidden">Profile settings</span>
                   </Link>
