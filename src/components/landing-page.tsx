@@ -20,7 +20,7 @@ import {
   Phone,
   Menu,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const DentistIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -212,6 +212,9 @@ export default function LandingPage() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
+              <SheetHeader>
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+              </SheetHeader>
               <nav className="flex flex-col gap-4 mt-8">
                 <a href="#" className="text-lg font-medium text-cyan-500">
                   Home
