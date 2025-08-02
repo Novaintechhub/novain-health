@@ -108,9 +108,9 @@ export default function PatientLayout({
                   <p>24 Jul 1983, 38 years</p>
                   <p>Newyork, USA</p>
                 </div>
-                <Link href="/patients/profile">
-                    <Button asChild variant="outline" className="mt-4 text-primary border-primary"><span>View Details</span></Button>
-                </Link>
+                <Button asChild variant="outline" className="mt-4 text-primary border-primary">
+                  <Link href="/patients/profile">View Details</Link>
+                </Button>
               </div>
             </SidebarGroup>
             <SidebarMenu>
@@ -155,8 +155,8 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Doctors">
-                  <Link href="#" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Doctors" isActive={pathname === '/patients/find-a-doctor'}>
+                  <Link href="/patients/find-a-doctor" className="flex items-center gap-3">
                     <Users />
                     <span className="group-data-[collapsible=icon]:hidden">Doctors</span>
                   </Link>
