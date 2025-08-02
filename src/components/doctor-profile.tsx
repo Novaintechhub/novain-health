@@ -202,7 +202,7 @@ export default function DoctorProfile() {
                   <div className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-muted-foreground" /> <span>35 Feedback</span></div>
                 </div>
                  <div className="flex items-center gap-2 mt-2 text-sm"><MapPin className="h-4 w-4 text-muted-foreground" /> <span>Newyork, USA</span></div>
-                 <div className="flex items-center gap-2 mt-2 text-sm"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span>$100 per hour</span></div>
+                 <div className="flex items-center gap-2 mt-2 text-sm"><span className="font-bold text-lg">₦</span> <span>100 per hour</span></div>
                  <div className="flex justify-start gap-2 mt-4">
                     <Button variant="outline" size="icon"><Bookmark /></Button>
                     <Link href="/patients/messages">
@@ -322,7 +322,7 @@ export default function DoctorProfile() {
                                 ))}
                             </div>
                             <div className="md:col-span-1 text-right">
-                                <p className="text-2xl font-bold">${location.price}</p>
+                                <p className="text-2xl font-bold">₦{location.price}</p>
                             </div>
                         </div>
                     ))}

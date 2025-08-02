@@ -25,7 +25,7 @@ const doctors = [
     reviews: 120,
     location: "New York, USA",
     availability: "Available Mon, 24 Dec",
-    price: "$150 - $300",
+    price: "₦150 - ₦300",
   },
   {
     name: "Tom Hanky",
@@ -37,7 +37,7 @@ const doctors = [
     reviews: 215,
     location: "Los Angeles, USA",
     availability: "Available Tue, 25 Dec",
-    price: "$200 - $400",
+    price: "₦200 - ₦400",
   },
   {
     name: "Leke Alder",
@@ -49,7 +49,7 @@ const doctors = [
     reviews: 89,
     location: "Chicago, USA",
     availability: "Available Wed, 26 Dec",
-    price: "$180 - $350",
+    price: "₦180 - ₦350",
   },
   {
     name: "Chisom Agu",
@@ -61,7 +61,7 @@ const doctors = [
     reviews: 302,
     location: "Houston, USA",
     availability: "Available Thu, 27 Dec",
-    price: "$250 - $500",
+    price: "₦250 - ₦500",
   },
   {
     name: "Precious Brownson",
@@ -85,7 +85,7 @@ const doctors = [
     reviews: 180,
     location: "Philadelphia, USA",
     availability: "Available Sat, 29 Dec",
-    price: "$300 - $600",
+    price: "₦300 - ₦600",
   },
   {
     name: "Glory Felix",
@@ -97,7 +97,7 @@ const doctors = [
     reviews: 95,
     location: "San Antonio, USA",
     availability: "Available Sun, 30 Dec",
-    price: "$120 - $250",
+    price: "₦120 - ₦250",
   },
   {
     name: "Ferdinand Lucios",
@@ -109,7 +109,7 @@ const doctors = [
     reviews: 210,
     location: "San Diego, USA",
     availability: "Available Mon, 31 Dec",
-    price: "$220 - $450",
+    price: "₦220 - ₦450",
   },
 ];
 

@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -22,7 +23,7 @@ const transactions = [
   {
     name: "Vera Ogechi",
     id: "#00016",
-    amount: "$150",
+    amount: "₦150",
     transactionId: "25JN03/67890/TN04",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman happy",
@@ -30,7 +31,7 @@ const transactions = [
   {
     name: "Ovie Whiskey",
     id: "#02016",
-    amount: "$150",
+    amount: "₦150",
     transactionId: "25JN03/67890/TN04",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "man smiling",
@@ -38,7 +39,7 @@ const transactions = [
   {
     name: "Peter Ogene",
     id: "#140016",
-    amount: "$150",
+    amount: "₦150",
     transactionId: "25JN03/67890/TN04",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "man portrait",
@@ -46,7 +47,7 @@ const transactions = [
   {
     name: "Sophia Zara",
     id: "#00016",
-    amount: "$150",
+    amount: "₦150",
     transactionId: "25JN03/67890/TN04",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman portrait",
@@ -54,7 +55,7 @@ const transactions = [
   {
     name: "Chicha Tobe",
     id: "#00066",
-    amount: "$150",
+    amount: "₦150",
     transactionId: "25JN03/67890/TN04",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman traditional",
@@ -62,7 +63,7 @@ const transactions = [
   {
     name: "Carol Susan",
     id: "#110016",
-    amount: "$150",
+    amount: "₦150",
     transactionId: "25JN03/67890/TN04",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman smiling",

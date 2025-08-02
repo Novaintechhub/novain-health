@@ -78,14 +78,14 @@ export default function InvoiceView() {
                             <tr className="border-b">
                                 <td className="p-3">General Consultation</td>
                                 <td className="p-3 text-center">1</td>
-                                <td className="p-3 text-center">$0</td>
-                                <td className="p-3 text-right">$100</td>
+                                <td className="p-3 text-center">₦0</td>
+                                <td className="p-3 text-right">₦100</td>
                             </tr>
                             <tr>
                                 <td className="p-3">Video Call Booking</td>
                                 <td className="p-3 text-center">1</td>
-                                <td className="p-3 text-center">$0</td>
-                                <td className="p-3 text-right">$250</td>
+                                <td className="p-3 text-center">₦0</td>
+                                <td className="p-3 text-right">₦250</td>
                             </tr>
                         </tbody>
                     </table>
@@ -95,7 +95,7 @@ export default function InvoiceView() {
                     <div className="w-full max-w-xs space-y-2">
                         <div className="flex justify-between">
                             <span className="font-semibold">Subtotal:</span>
-                            <span>$350</span>
+                            <span>₦350</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="font-semibold">Discount:</span>
@@ -104,7 +104,7 @@ export default function InvoiceView() {
                         <hr/>
                         <div className="flex justify-between font-bold text-lg">
                             <span>Total Amount:</span>
-                            <span>$315</span>
+                            <span>₦315</span>
                         </div>
                     </div>
                 </div>

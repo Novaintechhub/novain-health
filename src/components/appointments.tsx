@@ -19,7 +19,7 @@ const appointments = [
     bookingDate: "11th October 2025",
     type: "Video Call",
     status: "Confirm",
-    amount: "$200",
+    amount: "₦200",
   },
   {
     name: "Wright Thinker",
@@ -29,7 +29,7 @@ const appointments = [
     bookingDate: "15th October 2025",
     type: "Audio Call",
     status: "Cancelled",
-    amount: "$150",
+    amount: "₦150",
   },
   {
     name: "Kanayo Ike",
@@ -39,7 +39,7 @@ const appointments = [
     bookingDate: "10th October 2025",
     type: "Chat",
     status: "Confirm",
-    amount: "$100",
+    amount: "₦100",
   },
   {
     name: "Victor Thompson",
@@ -49,7 +49,7 @@ const appointments = [
     bookingDate: "12th October 2025",
     type: "Video Call",
     status: "Pending",
-    amount: "$300",
+    amount: "₦300",
   },
   {
     name: "Vera Ogechi",
@@ -59,7 +59,7 @@ const appointments = [
     bookingDate: "21st January 2025",
     type: "Video Call",
     status: "Confirm",
-    amount: "$250",
+    amount: "₦250",
   },
   {
     name: "Esther Peterson",
@@ -69,7 +69,7 @@ const appointments = [
     bookingDate: "31st January 2025",
     type: "Chat",
     status: "Confirm",
-    amount: "$50",
+    amount: "₦50",
   },
 ];
 

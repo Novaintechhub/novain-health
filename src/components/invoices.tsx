@@ -27,7 +27,7 @@ const invoices = [
     patientId: "#PT0016",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "man portrait",
-    amount: "$450",
+    amount: "₦450",
     paidOn: "14 Nov 2019",
   },
   {
@@ -36,7 +36,7 @@ const invoices = [
     patientId: "#PT0001",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman smiling",
-    amount: "$200",
+    amount: "₦200",
     paidOn: "13 Nov 2019",
   },
   {
@@ -45,7 +45,7 @@ const invoices = [
     patientId: "#PT0002",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "male doctor portrait",
-    amount: "$100",
+    amount: "₦100",
     paidOn: "12 Nov 2019",
   },
   {
@@ -54,7 +54,7 @@ const invoices = [
     patientId: "#PT0003",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "man portrait",
-    amount: "$350",
+    amount: "₦350",
     paidOn: "11 Nov 2019",
   },
   {
@@ -63,7 +63,7 @@ const invoices = [
     patientId: "#PT0004",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman portrait",
-    amount: "$275",
+    amount: "₦275",
     paidOn: "10 Nov 2019",
   },
   {
@@ -72,7 +72,7 @@ const invoices = [
     patientId: "#PT0005",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman portrait",
-    amount: "$600",
+    amount: "₦600",
     paidOn: "9 Nov 2019",
   },
   {
@@ -81,7 +81,7 @@ const invoices = [
     patientId: "#PT0006",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman portrait",
-    amount: "$50",
+    amount: "₦50",
     paidOn: "8 Nov 2019",
   },
   {
@@ -90,7 +90,7 @@ const invoices = [
     patientId: "#PT0007",
     avatarUrl: "https://placehold.co/40x40.png",
     avatarHint: "woman portrait",
-    amount: "$400",
+    amount: "₦400",
     paidOn: "7 Nov 2019",
   },
 ];

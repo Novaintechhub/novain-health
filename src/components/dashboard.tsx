@@ -25,6 +25,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import Link from "next/link";
 
 const patientData = [
     {
@@ -34,7 +35,7 @@ const patientData = [
         appointmentTime: "10:00am",
         purpose: "General",
         type: "New Patient",
-        paidAmount: "$150",
+        paidAmount: "₦150",
     },
     {
         id: "#00028",
@@ -43,7 +44,7 @@ const patientData = [
         appointmentTime: "1:00pm",
         purpose: "General",
         type: "Old Patient",
-        paidAmount: "$350",
+        paidAmount: "₦350",
     },
     {
         id: "#00118",
@@ -52,7 +53,7 @@ const patientData = [
         appointmentTime: "9:30am",
         purpose: "General",
         type: "Old Patient",
-        paidAmount: "$50",
+        paidAmount: "₦50",
     },
     {
         id: "#00118",
@@ -61,7 +62,7 @@ const patientData = [
         appointmentTime: "6:00pm",
         purpose: "General",
         type: "New Patient",
-        paidAmount: "$250",
+        paidAmount: "₦250",
     },
     {
         id: "#00216",
@@ -70,7 +71,7 @@ const patientData = [
         appointmentTime: "3:00pm",
         purpose: "General",
         type: "Old Patient",
-        paidAmount: "$85",
+        paidAmount: "₦85",
     },
     {
         id: "#00216",
@@ -79,7 +80,7 @@ const patientData = [
         appointmentTime: "12:00pm",
         purpose: "General",
         type: "New Patient",
-        paidAmount: "$80",
+        paidAmount: "₦80",
     },
 ];
 
@@ -232,8 +233,10 @@ export default function Dashboard() {
                     <TableCell>{patient.paidAmount}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                          <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                              <Eye className="h-4 w-4 mr-1"/> View
+                          <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                              <Link href="/doctor/view-appointment">
+                                <Eye className="h-4 w-4 mr-1"/> View
+                               </Link>
                           </Button>
                           <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
                               <Check className="h-4 w-4 mr-1"/> Accept
@@ -253,5 +256,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    

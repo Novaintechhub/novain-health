@@ -29,7 +29,7 @@ const patientData = [
         appointmentTime: "10:00am",
         purpose: "General",
         type: "New Patient",
-        paidAmount: "$150",
+        paidAmount: "₦150",
     },
     {
         id: "#00028",
@@ -38,7 +38,7 @@ const patientData = [
         appointmentTime: "1:00pm",
         purpose: "General",
         type: "Old Patient",
-        paidAmount: "$350",
+        paidAmount: "₦350",
     },
     {
         id: "#00118",
@@ -47,7 +47,7 @@ const patientData = [
         appointmentTime: "9:30am",
         purpose: "General",
         type: "Old Patient",
-        paidAmount: "$50",
+        paidAmount: "₦50",
     },
     {
         id: "#00118",
@@ -56,7 +56,7 @@ const patientData = [
         appointmentTime: "6:00pm",
         purpose: "General",
         type: "New Patient",
-        paidAmount: "$250",
+        paidAmount: "₦250",
     },
 ];
 
@@ -141,7 +141,7 @@ export default function PatientDashboard() {
 
       <Card className="bg-white rounded-lg shadow-sm">
         <CardContent className="p-4 flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
-            <EarningCard label="Last Bill" value="250.00" icon={<span className="text-2xl font-normal">$</span>} subtext="For general checkup" cta="View payment history"/>
+            <EarningCard label="Last Bill" value="250.00" icon={<span className="text-2xl font-normal">₦</span>} subtext="For general checkup" cta="View payment history"/>
             <EarningCard label="Prescriptions" value="3" subtext="Active" />
             <div className="flex justify-between items-center w-full md:w-auto">
               <EarningCard label="Next Appointment" value="Dec 11, 2024" subtext="with Dr. Tosin Adebayo" />

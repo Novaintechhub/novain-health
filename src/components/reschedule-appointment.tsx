@@ -52,7 +52,7 @@ export default function RescheduleAppointment() {
                         <div className="mt-2">
                             <StarRating rating={5} count={1176} />
                         </div>
-                        <p className="font-semibold my-2">$300 - $500</p>
+                        <p className="font-semibold my-2">₦300 - ₦500</p>
                         <div className="flex space-x-2">
                            <Button variant="outline" size="icon"><Bookmark/></Button>
                            <Button variant="outline" size="icon"><MessageCircle/></Button>
