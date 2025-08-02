@@ -155,17 +155,17 @@ export default function DoctorLayout({
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild href="/doctor/transactions/consultation-payments" isActive={pathname === '/doctor/transactions/consultation-payments'}>
+                        <SidebarMenuSubButton asChild isActive={pathname === '/doctor/transactions/consultation-payments'}>
                           <Link href="/doctor/transactions/consultation-payments">Consultation Payments</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                         <SidebarMenuSubButton asChild href="/doctor/transactions/invoices" isActive={pathname === '/doctor/transactions/invoices'}>
+                         <SidebarMenuSubButton asChild isActive={pathname === '/doctor/transactions/invoices'}>
                           <Link href="/doctor/transactions/invoices">Invoices</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                         <SidebarMenuSubButton asChild href="/doctor/transactions/payouts" isActive={pathname === '/doctor/transactions/payouts'}>
+                         <SidebarMenuSubButton asChild isActive={pathname === '/doctor/transactions/payouts'}>
                           <Link href="/doctor/transactions/payouts">Payouts</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -210,12 +210,12 @@ export default function DoctorLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <Link href="/doctor/login" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Logout">
+                <SidebarMenuButton asChild tooltip="Logout">
+                  <Link href="/doctor/login">
                     <LogOut />
                     <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -270,11 +270,9 @@ export default function DoctorLayout({
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/doctor/login" passHref legacyBehavior>
-                        <a>
+                      <Link href="/doctor/login">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Log out</span>
-                        </a>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

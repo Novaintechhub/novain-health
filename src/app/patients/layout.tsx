@@ -115,7 +115,7 @@ export default function PatientLayout({
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/patients/dashboard" tooltip="Dashboard" isActive={pathname === '/patients/dashboard'}>
+                <SidebarMenuButton asChild tooltip="Dashboard" isActive={pathname === '/patients/dashboard'}>
                   <Link href="/patients/dashboard" className="flex items-center gap-3">
                     <LayoutDashboard />
                     <span className="group-data-[collapsible=icon]:hidden">Dashboard</span>
@@ -199,12 +199,12 @@ export default function PatientLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <Link href="/patients/login" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Logout">
+                <SidebarMenuButton asChild tooltip="Logout">
+                  <Link href="/patients/login">
                     <LogOut />
                     <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -258,11 +258,9 @@ export default function PatientLayout({
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                       <Link href="/patients/login" passHref legacyBehavior>
-                        <a>
+                       <Link href="/patients/login">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Log out</span>
-                        </a>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

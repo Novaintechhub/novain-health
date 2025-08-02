@@ -106,36 +106,36 @@ export default function DashboardLayout({
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link href="/dashboard" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Dashboard" isActive={pathname === '/dashboard'}>
+                <SidebarMenuButton asChild tooltip="Dashboard" isActive={pathname === '/dashboard'}>
+                  <Link href="/dashboard">
                     <LayoutDashboard />
                     Dashboard
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/appointments" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
+                 <SidebarMenuButton asChild tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
+                   <Link href="/dashboard/appointments">
                     <Calendar />
                     Appointments
-                  </SidebarMenuButton>
-                </Link>
+                   </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/my-patients" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
+                 <SidebarMenuButton asChild tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
+                  <Link href="/dashboard/my-patients">
                     <Users />
                     My Patients
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/schedule-timings" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
+                <SidebarMenuButton asChild tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
+                  <Link href="/dashboard/schedule-timings">
                     <Clock />
                     Schedule Timings
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Collapsible>
@@ -149,74 +149,74 @@ export default function DashboardLayout({
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <Link href="/dashboard/transactions/consultation-payments" passHref legacyBehavior>
-                          <SidebarMenuSubButton isActive={pathname === '/dashboard/transactions/consultation-payments'}>
+                        <SidebarMenuSubButton asChild isActive={pathname === '/dashboard/transactions/consultation-payments'}>
+                          <Link href="/dashboard/transactions/consultation-payments">
                             Consultation Payments
-                          </SidebarMenuSubButton>
-                        </Link>
+                          </Link>
+                        </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                         <Link href="/dashboard/transactions/payouts" passHref legacyBehavior>
-                          <SidebarMenuSubButton isActive={pathname === '/dashboard/transactions/payouts'}>
+                        <SidebarMenuSubButton asChild isActive={pathname === '/dashboard/transactions/payouts'}>
+                          <Link href="/dashboard/transactions/payouts">
                             Payouts
-                          </SidebarMenuSubButton>
-                         </Link>
+                          </Link>
+                        </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <Link href="/dashboard/reviews" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
+                <SidebarMenuButton asChild tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
+                  <Link href="/dashboard/reviews">
                     <Star />
                     Reviews
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/messages" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Message" isActive={pathname === '/dashboard/messages'}>
+                <SidebarMenuButton asChild tooltip="Message" isActive={pathname === '/dashboard/messages'}>
+                  <Link href="/dashboard/messages">
                     <MessageSquare />
                     Message
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/profile-settings" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
+                <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
+                  <Link href="/dashboard/profile-settings">
                     <User />
                     Profile settings
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/social-media" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
+                <SidebarMenuButton asChild tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
+                  <Link href="/dashboard/social-media">
                     <Share2 />
                     Social Media
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/dashboard/change-password" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Change Password" isActive={pathname === '/dashboard/change-password'}>
+                <SidebarMenuButton asChild tooltip="Change Password" isActive={pathname === '/dashboard/change-password'}>
+                  <Link href="/dashboard/change-password">
                     <Lock />
                     Change password
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <Link href="/general-login" passHref legacyBehavior>
-                  <SidebarMenuButton tooltip="Logout">
+                <SidebarMenuButton asChild tooltip="Logout">
+                  <Link href="/general-login">
                     <LogOut />
                     Logout
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -271,11 +271,9 @@ export default function DashboardLayout({
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/general-login" passHref legacyBehavior>
-                        <a>
+                      <Link href="/general-login">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Log out</span>
-                        </a>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
