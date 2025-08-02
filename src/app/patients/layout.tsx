@@ -39,6 +39,7 @@ import {
   Lock,
   Share,
   FileText,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -142,6 +143,14 @@ export default function PatientLayout({
                   <Link href="/patients/medical-records" className="flex items-center gap-3">
                     <Briefcase />
                     <span className="group-data-[collapsible=icon]:hidden">Medical Records</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Billing" isActive={pathname === '/patients/billing'}>
+                  <Link href="/patients/billing" className="flex items-center gap-3">
+                    <CreditCard />
+                    <span className="group-data-[collapsible=icon]:hidden">Billing</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

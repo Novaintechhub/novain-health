@@ -111,7 +111,7 @@ export default function Appointments() {
                 <TabsTrigger value="appointments">Appointments</TabsTrigger>
                 <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
                 <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
-                <TabsTrigger value="billing">Billing</TabsTrigger>
+                <Link href="/patients/billing" className="w-full"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="appointments">
                 <Card className="bg-white rounded-lg shadow-sm">

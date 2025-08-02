@@ -9,97 +9,105 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Printer, Eye } from "lucide-react";
 import Link from "next/link";
 
-const prescriptions = [
+const billingData = [
   {
-    date: "14 Nov 2019",
-    name: "Prescription 1",
+    invoiceNo: "#INV-0010",
     doctorName: "Dr. Ruby Perrin",
     doctorSpecialty: "Dental",
+    amount: "$450",
+    paidOn: "14 Nov 2019",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor",
   },
   {
-    date: "13 Nov 2019",
-    name: "Prescription 2",
+    invoiceNo: "#INV-0009",
     doctorName: "Dr. Darren Elder",
     doctorSpecialty: "Dental",
+    amount: "$300",
+    paidOn: "13 Nov 2019",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "male doctor",
   },
   {
-    date: "12 Nov 2019",
-    name: "Prescription 3",
+    invoiceNo: "#INV-0008",
     doctorName: "Dr. Deborah Angel",
     doctorSpecialty: "Cardiology",
+    amount: "$150",
+    paidOn: "12 Nov 2019",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor portrait",
   },
   {
-    date: "11 Nov 2019",
-    name: "Prescription 4",
+    invoiceNo: "#INV-0007",
     doctorName: "Dr. Sofia Brient",
     doctorSpecialty: "Urology",
+    amount: "$50",
+    paidOn: "11 Nov 2019",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor smiling",
   },
   {
-    date: "10 Nov 2019",
-    name: "Prescription 5",
+    invoiceNo: "#INV-0006",
     doctorName: "Dr. Marvin Campbell",
-    doctorSpecialty: "Dental",
+    doctorSpecialty: "Ophthalmology",
+    amount: "$600",
+    paidOn: "10 Nov 2019",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "male doctor portrait",
   },
    {
-    date: "9 Nov 2019",
-    name: "Prescription 6",
+    invoiceNo: "#INV-0005",
     doctorName: "Dr. Katharine Berthold",
     doctorSpecialty: "Dental",
+    amount: "$200",
+    paidOn: "9 Nov 2019",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor glasses",
   },
 ];
 
-export default function Prescriptions() {
+export default function Billing() {
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Prescriptions</h1>
-        <Tabs defaultValue="prescriptions">
+      <h1 className="text-2xl font-bold">Billing</h1>
+        <Tabs defaultValue="billing">
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
                 <Link href="/patients/appointments" className="w-full"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
-                <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
+                <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
                 <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
-                <Link href="/patients/billing" className="w-full"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
+                <TabsTrigger value="billing">Billing</TabsTrigger>
             </TabsList>
-            <TabsContent value="prescriptions">
+            <TabsContent value="billing">
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Created by</TableHead>
+                                    <TableHead>Invoice No</TableHead>
+                                    <TableHead>Doctor</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Paid On</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {prescriptions.map((prescription, index) => (
+                                {billingData.map((invoice, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{prescription.date}</TableCell>
-                                        <TableCell>{prescription.name}</TableCell>
+                                        <TableCell>{invoice.invoiceNo}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10">
-                                                    <AvatarImage src={prescription.doctorAvatarUrl} alt={prescription.doctorName} data-ai-hint={prescription.doctorAvatarHint} />
-                                                    <AvatarFallback>{prescription.doctorName.charAt(0)}</AvatarFallback>
+                                                    <AvatarImage src={invoice.doctorAvatarUrl} alt={invoice.doctorName} data-ai-hint={invoice.doctorAvatarHint} />
+                                                    <AvatarFallback>{invoice.doctorName.charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <div className="font-medium">{prescription.doctorName}</div>
-                                                    <div className="text-sm text-muted-foreground">{prescription.doctorSpecialty}</div>
+                                                    <div className="font-medium">{invoice.doctorName}</div>
+                                                    <div className="text-sm text-muted-foreground">{invoice.doctorSpecialty}</div>
                                                 </div>
                                             </div>
                                         </TableCell>
+                                        <TableCell>{invoice.amount}</TableCell>
+                                        <TableCell>{invoice.paidOn}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex gap-2 justify-end">
                                                 <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">

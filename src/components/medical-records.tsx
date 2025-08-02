@@ -81,7 +81,7 @@ export default function MedicalRecords() {
                 <Link href="/patients/appointments" className="w-full"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
                 <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
                 <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
-                <TabsTrigger value="billing">Billing</TabsTrigger>
+                <Link href="/patients/billing" className="w-full"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="medical-records">
                 <Card className="bg-white rounded-lg shadow-sm">
