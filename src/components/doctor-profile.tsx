@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight } from "lucide-react";
 
-const StarRating = ({ rating, count }: { rating: number; count: number }) => (
+const StarRating = ({ rating, count }: { rating: number; count?: number }) => (
   <div className="flex items-center gap-1">
     {[...Array(5)].map((_, i) => (
       <Star
@@ -17,7 +17,7 @@ const StarRating = ({ rating, count }: { rating: number; count: number }) => (
         }`}
       />
     ))}
-    <span className="text-sm text-muted-foreground">({count})</span>
+    {count && <span className="text-sm text-muted-foreground">({count})</span>}
   </div>
 );
 
@@ -48,6 +48,45 @@ const specializations = [
     "Children Care", "Dental Care", "Oral and Maxillofacial Surgery",
     "Orthodontist", "Periodontist", "Prosthodontics"
 ];
+
+const locations = [
+    {
+      name: "Smile Cute Dental Care Center",
+      specialty: "MDS - Periodontology and Oral Implantology, BDS",
+      rating: 4,
+      reviewCount: 4,
+      address: "2286 Sundown Lane, Austin, Texas 78749, USA",
+      images: [
+        { src: "https://placehold.co/80x80.png", hint: "dental clinic" },
+        { src: "https://placehold.co/80x80.png", hint: "dental equipment" },
+        { src: "https://placehold.co/80x80.png", hint: "dentist patient" },
+        { src: "https://placehold.co/80x80.png", hint: "dental chair" },
+      ],
+      hours: [
+        { days: "Mon - Sat", time: "10:00 AM - 2:00 PM\n4:00 PM - 9:00 PM" },
+        { days: "Sun", time: "10:00 AM - 2:00 PM" },
+      ],
+      price: 250,
+    },
+    {
+      name: "The Family Dentistry Clinic",
+      specialty: "MDS - Periodontology and Oral Implantology, BDS",
+      rating: 4,
+      reviewCount: 4,
+      address: "2883 University Street, Seattle, Texas Washington, 98155",
+      images: [
+        { src: "https://placehold.co/80x80.png", hint: "clinic reception" },
+        { src: "https://placehold.co/80x80.png", hint: "medical tools" },
+        { src: "https://placehold.co/80x80.png", hint: "doctor with patient" },
+        { src: "https://placehold.co/80x80.png", hint: "operating room" },
+      ],
+      hours: [
+        { days: "Tue - Fri", time: "11:00 AM - 1:00 PM\n6:00 PM - 11:00 PM" },
+        { days: "Sat - Sun", time: "8:00 AM - 10:00 AM\n3:00 PM - 7:00 PM" },
+      ],
+      price: 350,
+    },
+  ];
 
 export default function DoctorProfile() {
   return (
@@ -182,12 +221,41 @@ export default function DoctorProfile() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="locations">
-          <Card>
-            <CardContent className="p-6">
-              <p>Locations content goes here.</p>
-            </CardContent>
-          </Card>
+        <TabsContent value="locations" className="mt-6">
+            <Card>
+                <CardContent className="p-0">
+                    {locations.map((location, index) => (
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 border-b last:border-b-0">
+                            <div className="md:col-span-1 space-y-2">
+                                <h4 className="text-lg font-bold">{location.name}</h4>
+                                <p className="text-sm text-muted-foreground">{location.specialty}</p>
+                                <StarRating rating={location.rating} count={location.reviewCount} />
+                                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                                    <span>{location.address}</span>
+                                </div>
+                                <a href="#" className="text-sm text-cyan-500 hover:underline">Get Directions</a>
+                                <div className="flex gap-2 pt-2">
+                                    {location.images.map((image, i) => (
+                                        <Image key={i} src={image.src} alt={`clinic photo ${i + 1}`} width={60} height={60} className="rounded-md object-cover" data-ai-hint={image.hint} />
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="md:col-span-1 space-y-2">
+                                {location.hours.map((hour, i) => (
+                                    <div key={i}>
+                                        <p className="font-semibold">{hour.days}</p>
+                                        <p className="text-sm text-muted-foreground whitespace-pre-line">{hour.time}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="md:col-span-1 text-right">
+                                <p className="text-2xl font-bold">${location.price}</p>
+                            </div>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
         </TabsContent>
         <TabsContent value="reviews">
           <Card>
