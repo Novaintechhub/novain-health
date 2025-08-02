@@ -46,14 +46,16 @@ export default function GeneralLogin() {
             </div>
             <h1 className="text-xl font-bold text-gray-800 mb-6">Create an account</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link href="/signup" passHref>
+              <Link href="/doctor-registration" passHref>
                 <Button variant="outline" className="w-full h-12 border-cyan-400 text-cyan-400 hover:bg-cyan-50 hover:text-cyan-500">
                   I am a Medical Professional
                 </Button>
               </Link>
-              <Button className="w-full h-12 bg-cyan-400 hover:bg-cyan-500 text-white">
-                I am seeking a Medical Professional
-              </Button>
+              <Link href="/signup" passHref>
+                <Button className="w-full h-12 bg-cyan-400 hover:bg-cyan-500 text-white">
+                    I am seeking a Medical Professional
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -70,3 +72,5 @@ export default function GeneralLogin() {
     </div>
   );
 }
+
+    
