@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -156,8 +157,12 @@ export default function Messages() {
           </div>
           <div className="flex items-center gap-4 text-gray-500">
             <Button variant="ghost" size="icon"><Bookmark className="h-5 w-5"/></Button>
-            <Button variant="ghost" size="icon"><Phone className="h-5 w-5"/></Button>
-            <Button variant="ghost" size="icon"><Video className="h-5 w-5"/></Button>
+            <Link href="/patients/voice-call">
+              <Button variant="ghost" size="icon"><Phone className="h-5 w-5"/></Button>
+            </Link>
+            <Link href="/patients/video-call">
+             <Button variant="ghost" size="icon"><Video className="h-5 w-5"/></Button>
+            </Link>
           </div>
         </header>
 
