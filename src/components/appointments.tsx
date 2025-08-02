@@ -134,10 +134,9 @@ export default function Appointments() {
                 <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="appointments">
-                <Card className="bg-white rounded-lg shadow-sm">
+                {/* Desktop View */}
+                <Card className="hidden md:block bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
-                      {/* Desktop View */}
-                      <div className="hidden md:block">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -192,58 +191,57 @@ export default function Appointments() {
                                 ))}
                             </TableBody>
                         </Table>
-                      </div>
-                      {/* Mobile View */}
-                      <div className="md:hidden space-y-4 p-4">
-                        {appointments.map((appointment, index) => (
-                          <Card key={index} className="shadow-md">
-                            <CardContent className="p-4 space-y-3">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-12 w-12">
-                                  <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                                  <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-bold">{appointment.name}</p>
-                                  <StatusBadge status={appointment.status} />
-                                </div>
-                              </div>
-                              <div className="border-t pt-3 space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Appt Date:</span>
-                                  <span className="font-medium">{appointment.date}</span>
-                                </div>
-                                 <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Booking Date:</span>
-                                  <span className="font-medium">{appointment.bookingDate}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-muted-foreground">Type:</span>
-                                  <TypeIcon type={appointment.type} />
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Amount:</span>
-                                  <span className="font-medium">{appointment.amount}</span>
-                                </div>
-                              </div>
-                              <div className="flex gap-2 justify-end border-t pt-3">
-                                  <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                      <Printer className="w-4 h-4 mr-1" />
-                                      Print
-                                  </Button>
-                                  <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                      <Link href="/patients/reschedule-appointment">
-                                          <Eye className="w-4 h-4 mr-1" />
-                                          View
-                                      </Link>
-                                  </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
                     </CardContent>
                 </Card>
+                {/* Mobile View */}
+                <div className="md:hidden space-y-4">
+                    {appointments.map((appointment, index) => (
+                        <Card key={index} className="shadow-md">
+                        <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center gap-3">
+                            <Avatar className="h-12 w-12">
+                                <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
+                                <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-bold">{appointment.name}</p>
+                                <StatusBadge status={appointment.status} />
+                            </div>
+                            </div>
+                            <div className="border-t pt-3 space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Appt Date:</span>
+                                <span className="font-medium">{appointment.date}</span>
+                            </div>
+                                <div className="flex justify-between">
+                                <span className="text-muted-foreground">Booking Date:</span>
+                                <span className="font-medium">{appointment.bookingDate}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Type:</span>
+                                <TypeIcon type={appointment.type} />
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Amount:</span>
+                                <span className="font-medium">{appointment.amount}</span>
+                            </div>
+                            </div>
+                            <div className="flex gap-2 justify-end border-t pt-3">
+                                <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                                    <Printer className="w-4 h-4 mr-1" />
+                                    Print
+                                </Button>
+                                <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                    <Link href="/patients/reschedule-appointment">
+                                        <Eye className="w-4 h-4 mr-1" />
+                                        View
+                                    </Link>
+                                </Button>
+                            </div>
+                        </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </TabsContent>
         </Tabs>
     </div>
