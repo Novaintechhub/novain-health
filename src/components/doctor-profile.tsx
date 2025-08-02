@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const StarRating = ({ rating, count, onRatingChange, interactive = false }: { rating: number; count?: number; onRatingChange?: (rating: number) => void; interactive?: boolean }) => (
   <div className="flex items-center gap-1">
@@ -134,6 +135,17 @@ const locations = [
       reply: null,
     },
   ];
+
+const businessHours = [
+    { day: "Today", date: "5 Nov 2019", time: "07:00 AM - 09:00 PM", status: "Open Now" },
+    { day: "Monday", time: "07:00 AM - 09:00 PM" },
+    { day: "Tuesday", time: "07:00 AM - 09:00 PM" },
+    { day: "Wednesday", time: "07:00 AM - 09:00 PM" },
+    { day: "Thursday", time: "07:00 AM - 09:00 PM" },
+    { day: "Friday", time: "07:00 AM - 09:00 PM" },
+    { day: "Saturday", time: "07:00 AM - 09:00 PM" },
+    { day: "Sunday", time: "", status: "Closed" },
+];
 
 export default function DoctorProfile() {
   const [reviewRating, setReviewRating] = React.useState(0);
@@ -410,12 +422,33 @@ export default function DoctorProfile() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="business-hours">
-          <Card>
-            <CardContent className="p-6">
-              <p>Business hours content goes here.</p>
-            </CardContent>
-          </Card>
+        <TabsContent value="business-hours" className="mt-6">
+            <Card>
+                <CardContent className="p-6">
+                    <ul className="space-y-4">
+                        {businessHours.map((item, index) => (
+                            <li key={index} className="flex justify-between items-center border-b pb-4 last:border-b-0">
+                                <div>
+                                    <p className="font-semibold">{item.day}</p>
+                                    {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                                </div>
+                                <div className="text-right">
+                                    {item.status === "Open Now" && (
+                                        <>
+                                            <p className="text-sm text-muted-foreground">{item.time}</p>
+                                            <Badge className="bg-green-100 text-green-800 mt-1">Open Now</Badge>
+                                        </>
+                                    )}
+                                    {item.status === "Closed" && (
+                                        <Badge variant="destructive" className="bg-red-100 text-red-800">Closed</Badge>
+                                    )}
+                                    {!item.status && <p className="text-sm text-muted-foreground">{item.time}</p>}
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
         </TabsContent>
       </Tabs>
     </div>
