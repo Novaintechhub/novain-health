@@ -5,7 +5,8 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight } from "lucide-react";
+import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight, Reply, ThumbsDown } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const StarRating = ({ rating, count }: { rating: number; count?: number }) => (
   <div className="flex items-center gap-1">
@@ -85,6 +86,36 @@ const locations = [
         { days: "Sat - Sun", time: "8:00 AM - 10:00 AM\n3:00 PM - 7:00 PM" },
       ],
       price: 350,
+    },
+  ];
+
+  const reviews = [
+    {
+      name: "Richard Wilson",
+      avatar: "https://placehold.co/80x80.png",
+      avatarHint: "man portrait",
+      date: "Reviewed 2 Days ago",
+      rating: 5,
+      recommended: true,
+      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
+    },
+    {
+      name: "Charlene Reed",
+      avatar: "https://placehold.co/80x80.png",
+      avatarHint: "woman smiling",
+      date: "Reviewed 3 Days ago",
+      rating: 4,
+      recommended: false,
+      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
+    },
+    {
+      name: "Travis Trimble",
+      avatar: "https://placehold.co/80x80.png",
+      avatarHint: "male doctor portrait",
+      date: "Reviewed 4 Days ago",
+      rating: 5,
+      recommended: false,
+      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
     },
   ];
 
@@ -257,10 +288,52 @@ export default function DoctorProfile() {
                 </CardContent>
             </Card>
         </TabsContent>
-        <TabsContent value="reviews">
+        <TabsContent value="reviews" className="mt-6">
           <Card>
-            <CardContent className="p-6">
-              <p>Reviews content goes here.</p>
+            <CardContent className="p-6 space-y-8">
+               {reviews.map((review, index) => (
+                 <div key={index} className="border-b last:border-b-0 pb-8 last:pb-0">
+                    <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12 shrink-0">
+                            <AvatarImage src={review.avatar} alt={review.name} data-ai-hint={review.avatarHint} />
+                            <AvatarFallback>{review.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h4 className="font-bold">{review.name}</h4>
+                                    <p className="text-sm text-muted-foreground">{review.date}</p>
+                                </div>
+                                <StarRating rating={review.rating} />
+                            </div>
+                            {review.recommended && (
+                                <div className="flex items-center gap-2 mt-2 text-green-600 font-semibold">
+                                    <ThumbsUp className="h-4 w-4"/>
+                                    <span>I recommend the doctor</span>
+                                </div>
+                            )}
+                            <p className="mt-2 text-muted-foreground">{review.text}</p>
+                            <div className="flex items-center justify-between mt-4">
+                                <Button variant="ghost" className="p-0 text-cyan-500 hover:text-cyan-600">
+                                    <Reply className="h-4 w-4 mr-2"/> Reply
+                                </Button>
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                    <span>Recommend?</span>
+                                    <Button variant="outline" size="sm" className="gap-1">
+                                        <ThumbsUp className="h-4 w-4 text-green-500"/> Yes
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="gap-1">
+                                        <ThumbsDown className="h-4 w-4 text-red-500"/> No
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+               ))}
+               <div className="text-center">
+                 <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">Show all feedback (167)</Button>
+               </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -275,3 +348,5 @@ export default function DoctorProfile() {
     </div>
   );
 }
+
+    
