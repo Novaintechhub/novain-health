@@ -74,16 +74,36 @@ const appointments = [
 ];
 
 const TypeIcon = ({ type }: { type: string }) => {
+    let icon;
+    let href;
+    let className;
     switch (type) {
         case "Video Call":
-            return <Video className="h-5 w-5 text-green-500" />;
+            icon = <Video className="h-5 w-5 text-green-500" />;
+            href = "/patients/video-call";
+            className = "text-green-500";
+            break;
         case "Audio Call":
-            return <Phone className="h-5 w-5 text-blue-500" />;
+            icon = <Phone className="h-5 w-5 text-blue-500" />;
+            href = "/patients/voice-call";
+            className = "text-blue-500";
+            break;
         case "Chat":
-            return <MessageSquare className="h-5 w-5 text-purple-500" />;
+            icon = <MessageSquare className="h-5 w-5 text-purple-500" />;
+            href = "/patients/messages";
+            className = "text-purple-500";
+            break;
         default:
             return null;
     }
+    return (
+        <Link href={href}>
+            <div className={`flex items-center gap-2 hover:underline ${className}`}>
+                {icon}
+                <span>{type}</span>
+            </div>
+        </Link>
+    )
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -146,10 +166,7 @@ export default function Appointments() {
                                         </TableCell>
                                         <TableCell>{appointment.bookingDate}</TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <TypeIcon type={appointment.type} />
-                                                <span>{appointment.type}</span>
-                                            </div>
+                                            <TypeIcon type={appointment.type} />
                                         </TableCell>
                                         <TableCell>{appointment.amount}</TableCell>
                                         <TableCell>

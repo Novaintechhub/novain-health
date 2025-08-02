@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic, Phone, UserPlus, Video, Settings } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function VoiceCall() {
   const [seconds, setSeconds] = useState(59);
@@ -65,9 +66,11 @@ export default function VoiceCall() {
             </Card>
         </div>
         <div className="bg-white py-4 px-6 flex justify-center items-center gap-4 border-t">
-            <Button variant="outline" size="icon" className="rounded-full w-12 h-12">
-                <Video />
-            </Button>
+            <Link href="/patients/video-call">
+                <Button variant="outline" size="icon" className="rounded-full w-12 h-12">
+                    <Video />
+                </Button>
+            </Link>
             <Button variant="outline" size="icon" className="rounded-full w-12 h-12">
                 <Mic />
             </Button>
