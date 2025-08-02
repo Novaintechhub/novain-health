@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
 
 export const metadata: Metadata = {
   title: "NovainHealth",
@@ -22,7 +30,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased h-full">
+      <body className={`${inter.variable} font-body antialiased h-full`}>
         {children}
         <Toaster />
       </body>

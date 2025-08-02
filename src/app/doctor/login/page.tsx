@@ -1,5 +1,9 @@
 import Login from "@/components/login";
 
 export default function LoginPage() {
-  return <Login />;
+  return (
+    <div className="h-full">
+        <Login />
+    </div>
+  );
 }
