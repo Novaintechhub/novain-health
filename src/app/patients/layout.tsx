@@ -107,7 +107,7 @@ export default function PatientLayout({
                   <p>Newyork, USA</p>
                 </div>
                 <Link href="/patients/profile">
-                    <Button variant="outline" className="mt-4 text-primary border-primary">View Details</Button>
+                    <Button asChild variant="outline" className="mt-4 text-primary border-primary"><span>View Details</span></Button>
                 </Link>
               </div>
             </SidebarGroup>
