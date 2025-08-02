@@ -92,7 +92,7 @@ export default function Signup() {
               <AppleIcon className="mr-2 h-5 w-5" />
               Continue with Apple
             </Button>
-            <Link href="/doctor-registration" passHref>
+            <Link href="/doctor-registration" passHref className="mt-3">
               <Button variant="outline" className="w-full justify-center">
                 <Mail className="mr-2 h-5 w-5" />
                 Continue with Email
