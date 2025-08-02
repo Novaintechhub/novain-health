@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 const StarRating = ({ rating, count, onRatingChange, interactive = false }: { rating: number; count?: number; onRatingChange?: (rating: number) => void; interactive?: boolean }) => (
   <div className="flex items-center gap-1">
@@ -204,9 +205,15 @@ export default function DoctorProfile() {
                  <div className="flex items-center gap-2 mt-2 text-sm"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span>$100 per hour</span></div>
                  <div className="flex justify-start gap-2 mt-4">
                     <Button variant="outline" size="icon"><Bookmark /></Button>
-                    <Button variant="outline" size="icon"><MessageCircle /></Button>
-                    <Button variant="outline" size="icon"><Phone /></Button>
-                    <Button variant="outline" size="icon"><Video /></Button>
+                    <Link href="/patients/messages">
+                      <Button variant="outline" size="icon"><MessageCircle /></Button>
+                    </Link>
+                    <Link href="/patients/voice-call">
+                      <Button variant="outline" size="icon"><Phone /></Button>
+                    </Link>
+                    <Link href="/patients/video-call">
+                      <Button variant="outline" size="icon"><Video /></Button>
+                    </Link>
                  </div>
               </div>
               <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4">Book Appointment</Button>
