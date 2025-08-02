@@ -106,7 +106,7 @@ export default function PatientLayout({
                   <p>24 Jul 1983, 38 years</p>
                   <p>Newyork, USA</p>
                 </div>
-                <Link href="/patients/profile" passHref legacyBehavior>
+                <Link href="/patients/profile">
                     <Button variant="outline" className="mt-4 text-primary border-primary">View Details</Button>
                 </Link>
               </div>
