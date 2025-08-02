@@ -7,20 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight, Reply, ThumbsDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
-const StarRating = ({ rating, count }: { rating: number; count?: number }) => (
+const StarRating = ({ rating, count, onRatingChange, interactive = false }: { rating: number; count?: number; onRatingChange?: (rating: number) => void; interactive?: boolean }) => (
   <div className="flex items-center gap-1">
     {[...Array(5)].map((_, i) => (
       <Star
         key={i}
         className={`h-5 w-5 ${
           i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-        }`}
+        } ${interactive ? 'cursor-pointer' : ''}`}
+        onClick={() => onRatingChange?.(i + 1)}
       />
     ))}
-    {count && <span className="text-sm text-muted-foreground">({count})</span>}
+    {count !== undefined && <span className="text-sm text-muted-foreground">({count})</span>}
   </div>
 );
+
 
 const awards = [
     {
@@ -47,7 +53,7 @@ const services = [
 
 const specializations = [
     "Children Care", "Dental Care", "Oral and Maxillofacial Surgery",
-    "Orthodontist", "Periodontist", "Prosthodontics"
+    "Orthodontist", "Periododontist", "Prosthodontics"
 ];
 
 const locations = [
@@ -98,6 +104,13 @@ const locations = [
       rating: 5,
       recommended: true,
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
+      reply: {
+        name: "Dr. Darren Elder",
+        avatar: "https://placehold.co/80x80.png",
+        avatarHint: "male doctor",
+        date: "Reviewed 2 Days ago",
+        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
+      }
     },
     {
       name: "Charlene Reed",
@@ -107,6 +120,7 @@ const locations = [
       rating: 4,
       recommended: false,
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
+      reply: null,
     },
     {
       name: "Travis Trimble",
@@ -116,10 +130,15 @@ const locations = [
       rating: 5,
       recommended: false,
       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Curabitur non nulla sit amet nisl tempus",
+      reply: null,
     },
   ];
 
 export default function DoctorProfile() {
+  const [reviewRating, setReviewRating] = React.useState(0);
+  const [reviewText, setReviewText] = React.useState('');
+  const MAX_REVIEW_LENGTH = 100;
+
   return (
     <div className="space-y-6">
       <div>
@@ -327,6 +346,23 @@ export default function DoctorProfile() {
                                     </Button>
                                 </div>
                             </div>
+                            {review.reply && (
+                                <div className="flex items-start gap-4 mt-6 ml-8 p-4 bg-gray-50 rounded-lg">
+                                    <Avatar className="h-12 w-12 shrink-0">
+                                        <AvatarImage src={review.reply.avatar} alt={review.reply.name} data-ai-hint={review.reply.avatarHint} />
+                                        <AvatarFallback>{review.reply.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="font-bold">{review.reply.name}</h4>
+                                                <p className="text-sm text-muted-foreground">{review.reply.date}</p>
+                                            </div>
+                                        </div>
+                                        <p className="mt-2 text-muted-foreground">{review.reply.text}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                  </div>
@@ -334,6 +370,42 @@ export default function DoctorProfile() {
                <div className="text-center">
                  <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">Show all feedback (167)</Button>
                </div>
+
+               <div className="border-t pt-8 mt-8">
+                    <h3 className="text-xl font-bold mb-4">Write a review for Dr. Darren Elder</h3>
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Review</Label>
+                            <div className="mt-1">
+                                <StarRating rating={reviewRating} onRatingChange={setReviewRating} interactive={true} />
+                            </div>
+                        </div>
+                        <div>
+                            <Label htmlFor="review-title">Title of your review</Label>
+                            <Input id="review-title" placeholder="If you could say it in one sentence, what would you say?" />
+                        </div>
+                        <div>
+                            <Label htmlFor="review-text">Your review</Label>
+                            <Textarea 
+                                id="review-text"
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                                maxLength={MAX_REVIEW_LENGTH}
+                            />
+                            <p className="text-sm text-muted-foreground mt-1">{MAX_REVIEW_LENGTH - reviewText.length} characters remaining</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="terms" />
+                            <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground">
+                                I have read and accept <a href="#" className="text-cyan-500 hover:underline">Terms & Conditions</a>
+                            </Label>
+                        </div>
+                        <div>
+                            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">Add Review</Button>
+                        </div>
+                    </div>
+                </div>
+
             </CardContent>
           </Card>
         </TabsContent>
