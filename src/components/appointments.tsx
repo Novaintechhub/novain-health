@@ -161,9 +161,11 @@ export default function Appointments() {
                                                     <Printer className="w-4 h-4 mr-1" />
                                                     Print
                                                 </Button>
-                                                <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    View
+                                                <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                    <Link href="/patients/reschedule-appointment">
+                                                        <Eye className="w-4 h-4 mr-1" />
+                                                        View
+                                                    </Link>
                                                 </Button>
                                             </div>
                                         </TableCell>

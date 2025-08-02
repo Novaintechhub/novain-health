@@ -19,6 +19,7 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
+import Link from "next/link";
 
 const patientData = [
     {
@@ -196,8 +197,10 @@ export default function PatientDashboard() {
                     <TableCell>{patient.paidAmount}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                          <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                              <Eye className="h-4 w-4 mr-1"/> View
+                          <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                              <Link href="/patients/reschedule-appointment">
+                                <Eye className="h-4 w-4 mr-1"/> View
+                              </Link>
                           </Button>
                           <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
                               <X className="h-4 w-4 mr-1"/> Cancel
