@@ -30,7 +30,6 @@ import {
   Calendar,
   Users,
   FlaskConical,
-  HeartPulse,
   MessageSquare,
   User,
   LogOut,
@@ -92,19 +91,109 @@ export default function PatientLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex flex-col min-h-screen bg-gray-50/50 w-full">
-        <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
+      <div className="flex min-h-screen bg-gray-50/50 w-full">
+        <Sidebar className="bg-white border-r" collapsible="icon">
+          <SidebarContent className="p-4">
+            <SidebarGroup>
+               <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
+                <Avatar className="h-24 w-24 border-2 border-primary rounded-full shadow-lg">
+                  <AvatarImage src="https://placehold.co/96x96.png" alt="Tosin Chukwuka" data-ai-hint="woman portrait" />
+                  <AvatarFallback>TC</AvatarFallback>
+                </Avatar>
+                <h3 className="mt-4 text-xl font-semibold">Tosin Chukwuka</h3>
+                <p className="text-sm text-muted-foreground">Patient</p>
+              </div>
+            </SidebarGroup>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild href="/patients/dashboard" tooltip="Dashboard" isActive={pathname === '/patients/dashboard'}>
+                  <Link href="/patients/dashboard" className="flex items-center gap-3">
+                    <LayoutDashboard />
+                    <span className="group-data-[collapsible=icon]:hidden">Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Appointments">
+                   <Link href="#" className="flex items-center gap-3">
+                    <Calendar />
+                    <span className="group-data-[collapsible=icon]:hidden">Appointments</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Doctors">
+                  <Link href="#" className="flex items-center gap-3">
+                    <Users />
+                    <span className="group-data-[collapsible=icon]:hidden">Doctors</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Medical Records">
+                  <Link href="#" className="flex items-center gap-3">
+                    <Briefcase />
+                    <span className="group-data-[collapsible=icon]:hidden">Medical Records</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Lab Tests">
+                  <Link href="#" className="flex items-center gap-3">
+                    <FlaskConical />
+                    <span className="group-data-[collapsible=icon]:hidden">Lab Tests</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Messages">
+                  <Link href="#" className="flex items-center gap-3">
+                    <MessageSquare />
+                    <span className="group-data-[collapsible=icon]:hidden">Messages</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Profile Settings">
+                  <Link href="#" className="flex items-center gap-3">
+                    <User />
+                    <span className="group-data-[collapsible=icon]:hidden">Profile settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Referrals">
+                  <Link href="#" className="flex items-center gap-3">
+                    <Share />
+                    <span className="group-data-[collapsible=icon]:hidden">Referrals</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu className="p-4">
+              <SidebarMenuItem>
+                <SidebarMenuButton href="#" tooltip="Logout">
+                  <LogOut />
+                  <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset>
+          <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
             <div className="flex items-center gap-4">
-              <NovainLogo />
+              <SidebarTrigger />
+              <div className="hidden md:block">
+                <p className="text-sm text-muted-foreground">Home / Dashboard</p>
+                <h1 className="text-lg font-bold">Dashboard</h1>
+              </div>
             </div>
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-                <Link href="#" className="text-foreground">Home</Link>
-                <Link href="#" className="text-muted-foreground">Blog</Link>
-                <Link href="#" className="text-muted-foreground">About Us</Link>
-                <Link href="#" className="text-muted-foreground">Contact Us</Link>
-            </nav>
+
             <div className="flex items-center gap-2 sm:gap-4">
-              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-4 sm:px-6">
+              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
                 Emergency
               </Button>
               <Button variant="ghost" size="icon">
@@ -145,75 +234,8 @@ export default function PatientLayout({
                 </DropdownMenu>
             </div>
           </header>
-          <div className="flex flex-1">
-            <Sidebar className="bg-white border-r" collapsible="icon">
-                <SidebarContent className="p-2">
-                    <SidebarMenu>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Home" isActive={pathname === '/patients/dashboard'}>
-                                 <Home />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Appointments">
-                                <Calendar />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Doctors">
-                                <Users />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Medical Records">
-                                <Briefcase />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Lab Tests">
-                                <FlaskConical />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Messages">
-                                <MessageSquare />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Profile Settings">
-                                <User />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                         <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Referrals">
-                                <Share />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Change Password">
-                                <Lock />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarContent>
-                <SidebarFooter>
-                    <SidebarMenu className="p-2">
-                        <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Logout">
-                                <LogOut />
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-              </SidebarFooter>
-            </Sidebar>
-            <SidebarInset className="flex-1 flex flex-col">
-              <div className="bg-primary text-primary-foreground py-4 px-6">
-                <p className="text-sm">Home / Dashboard</p>
-                <h1 className="text-2xl font-bold">Dashboard</h1>
-              </div>
-              <main className="flex-1 p-4 sm:p-6">{children}</main>
-            </SidebarInset>
-          </div>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );

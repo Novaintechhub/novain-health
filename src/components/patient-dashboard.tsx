@@ -1,220 +1,216 @@
 
 "use client";
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { PlusCircle, ArrowRight, FileText, Stethoscope, HeartPulse } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Eye, Check, X, MoreVertical, Calendar, Briefcase, FlaskConical } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+} from "recharts";
 
-const HealthCheckCard = ({ title, icon, lastUsed, bgColor, iconColor }: { title: string, icon: React.ReactNode, lastUsed: string, bgColor: string, iconColor: string }) => (
-    <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
-        <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${bgColor}`}>
-                    {icon}
-                </div>
-                <div>
-                    <h3 className="font-semibold text-md">{title}</h3>
-                     <p className="text-xs text-muted-foreground">Last used: {lastUsed}</p>
-                </div>
-            </div>
-             <Button variant="ghost" className="w-full justify-start mt-4 text-sm text-primary h-8 p-2">
-                Check Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-        </CardContent>
+const patientData = [
+    {
+        id: "#00016",
+        name: "Dr. Tosin Adebayo",
+        appointmentDate: "11th Dec 2024",
+        appointmentTime: "10:00am",
+        purpose: "General",
+        type: "New Patient",
+        paidAmount: "$150",
+    },
+    {
+        id: "#00028",
+        name: "Dr. Musa Ahmed",
+        appointmentDate: "14th Dec 2024",
+        appointmentTime: "1:00pm",
+        purpose: "General",
+        type: "Old Patient",
+        paidAmount: "$350",
+    },
+    {
+        id: "#00118",
+        name: "Dr. Peter Obi",
+        appointmentDate: "16th Dec 2024",
+        appointmentTime: "9:30am",
+        purpose: "General",
+        type: "Old Patient",
+        paidAmount: "$50",
+    },
+    {
+        id: "#00118",
+        name: "Dr. Chima Okenwa",
+        appointmentDate: "24th Nov 2024",
+        appointmentTime: "6:00pm",
+        purpose: "General",
+        type: "New Patient",
+        paidAmount: "$250",
+    },
+];
+
+const StatCard = ({ icon, label, value, subtext, progress, color }: { icon: React.ReactNode, label: string, value: string, subtext: string, progress: number, color: string }) => {
+  const data = [
+    { name: 'Progress', value: progress },
+    { name: 'Remaining', value: 100 - progress }
+  ];
+
+  return (
+    <Card className="bg-white rounded-lg shadow-sm p-4">
+      <CardContent className="flex items-center gap-4 p-0">
+        <div className="relative h-20 w-20">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={28}
+                outerRadius={35}
+                startAngle={90}
+                endAngle={450}
+                dataKey="value"
+                stroke="none"
+              >
+                <Cell fill={color} />
+                <Cell fill="#f0f0f0" />
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute inset-0 flex items-center justify-center text-white" style={{ color }}>
+            {icon}
+          </div>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-xs text-muted-foreground">{subtext}</p>
+        </div>
+      </CardContent>
     </Card>
-);
+  );
+};
 
-const TestResultItem = ({ icon, name, date, status, statusColor }: { icon: React.ReactNode, name: string, date: string, status: string, statusColor: string }) => (
-    <TableRow>
-        <TableCell>
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-md flex items-center justify-center bg-gray-100">
-                    {icon}
-                </div>
-                <div>
-                    <p className="font-medium text-sm">{name}</p>
-                    <p className="text-xs text-muted-foreground">{date}</p>
-                </div>
-            </div>
-        </TableCell>
-        <TableCell>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}>{status}</span>
-        </TableCell>
-        <TableCell className="text-right">
-            <Button variant="outline" size="sm">View</Button>
-        </TableCell>
-    </TableRow>
+const EarningCard = ({ label, value, icon, subtext, cta }: { label: string, value: string, icon?: React.ReactNode, subtext: string, cta?: string }) => (
+    <div className="flex flex-col">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <div className="flex items-center gap-2">
+        {icon && <div className="text-2xl font-normal">{icon}</div>}
+        <p className="text-2xl font-bold">{value}</p>
+      </div>
+      <p className="text-xs text-muted-foreground">{subtext}</p>
+      {cta && <a href="#" className="text-sm text-cyan-500 hover:underline mt-1">{cta}</a>}
+    </div>
 );
 
 
 export default function PatientDashboard() {
-  const patient = {
-    name: "Tosin Chukwuka",
-    id: "PT00136",
-    membership: "Basic",
-    avatarUrl: "https://placehold.co/128x128.png",
-    avatarHint: "woman portrait",
-    info: {
-        "Gender": "Male",
-        "Blood group": "O+ (Positive)",
-        "Allergies": "Milk, Penicilin",
-        "Diseases": "Diabetes, Blood Disorders",
-        "Height": "1.78m",
-        "Weight": "66kg",
-        "Patient ID": "00018",
-        "Last Appointment": "18th Dec 2024",
-        "DOB": "20th Oct 1991"
-    }
+  const stats = {
+    appointments: 12,
+    medicalRecords: 5,
+    labTests: 3,
   };
-
-  const appointments = [
-      { doctor: "Dr. Susan Mandible", date: "22nd Sep 2025", time: "4:30pm", type: "Video call", status: "Confirmed" },
-      { doctor: "Dr. Esther Against", date: "20th Nov 2025", time: "4:30pm", type: "On-site", status: "Pending" },
-  ]
-
-  const testResults = [
-      { name: "CT Scan - Full Body", date: "12th Feb 2024", status: "Completed", statusColor: "bg-green-100 text-green-800" },
-      { name: "Creatine Kinese - T", date: "16th Jul 2024", status: "Pending", statusColor: "bg-yellow-100 text-yellow-800" },
-      { name: "Eye Fluorescein Test", date: "21st Jan 2025", status: "Completed", statusColor: "bg-green-100 text-green-800" },
-      { name: "Full Body X-Ray", date: "28th Sep 2024", status: "Cancelled", statusColor: "bg-red-100 text-red-800" },
-  ]
-
-  const ToothIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-cyan-600">
-        <path d="M9.5 3.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2.4a1 1 0 0 0 .6.9l5.1 2.9a1 1 0 0 1 .3 1.4l-1.9 3.2a1 1 0 0 1-1.4.3l-2-1.2a1 1 0 0 0-1 0l-2 1.2a1 1 0 0 1-1.4-.3l-1.9-3.2a1 1 0 0 1 .3-1.4l5.1-2.9a1 1 0 0 0 .6-.9V3.5Z" />
-        <path d="m5 14 2.4-1.4" />
-        <path d="M19 14l-2.4-1.4" />
-        <path d="m5 18 3.4-2.4" />
-        <path d="M19 18l-3.4-2.4" />
-    </svg>
-  );
 
   return (
     <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Welcome back, {patient.name.split(' ')[0]}!</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 space-y-6">
-                <Card className="shadow-sm">
-                    <CardContent className="p-6 flex flex-col items-center text-center">
-                        <Avatar className="h-24 w-24 mb-4 border-2 border-primary">
-                            <AvatarImage src={patient.avatarUrl} alt={patient.name} data-ai-hint={patient.avatarHint} />
-                            <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard 
+            icon={<Calendar />}
+            label="Appointments" value={stats.appointments.toString()} subtext="Scheduled" 
+            progress={75} color="#D90067" />
+        <StatCard 
+            icon={<Briefcase />}
+            label="Medical Records" value={stats.medicalRecords.toString()} subtext="Files" 
+            progress={40} color="#00A76F" />
+        <StatCard 
+            icon={<FlaskConical />}
+            label="Lab Tests" value={stats.labTests.toString()} subtext="Results Pending"
+            progress={60} color="#46C8F5" />
+      </div>
+
+      <Card className="bg-white rounded-lg shadow-sm">
+        <CardContent className="p-4 flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
+            <EarningCard label="Last Bill" value="250.00" icon={<span className="text-2xl font-normal">$</span>} subtext="For general checkup" cta="View payment history"/>
+            <EarningCard label="Prescriptions" value="3" subtext="Active" />
+            <div className="flex justify-between items-center w-full md:w-auto">
+              <EarningCard label="Next Appointment" value="Dec 11, 2024" subtext="with Dr. Tosin Adebayo" />
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white rounded-lg shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Upcoming Appointments</h3>
+            <div className="flex gap-2">
+              <Button variant="outline" className="rounded-full bg-cyan-400 text-white border-cyan-400 hover:bg-cyan-500 hover:text-white">Upcoming</Button>
+              <Button variant="ghost" className="rounded-full">Today</Button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Doctor Name</TableHead>
+                  <TableHead>Appointment</TableHead>
+                  <TableHead className="hidden md:table-cell">Purpose</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead>Paid Amount</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {patientData.map((patient, index) => (
+                  <TableRow key={index} className="hover:bg-gray-50">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={`https://placehold.co/40x40.png?text=${patient.name.charAt(0)}`} alt={patient.name} />
+                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <p className="font-bold text-xl">{patient.name}</p>
-                        <p className="text-sm text-muted-foreground">{patient.id}</p>
-                        <p className="text-sm text-muted-foreground mt-2 bg-primary/10 text-primary px-3 py-1 rounded-full">Membership: {patient.membership}</p>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle className="text-lg">Patient's Information</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                            {Object.entries(patient.info).map(([key, value]) => (
-                                <React.Fragment key={key}>
-                                    <span className="font-semibold text-gray-600">{key}</span>
-                                    <span className="text-right text-muted-foreground">{value}</span>
-                                </React.Fragment>
-                            ))}
+                        <div>
+                          <div className="font-medium">{patient.name}</div>
+                          <div className="text-xs text-muted-foreground">{patient.id}</div>
                         </div>
-                        <Button variant="outline" className="mt-6 w-full text-primary border-primary hover:bg-primary/5">
-                            Show More Details
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="lg:col-span-2 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <HealthCheckCard
-                        title="Health Checks"
-                        icon={<Stethoscope className="h-6 w-6 text-pink-600" />}
-                        lastUsed="2 Hours ago"
-                        bgColor="bg-pink-100"
-                        iconColor="text-pink-600"
-                    />
-                     <HealthCheckCard
-                        title="Dental Checkup"
-                        icon={<ToothIcon />}
-                        lastUsed="2 Days ago"
-                        bgColor="bg-cyan-100"
-                        iconColor="text-cyan-600"
-                     />
-                     <HealthCheckCard
-                        title="Cardio Fitness"
-                        icon={<HeartPulse className="h-6 w-6 text-purple-600" />}
-                        lastUsed="1 Week ago"
-                        bgColor="bg-purple-100"
-                        iconColor="text-purple-600"
-                    />
-                </div>
-                 <Card className="shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-lg">Test Results</CardTitle>
-                        <Button variant="ghost" size="sm">View All</Button>
-                    </CardHeader>
-                    <CardContent>
-                       <Table>
-                           <TableHeader>
-                               <TableRow>
-                                   <TableHead>Test</TableHead>
-                                   <TableHead>Status</TableHead>
-                                   <TableHead className="text-right">Action</TableHead>
-                               </TableRow>
-                           </TableHeader>
-                           <TableBody>
-                                {testResults.map((result, index) => (
-                                    <TestResultItem key={index} icon={<FileText className="h-5 w-5 text-gray-500" />} {...result} />
-                                ))}
-                           </TableBody>
-                       </Table>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-lg">Upcoming Appointments</CardTitle>
-                         <Button variant="ghost" className="text-primary hover:text-primary">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Book new appointment
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Doctor</TableHead>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Time</TableHead>
-                                        <TableHead>Type</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {appointments.map((appt, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell className="font-medium">{appt.doctor}</TableCell>
-                                            <TableCell>{appt.date}</TableCell>
-                                            <TableCell>{appt.time}</TableCell>
-                                            <TableCell>{appt.type}</TableCell>
-                                            <TableCell>
-                                                <span className={`px-2 py-1 rounded-full text-xs ${appt.status === 'Confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                    {appt.status}
-                                                </span>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>{patient.appointmentDate}</div>
+                      <div className="text-cyan-500">{patient.appointmentTime}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{patient.purpose}</TableCell>
+                    <TableCell className="hidden md:table-cell">{patient.type}</TableCell>
+                    <TableCell>{patient.paidAmount}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                          <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                              <Eye className="h-4 w-4 mr-1"/> View
+                          </Button>
+                          <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
+                              <X className="h-4 w-4 mr-1"/> Cancel
+                          </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
