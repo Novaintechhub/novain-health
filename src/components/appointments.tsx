@@ -1,120 +1,180 @@
+
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Check, X, Clock, MapPin, Mail, Phone } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Video, Phone, MessageSquare, Printer, Eye } from "lucide-react";
 
 const appointments = [
   {
     name: "Tosin Adebayo",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "woman portrait",
-    date: "12th October 2025, 4pm",
-    location: "New York, United States",
-    email: "tosinadebayo@yahoo.com",
-    phone: "+234 802375227",
+    date: "12th October 2025, 4:00 PM",
+    bookingDate: "11th October 2025",
+    type: "Video Call",
+    status: "Confirm",
+    amount: "$200",
   },
   {
     name: "Wright Thinker",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "woman smiling",
-    date: "16th October 2025, 4pm",
-    location: "New York, United States",
-    email: "wrightthinks@gmail.com",
-    phone: "+234 809445227",
+    date: "16th October 2025, 4:00 PM",
+    bookingDate: "15th October 2025",
+    type: "Audio Call",
+    status: "Cancelled",
+    amount: "$150",
   },
   {
     name: "Kanayo Ike",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "man traditional",
-    date: "12th October 2025, 4pm",
-    location: "New York, United States",
-    email: "kanayoike@yahoo.com",
-    phone: "+234 802375227",
+    date: "12th October 2025, 4:00 PM",
+    bookingDate: "10th October 2025",
+    type: "Chat",
+    status: "Confirm",
+    amount: "$100",
   },
   {
     name: "Victor Thompson",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "man portrait",
-    date: "12th October 2025, 4pm",
-    location: "New York, United States",
-    email: "victorthom@hotmail.com",
-    phone: "+234 802375227",
+    date: "12th October 2025, 4:00 PM",
+    bookingDate: "12th October 2025",
+    type: "Video Call",
+    status: "Pending",
+    amount: "$300",
   },
   {
     name: "Vera Ogechi",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "woman happy",
-    date: "22nd January 2025, 10am",
-    location: "New York, United States",
-    email: "veraoge@gmail.com",
-    phone: "+234 802375227",
+    date: "22nd January 2025, 10:00 AM",
+    bookingDate: "21st January 2025",
+    type: "Video Call",
+    status: "Confirm",
+    amount: "$250",
   },
   {
     name: "Esther Peterson",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "woman looking",
-    date: "1st February 2025, 9am",
-    location: "New York, United States",
-    email: "epeterson@gmail.com",
-    phone: "+234 802375227",
+    date: "1st February 2025, 9:00 AM",
+    bookingDate: "31st January 2025",
+    type: "Chat",
+    status: "Confirm",
+    amount: "$50",
   },
 ];
+
+const TypeIcon = ({ type }: { type: string }) => {
+    switch (type) {
+        case "Video Call":
+            return <Video className="h-5 w-5 text-green-500" />;
+        case "Audio Call":
+            return <Phone className="h-5 w-5 text-blue-500" />;
+        case "Chat":
+            return <MessageSquare className="h-5 w-5 text-purple-500" />;
+        default:
+            return null;
+    }
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  let variant: "default" | "destructive" | "secondary" = "default";
+  if (status === "Confirm") variant = "default";
+  if (status === "Cancelled") variant = "destructive";
+  if (status === "Pending") variant = "secondary";
+  
+  const statusClasses = {
+    Confirm: 'bg-green-100 text-green-800',
+    Cancelled: 'bg-red-100 text-red-800',
+    Pending: 'bg-yellow-100 text-yellow-800',
+  };
+
+  return <Badge className={`capitalize ${statusClasses[status as keyof typeof statusClasses] || ''}`}>{status}</Badge>;
+};
+
 
 export default function Appointments() {
   return (
     <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Appointments</h1>
-        <Card className="bg-white rounded-lg shadow-sm">
-            <CardContent className="p-6 space-y-6">
-                {appointments.map((appointment, index) => (
-                    <div key={index} className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 rounded-lg border border-gray-100">
-                        <Avatar className="h-20 w-20">
-                            <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                            <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
-                            <div className="space-y-1">
-                                <p className="font-semibold text-lg">{appointment.name}</p>
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <Clock className="w-4 h-4 mr-2" />
-                                    <span>{appointment.date}</span>
-                                </div>
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <MapPin className="w-4 h-4 mr-2" />
-                                    <span>{appointment.location}</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <Mail className="w-4 h-4 mr-2" />
-                                    <span>{appointment.email}</span>
-                                </div>
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <Phone className="w-4 h-4 mr-2" />
-                                    <span>{appointment.phone}</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 justify-start md:justify-end">
-                                <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                    <Eye className="w-4 h-4 mr-1" />
-                                    View
-                                </Button>
-                                <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                    <Check className="w-4 h-4 mr-1" />
-                                    Accept
-                                </Button>
-                                <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
-                                    <X className="w-4 h-4 mr-1" />
-                                    Cancel
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </CardContent>
-        </Card>
+      <h1 className="text-2xl font-bold">Appointments</h1>
+        <Tabs defaultValue="appointments">
+            <TabsList className="grid w-full grid-cols-4 max-w-lg">
+                <TabsTrigger value="appointments">Appointments</TabsTrigger>
+                <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
+                <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
+                <TabsTrigger value="billing">Billing</TabsTrigger>
+            </TabsList>
+            <TabsContent value="appointments">
+                <Card className="bg-white rounded-lg shadow-sm">
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Patient</TableHead>
+                                    <TableHead>Appt Date</TableHead>
+                                    <TableHead>Booking Date</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {appointments.map((appointment, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-10 w-10">
+                                                    <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
+                                                    <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="font-medium">{appointment.name}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div>{appointment.date.split(',')[0]}</div>
+                                            <div className="text-sm text-muted-foreground">{appointment.date.split(',')[1]}</div>
+                                        </TableCell>
+                                        <TableCell>{appointment.bookingDate}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <TypeIcon type={appointment.type} />
+                                                <span>{appointment.type}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{appointment.amount}</TableCell>
+                                        <TableCell>
+                                            <StatusBadge status={appointment.status} />
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex gap-2 justify-end">
+                                                <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                                                    <Printer className="w-4 h-4 mr-1" />
+                                                    Print
+                                                </Button>
+                                                <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                    <Eye className="w-4 h-4 mr-1" />
+                                                    View
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
     </div>
   );
 }
+
