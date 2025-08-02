@@ -210,10 +210,12 @@ export default function DoctorLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Logout">
-                  <LogOut />
-                  <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-                </SidebarMenuButton>
+                <Link href="/doctor/login" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Logout">
+                    <LogOut />
+                    <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -267,9 +269,13 @@ export default function DoctorLayout({
                         <span>Change Password</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                    <DropdownMenuItem asChild>
+                      <Link href="/doctor/login" passHref legacyBehavior>
+                        <a>
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Log out</span>
+                        </a>
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -281,3 +287,5 @@ export default function DoctorLayout({
     </SidebarProvider>
   );
 }
+
+    

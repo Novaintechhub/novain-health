@@ -211,10 +211,12 @@ export default function DashboardLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <SidebarMenuButton href="#" tooltip="Logout">
-                  <LogOut />
-                  Logout
-                </SidebarMenuButton>
+                <Link href="/general-login" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Logout">
+                    <LogOut />
+                    Logout
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -268,9 +270,13 @@ export default function DashboardLayout({
                         <span>Change Password</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                    <DropdownMenuItem asChild>
+                      <Link href="/general-login" passHref legacyBehavior>
+                        <a>
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Log out</span>
+                        </a>
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -282,3 +288,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    
