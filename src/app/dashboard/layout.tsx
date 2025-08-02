@@ -97,107 +97,114 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-gray-50/50 w-full">
-        <Sidebar className="bg-white border-r" collapsible="icon">
+        <Sidebar className="bg-white border-r">
           <SidebarContent className="p-4">
             <SidebarGroup>
-              <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
-                <Avatar className="h-24 w-24 border-2 border-white rounded-full shadow-lg">
-                  <AvatarImage src="https://placehold.co/96x96.png" alt="Dr. Susan Mandible" data-ai-hint="female doctor" />
-                  <AvatarFallback>SM</AvatarFallback>
-                </Avatar>
-                <h3 className="mt-4 text-xl font-semibold">Dr. Susan Mandible</h3>
-                <p className="text-sm text-muted-foreground">BDS, MDS - Oral & Maxillofacial Surgery</p>
+              <div className="flex items-center gap-4 p-4">
+                <NovainLogo />
               </div>
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard" tooltip="Dashboard" isActive={pathname === '/dashboard'}>
-                  <Link href="/dashboard" className="flex items-center gap-3">
+                <Link href="/dashboard" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Dashboard" isActive={pathname === '/dashboard'}>
                     <LayoutDashboard />
-                    <span className="group-data-[collapsible=icon]:hidden">Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Dashboard
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
-                   <Link href="/dashboard/appointments" className="flex items-center gap-3">
+                <Link href="/dashboard/appointments" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
                     <Calendar />
-                    <span className="group-data-[collapsible=icon]:hidden">Appointments</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Appointments
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
-                  <Link href="/dashboard/my-patients" className="flex items-center gap-3">
+                <Link href="/dashboard/my-patients" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
                     <Users />
-                    <span className="group-data-[collapsible=icon]:hidden">My Patients</span>
-                  </Link>
-                </SidebarMenuButton>
+                    My Patients
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
-                  <Link href="/dashboard/schedule-timings" className="flex items-center gap-3">
+                <Link href="/dashboard/schedule-timings" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
                     <Clock />
-                    <span className="group-data-[collapsible=icon]:hidden">Schedule Timings</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Schedule Timings
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Collapsible>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/dashboard/transactions')}>
                         <CreditCard />
-                        <span className="group-data-[collapsible=icon]:hidden flex-grow text-left">Transactions</span>
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180 group-data-[collapsible=icon]:hidden" />
+                        Transactions
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild href="/dashboard/transactions/consultation-payments" isActive={pathname === '/dashboard/transactions/consultation-payments'}>
-                          <Link href="/dashboard/transactions/consultation-payments">Consultation Payments</Link>
-                        </SidebarMenuSubButton>
+                        <Link href="/dashboard/transactions/consultation-payments" passHref legacyBehavior>
+                          <SidebarMenuSubButton isActive={pathname === '/dashboard/transactions/consultation-payments'}>
+                            Consultation Payments
+                          </SidebarMenuSubButton>
+                        </Link>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                         <SidebarMenuSubButton asChild href="/dashboard/transactions/payouts" isActive={pathname === '/dashboard/transactions/payouts'}>
-                          <Link href="/dashboard/transactions/payouts">Payouts</Link>
-                        </SidebarMenuSubButton>
+                         <Link href="/dashboard/transactions/payouts" passHref legacyBehavior>
+                          <SidebarMenuSubButton isActive={pathname === '/dashboard/transactions/payouts'}>
+                            Payouts
+                          </SidebarMenuSubButton>
+                         </Link>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
-                  <Link href="/dashboard/reviews" className="flex items-center gap-3">
+                <Link href="/dashboard/reviews" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
                     <Star />
-                    <span className="group-data-[collapsible=icon]:hidden">Reviews</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Reviews
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Message" isActive={pathname === '/dashboard/messages'}>
-                  <Link href="/dashboard/messages" className="flex items-center gap-3">
+                <Link href="/dashboard/messages" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Message" isActive={pathname === '/dashboard/messages'}>
                     <MessageSquare />
-                    <span className="group-data-[collapsible=icon]:hidden">Message</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Message
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
-                  <Link href="/dashboard/profile-settings" className="flex items-center gap-3">
+                <Link href="/dashboard/profile-settings" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
                     <User />
-                    <span className="group-data-[collapsible=icon]:hidden">Profile settings</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Profile settings
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
-                  <Link href="/dashboard/social-media" className="flex items-center gap-3">
+                <Link href="/dashboard/social-media" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
                     <Share2 />
-                    <span className="group-data-[collapsible=icon]:hidden">Social Media</span>
-                  </Link>
-                </SidebarMenuButton>
+                    Social Media
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href="/dashboard/change-password" passHref legacyBehavior>
+                  <SidebarMenuButton tooltip="Change Password" isActive={pathname === '/dashboard/change-password'}>
+                    <Lock />
+                    Change password
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
@@ -206,7 +213,7 @@ export default function DashboardLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton href="#" tooltip="Logout">
                   <LogOut />
-                  <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                  Logout
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -216,11 +223,11 @@ export default function DashboardLayout({
           <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
-              <h2 className="text-xl font-semibold hidden md:block">Dashboard</h2>
+              <h2 className="text-xl font-semibold">Dashboard</h2>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
+            <div className="flex items-center gap-4">
+              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full">
                 Emergency
               </Button>
               <Button variant="ghost" size="icon">
@@ -275,3 +282,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    

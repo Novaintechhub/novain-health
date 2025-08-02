@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,8 +84,4 @@
   }
 }
 
-@layer components {
-  .sidebar-active-link {
-    @apply bg-primary text-primary-foreground;
-  }
-}
+    
