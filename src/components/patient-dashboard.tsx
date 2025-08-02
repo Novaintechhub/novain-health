@@ -102,19 +102,19 @@ export default function PatientDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <HealthCheckCard 
                         title="Health Checks"
-                        icon={<svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="#D90067" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 7.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" stroke="#D90067" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>}
+                        icon={<svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="#D90067" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.5 7.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" stroke="#D90067" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                         lastUsed="2 Hours ago"
                         bgColor="bg-pink-100"
                     />
                      <HealthCheckCard 
                         title="Dental Checkup"
-                        icon={<svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 18a6 6 0 100-12 6 6 0 000 12z" stroke="#46C8F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15l6 6" stroke="#46C8F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill="#46C8F5"/></svg>}
+                        icon={<svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 18a6 6 0 100-12 6 6 0 000 12z" stroke="#46C8F5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M15 15l6 6" stroke="#46C8F5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 9a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill="#46C8F5"/></svg>}
                         lastUsed="2 Days ago"
                         bgColor="bg-cyan-50"
                      />
                      <HealthCheckCard 
                         title="Cardio Fitness"
-                        icon={<svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h3l3-9 6 18 3-9h3" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>}
+                        icon={<svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h3l3-9 6 18 3-9h3" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                         lastUsed="1 Week ago"
                         bgColor="bg-purple-100"
                     />
@@ -124,10 +124,10 @@ export default function PatientDashboard() {
                         <CardTitle className="text-lg">Test Results</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>} name="CT Scan - Full Body" date="12th February 2024" bgColor="bg-pink-400" />
-                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>} name="Creatine Kinese - T" date="16th July 2024" bgColor="bg-cyan-400" />
-                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>} name="Eye Fluorescein Test" date="21st January 2025" bgColor="bg-green-400" />
-                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>} name="Full Body X-Ray" date="28th September 2024" bgColor="bg-indigo-400" />
+                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>} name="CT Scan - Full Body" date="12th February 2024" bgColor="bg-pink-400" />
+                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>} name="Creatine Kinese - T" date="16th July 2024" bgColor="bg-cyan-400" />
+                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>} name="Eye Fluorescein Test" date="21st January 2025" bgColor="bg-green-400" />
+                        <TestResultItem icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l2 2 4 4v10a2 2 0 01-2 2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>} name="Full Body X-Ray" date="28th September 2024" bgColor="bg-indigo-400" />
                     </CardContent>
                 </Card>
                 <Card>
