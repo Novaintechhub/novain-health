@@ -14,6 +14,9 @@ import {
   SidebarGroup,
   SidebarInset,
   SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -41,6 +44,7 @@ import {
   Bell,
 } from "lucide-react";
 import Link from "next/link";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 
 const NovainLogo = (props: React.SVGProps<SVGSVGElement>) => (
@@ -109,72 +113,107 @@ export default function DashboardLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard" tooltip="Dashboard" isActive={pathname === '/dashboard'}>
                   <Link href="/dashboard">
-                    <LayoutDashboard />
-                    Dashboard
+                    <span>
+                      <LayoutDashboard />
+                      Dashboard
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/appointments" tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
                   <Link href="/dashboard/appointments">
-                    <Calendar />
-                    Appointments
+                    <span>
+                      <Calendar />
+                      Appointments
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/my-patients" tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
                   <Link href="/dashboard/my-patients">
-                    <Users />
-                    My Patients
+                    <span>
+                      <Users />
+                      My Patients
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/schedule-timings" tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
                   <Link href="/dashboard/schedule-timings">
-                    <Clock />
-                    Schedule Timings
+                    <span>
+                      <Clock />
+                      Schedule Timings
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/transactions" tooltip="Transactions" isActive={pathname === '/dashboard/transactions'}>
-                   <Link href="/dashboard/transactions">
-                    <CreditCard />
-                    Transactions
-                  </Link>
-                </SidebarMenuButton>
+                <Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/dashboard/transactions')}>
+                        <span>
+                            <CreditCard />
+                            Transactions
+                            <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                        </span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton href="/dashboard/transactions/consultation-payments" isActive={pathname === '/dashboard/transactions/consultation-payments'}>
+                          Consultation Payments
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton href="/dashboard/transactions/payouts" isActive={pathname === '/dashboard/transactions/payouts'}>
+                          Payouts
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
                <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/reviews" tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
                   <Link href="/dashboard/reviews">
-                    <Star />
-                    Reviews
+                    <span>
+                      <Star />
+                      Reviews
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/messages" tooltip="Message" isActive={pathname === '/dashboard/messages'}>
                   <Link href="/dashboard/messages">
-                    <MessageSquare />
-                    Message
+                    <span>
+                      <MessageSquare />
+                      Message
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/profile-settings" tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
                   <Link href="/dashboard/profile-settings">
-                    <User />
-                    Profile settings
+                    <span>
+                      <User />
+                      Profile settings
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/social-media" tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
                   <Link href="/dashboard/social-media">
-                    <Share2 />
-                    Social Media
+                    <span>
+                      <Share2 />
+                      Social Media
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -184,8 +223,10 @@ export default function DashboardLayout({
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
                 <SidebarMenuButton href="#" tooltip="Logout">
-                  <LogOut />
-                  Logout
+                  <span>
+                    <LogOut />
+                    Logout
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
