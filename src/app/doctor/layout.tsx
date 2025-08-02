@@ -42,6 +42,7 @@ import {
   LogOut,
   ChevronDown,
   Bell,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -156,6 +157,11 @@ export default function DoctorLayout({
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild href="/doctor/transactions/consultation-payments" isActive={pathname === '/doctor/transactions/consultation-payments'}>
                           <Link href="/doctor/transactions/consultation-payments">Consultation Payments</Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                         <SidebarMenuSubButton asChild href="/doctor/transactions/invoices" isActive={pathname === '/doctor/transactions/invoices'}>
+                          <Link href="/doctor/transactions/invoices">Invoices</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
