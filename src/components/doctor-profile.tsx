@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle } from "lucide-react";
+import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight } from "lucide-react";
 
 const StarRating = ({ rating, count }: { rating: number; count: number }) => (
   <div className="flex items-center gap-1">
@@ -20,6 +20,34 @@ const StarRating = ({ rating, count }: { rating: number; count: number }) => (
     <span className="text-sm text-muted-foreground">({count})</span>
   </div>
 );
+
+const awards = [
+    {
+        date: "July 2019",
+        title: "Humanitarian Award",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ipsum tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus."
+    },
+    {
+        date: "March 2011",
+        title: "Certificate for International Volunteer Service",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ipsum tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus."
+    },
+    {
+        date: "May 2008",
+        title: "The Dental Professional of The Year Award",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin a ipsum tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus."
+    }
+];
+
+const services = [
+    "Tooth cleaning", "Root Canal Therapy", "Implants",
+    "Composite Bonding", "Fissure Sealants", "Surgical Extractions"
+];
+
+const specializations = [
+    "Children Care", "Dental Care", "Oral and Maxillofacial Surgery",
+    "Orthodontist", "Periodontist", "Prosthodontics"
+];
 
 export default function DoctorProfile() {
   return (
@@ -117,34 +145,39 @@ export default function DoctorProfile() {
                 </ul>
               </div>
                <div>
-                <h3 className="text-lg font-semibold">Awards</h3>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-muted-foreground">
-                    <li>Humanitarian Award (July 2019)</li>
-                    <li>Certificate of Appreciation (March 2018)</li>
-                    <li>Best Internee (June 2015)</li>
-                </ul>
+                <h3 className="text-lg font-semibold mb-4">Awards</h3>
+                 <div className="relative border-l-2 border-cyan-200 pl-8 space-y-10">
+                    {awards.map((award, index) => (
+                        <div key={index} className="relative">
+                            <div className="absolute -left-[42px] top-1 h-4 w-4 rounded-full bg-white border-2 border-cyan-400"></div>
+                            <p className="text-sm text-cyan-500">{award.date}</p>
+                            <h4 className="font-semibold">{award.title}</h4>
+                            <p className="text-muted-foreground text-sm">{award.description}</p>
+                        </div>
+                    ))}
+                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Services</h3>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-muted-foreground">
-                    <li>Tooth cleaning</li>
-                    <li>Root Canal Therapy</li>
-                    <li>Implants</li>
-                    <li>Composite Bonding</li>
-                    <li>Fissure Sealants</li>
-                    <li>Surgical Extractions</li>
-                </ul>
+                <h3 className="text-lg font-semibold mb-4">Services</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-2">
+                    {services.map((service, index) => (
+                        <div key={index} className="flex items-center gap-2 text-muted-foreground">
+                            <ArrowRight className="h-4 w-4 text-cyan-500"/>
+                            <span>{service}</span>
+                        </div>
+                    ))}
+                </div>
               </div>
                <div>
-                <h3 className="text-lg font-semibold">Specializations</h3>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-muted-foreground">
-                    <li>Children Care</li>
-                    <li>Dental Care</li>
-                    <li>Oral and Maxillofacial Surgery</li>
-                    <li>Orthodontist</li>
-                    <li>Periodontist</li>
-                    <li>Prosthodontics</li>
-                </ul>
+                <h3 className="text-lg font-semibold mb-4">Specializations</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-2">
+                    {specializations.map((spec, index) => (
+                        <div key={index} className="flex items-center gap-2 text-muted-foreground">
+                            <ArrowRight className="h-4 w-4 text-cyan-500"/>
+                            <span>{spec}</span>
+                        </div>
+                    ))}
+                </div>
               </div>
             </CardContent>
           </Card>
