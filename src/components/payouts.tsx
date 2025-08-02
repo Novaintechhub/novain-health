@@ -1,8 +1,26 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings, Send } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const EarningCard = ({ label, value, icon, subtext }: { label: string, value: string, icon?: React.ReactNode, subtext: string }) => (
     <div className="flex flex-col p-4 rounded-lg bg-gray-50 flex-1">
@@ -40,15 +58,78 @@ export default function Payouts() {
         </Card>
 
         <div className="space-y-4">
-            <Button variant="ghost" className="text-cyan-500 hover:text-cyan-600 p-0">
-                <Settings className="mr-2 h-5 w-5" />
-                Setup payout account
-            </Button>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" className="text-cyan-500 hover:text-cyan-600 p-0">
+                        <Settings className="mr-2 h-5 w-5" />
+                        Setup payout account
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Setup Payout Account</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="bank-name">Bank Name</Label>
+                            <Input id="bank-name" placeholder="Enter bank name" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="account-number">Account Number</Label>
+                            <Input id="account-number" placeholder="Enter account number" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="account-name">Account Holder Name</Label>
+                            <Input id="account-name" placeholder="Enter account holder name" />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Save</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <br/>
-            <Button variant="ghost" className="text-cyan-500 hover:text-cyan-600 p-0">
-                <Send className="mr-2 h-5 w-5" />
-                Place a withdrawal request
-            </Button>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" className="text-cyan-500 hover:text-cyan-600 p-0">
+                        <Send className="mr-2 h-5 w-5" />
+                        Place a withdrawal request
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Request Withdrawal</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="amount">Amount (Naira)</Label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₦</span>
+                                <Input id="amount" placeholder="" className="pl-8" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="withdrawal-account">Choose withdrawal account</Label>
+                            <Select>
+                                <SelectTrigger id="withdrawal-account">
+                                    <SelectValue placeholder="Select account" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="account1">** ** **** 4267 - GTBank</SelectItem>
+                                    <SelectItem value="account2">** ** **** 8921 - First Bank</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Enter Password</Label>
+                            <Input id="password" type="password" />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Submit</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     </div>
   );
