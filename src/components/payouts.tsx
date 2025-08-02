@@ -43,8 +43,8 @@ export default function Payouts() {
         </div>
         <div className="flex flex-col md:flex-row gap-4">
             <EarningCard label="Wallet Balance" value="150,000.00" icon={<span className="text-2xl font-normal">₦</span>} subtext="One hundred and fifty thousand naira" />
-            <EarningCard label="Total Withdrawal" value="65,000" icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M12 2a5 5 0 0 0-5 5c0 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3a5 5 0 0 0-5-5z"/><path d="M12 22a5 5 0 0 0 5-5c0-1.66-1.34-3-3-3h-4c-1.66 0-3 1.34-3 3a5 5 0 0 0 5 5z"/></svg>} subtext="" />
-            <EarningCard label="Total Earnings" value="172,000" icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M12 2a5 5 0 0 0-5 5c0 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3a5 5 0 0 0-5-5z"/><path d="M12 22a5 5 0 0 0 5-5c0-1.66-1.34-3-3-3h-4c-1.66 0-3 1.34-3 3a5 5 0 0 0 5 5z"/></svg>} subtext="After 20% commission" />
+            <EarningCard label="Total Withdrawal" value="65,000" icon={<span className="text-2xl font-normal">₦</span>} subtext="" />
+            <EarningCard label="Total Earnings" value="172,000" icon={<span className="text-2xl font-normal">₦</span>} subtext="After 20% commission" />
         </div>
 
         <Card>

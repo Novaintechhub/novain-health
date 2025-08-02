@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Video, Phone, MessageSquare, Printer, Eye } from "lucide-react";
+import { Video, Phone, MessageSquare, Printer, Eye, Calendar, Clock, User, DollarSign } from "lucide-react";
 import Link from "next/link";
 
 const appointments = [
@@ -129,22 +129,23 @@ export default function Appointments() {
         <Tabs defaultValue="appointments">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-lg">
                 <TabsTrigger value="appointments">Appointments</TabsTrigger>
-                <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
-                <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
-                <Link href="/patients/billing" className="w-full"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
+                <Link href="/patients/prescriptions"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
+                <Link href="/patients/medical-records"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
+                <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="appointments">
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
-                      <div className="overflow-x-auto">
+                      {/* Desktop View */}
+                      <div className="hidden md:block">
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Patient</TableHead>
                                     <TableHead>Appt Date</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Booking Date</TableHead>
+                                    <TableHead>Booking Date</TableHead>
                                     <TableHead>Type</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Amount</TableHead>
+                                    <TableHead>Amount</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
@@ -165,16 +166,16 @@ export default function Appointments() {
                                             <div>{appointment.date.split(',')[0]}</div>
                                             <div className="text-sm text-muted-foreground">{appointment.date.split(',')[1]}</div>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{appointment.bookingDate}</TableCell>
+                                        <TableCell>{appointment.bookingDate}</TableCell>
                                         <TableCell>
                                             <TypeIcon type={appointment.type} />
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{appointment.amount}</TableCell>
+                                        <TableCell>{appointment.amount}</TableCell>
                                         <TableCell>
                                             <StatusBadge status={appointment.status} />
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                                            <div className="flex flex-row gap-2 justify-end">
                                                 <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                                     <Printer className="w-4 h-4 mr-1" />
                                                     Print
@@ -191,6 +192,55 @@ export default function Appointments() {
                                 ))}
                             </TableBody>
                         </Table>
+                      </div>
+                      {/* Mobile View */}
+                      <div className="md:hidden space-y-4 p-4">
+                        {appointments.map((appointment, index) => (
+                          <Card key={index} className="shadow-md">
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-12 w-12">
+                                  <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
+                                  <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-bold">{appointment.name}</p>
+                                  <StatusBadge status={appointment.status} />
+                                </div>
+                              </div>
+                              <div className="border-t pt-3 space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Appt Date:</span>
+                                  <span className="font-medium">{appointment.date}</span>
+                                </div>
+                                 <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Booking Date:</span>
+                                  <span className="font-medium">{appointment.bookingDate}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Type:</span>
+                                  <TypeIcon type={appointment.type} />
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Amount:</span>
+                                  <span className="font-medium">{appointment.amount}</span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 justify-end border-t pt-3">
+                                  <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                                      <Printer className="w-4 h-4 mr-1" />
+                                      Print
+                                  </Button>
+                                  <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                      <Link href="/patients/reschedule-appointment">
+                                          <Eye className="w-4 h-4 mr-1" />
+                                          View
+                                      </Link>
+                                  </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
                     </CardContent>
                 </Card>

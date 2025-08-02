@@ -4,8 +4,6 @@
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Table,
@@ -81,7 +79,8 @@ export default function ConsultationPayments() {
       </div>
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          {/* Desktop View */}
+          <div className="overflow-x-auto hidden md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -141,6 +140,51 @@ export default function ConsultationPayments() {
               </TableBody>
             </Table>
           </div>
+
+          {/* Mobile View */}
+          <div className="md:hidden space-y-4 p-4">
+            {transactions.map((transaction, index) => (
+              <Card key={index} className="shadow-md">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage
+                        src={transaction.avatarUrl}
+                        alt={transaction.name}
+                        data-ai-hint={transaction.avatarHint}
+                      />
+                      <AvatarFallback>
+                        {transaction.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-bold">{transaction.name}</p>
+                      <p className="text-sm text-muted-foreground">{transaction.id}</p>
+                    </div>
+                  </div>
+                  <div className="border-t pt-3 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Amount Paid:</span>
+                      <span className="font-medium">{transaction.amount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Transaction ID:</span>
+                      <span className="font-medium truncate">{transaction.transactionId}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 justify-end border-t pt-3">
+                    <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                        <Eye className="w-4 h-4 mr-1" /> View
+                    </Button>
+                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                        <Printer className="w-4 h-4 mr-1" /> Print
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
         </CardContent>
       </Card>
     </div>

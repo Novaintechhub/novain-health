@@ -66,56 +66,95 @@ export default function Prescriptions() {
       <h1 className="text-2xl font-bold">Prescriptions</h1>
         <Tabs defaultValue="prescriptions">
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
-                <Link href="/patients/appointments" className="w-full"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
+                <Link href="/patients/appointments"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
                 <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
-                <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
-                <Link href="/patients/billing" className="w-full"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
+                <Link href="/patients/medical-records"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
+                <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="prescriptions">
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Created by</TableHead>
-                                    <TableHead className="text-right">Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {prescriptions.map((prescription, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{prescription.date}</TableCell>
-                                        <TableCell>{prescription.name}</TableCell>
-                                        <TableCell>
+                        {/* Desktop View */}
+                        <div className="hidden md:block">
+                          <Table>
+                              <TableHeader>
+                                  <TableRow>
+                                      <TableHead>Date</TableHead>
+                                      <TableHead>Name</TableHead>
+                                      <TableHead>Created by</TableHead>
+                                      <TableHead className="text-right">Action</TableHead>
+                                  </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                  {prescriptions.map((prescription, index) => (
+                                      <TableRow key={index}>
+                                          <TableCell>{prescription.date}</TableCell>
+                                          <TableCell>{prescription.name}</TableCell>
+                                          <TableCell>
+                                              <div className="flex items-center gap-3">
+                                                  <Avatar className="h-10 w-10">
+                                                      <AvatarImage src={prescription.doctorAvatarUrl} alt={prescription.doctorName} data-ai-hint={prescription.doctorAvatarHint} />
+                                                      <AvatarFallback>{prescription.doctorName.charAt(0)}</AvatarFallback>
+                                                  </Avatar>
+                                                  <div>
+                                                      <div className="font-medium">{prescription.doctorName}</div>
+                                                      <div className="text-sm text-muted-foreground">{prescription.doctorSpecialty}</div>
+                                                  </div>
+                                              </div>
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                              <div className="flex gap-2 justify-end">
+                                                  <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                                                      <Printer className="w-4 h-4 mr-1" />
+                                                      Print
+                                                  </Button>
+                                                  <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                      <Eye className="w-4 h-4 mr-1" />
+                                                      View
+                                                  </Button>
+                                              </div>
+                                          </TableCell>
+                                      </TableRow>
+                                  ))}
+                              </TableBody>
+                          </Table>
+                        </div>
+                         {/* Mobile View */}
+                        <div className="md:hidden space-y-4 p-4">
+                            {prescriptions.map((prescription, index) => (
+                                <Card key={index} className="shadow-md">
+                                    <CardContent className="p-4 space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="font-bold">{prescription.name}</h3>
+                                                <p className="text-sm text-muted-foreground">{prescription.date}</p>
+                                            </div>
+                                        </div>
+                                        <div className="border-t pt-3">
+                                            <p className="text-xs text-muted-foreground mb-2">Created by:</p>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10">
                                                     <AvatarImage src={prescription.doctorAvatarUrl} alt={prescription.doctorName} data-ai-hint={prescription.doctorAvatarHint} />
                                                     <AvatarFallback>{prescription.doctorName.charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <div className="font-medium">{prescription.doctorName}</div>
-                                                    <div className="text-sm text-muted-foreground">{prescription.doctorSpecialty}</div>
+                                                    <p className="font-semibold">{prescription.doctorName}</p>
+                                                    <p className="text-sm text-muted-foreground">{prescription.doctorSpecialty}</p>
                                                 </div>
                                             </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex gap-2 justify-end">
-                                                <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                    <Printer className="w-4 h-4 mr-1" />
-                                                    Print
-                                                </Button>
-                                                <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    View
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                        </div>
+                                        <div className="flex gap-2 justify-end border-t pt-3">
+                                            <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                                                <Printer className="w-4 h-4 mr-1" /> Print
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                <Eye className="w-4 h-4 mr-1" /> View
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
             </TabsContent>

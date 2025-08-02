@@ -18,12 +18,6 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
 } from "recharts";
 import Link from "next/link";
 
@@ -197,15 +191,16 @@ export default function Dashboard() {
               <Button variant="ghost" className="rounded-full">Today</Button>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          {/* Desktop View */}
+          <div className="overflow-x-auto hidden md:block">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Patient Name</TableHead>
                   <TableHead>Appointment</TableHead>
-                  <TableHead className="hidden md:table-cell">Purpose</TableHead>
-                  <TableHead className="hidden lg:table-cell">Type</TableHead>
-                  <TableHead className="hidden sm:table-cell">Paid Amount</TableHead>
+                  <TableHead>Purpose</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Paid Amount</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -228,11 +223,11 @@ export default function Dashboard() {
                       <div>{patient.appointmentDate}</div>
                       <div className="text-cyan-500">{patient.appointmentTime}</div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">{patient.purpose}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{patient.type}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{patient.paidAmount}</TableCell>
+                    <TableCell>{patient.purpose}</TableCell>
+                    <TableCell>{patient.type}</TableCell>
+                    <TableCell>{patient.paidAmount}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                      <div className="flex flex-row gap-2 justify-end">
                           <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                               <Link href="/doctor/view-appointment">
                                 <Eye className="h-4 w-4 mr-1"/> View
@@ -250,6 +245,56 @@ export default function Dashboard() {
                 ))}
               </TableBody>
             </Table>
+          </div>
+          {/* Mobile View */}
+          <div className="md:hidden space-y-4">
+            {patientData.map((patient, index) => (
+              <Card key={index} className="shadow-md">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={`https://placehold.co/40x40.png?text=${patient.name.charAt(0)}`} alt={patient.name} />
+                      <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-bold">{patient.name}</p>
+                      <p className="text-sm text-muted-foreground">{patient.id}</p>
+                    </div>
+                  </div>
+                  <div className="border-t pt-3 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Appointment:</span>
+                      <span className="font-medium text-right">{patient.appointmentDate} <br/> <span className="text-cyan-500">{patient.appointmentTime}</span></span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Purpose:</span>
+                      <span className="font-medium">{patient.purpose}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Type:</span>
+                      <span className="font-medium">{patient.type}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Paid Amount:</span>
+                      <span className="font-medium">{patient.paidAmount}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 justify-end border-t pt-3">
+                    <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200 flex-1">
+                        <Link href="/doctor/view-appointment">
+                          <Eye className="w-4 h-4 mr-1"/> View
+                         </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1">
+                        <Check className="h-4 w-4 mr-1"/> Accept
+                    </Button>
+                    <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1">
+                        <X className="h-4 w-4 mr-1"/> Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>
