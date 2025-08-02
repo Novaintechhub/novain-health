@@ -216,7 +216,7 @@ export default function DoctorProfile() {
                     </Link>
                  </div>
               </div>
-              <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4">Book Appointment</Button>
+              <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4">Request Appointment</Button>
             </div>
           </div>
         </CardContent>
