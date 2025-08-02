@@ -138,18 +138,18 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Doctors">
-                  <Link href="#" className="flex items-center gap-3">
-                    <Users />
-                    <span className="group-data-[collapsible=icon]:hidden">Doctors</span>
+                <SidebarMenuButton asChild tooltip="Medical Records" isActive={pathname === '/patients/medical-records'}>
+                  <Link href="/patients/medical-records" className="flex items-center gap-3">
+                    <Briefcase />
+                    <span className="group-data-[collapsible=icon]:hidden">Medical Records</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Medical Records">
+                <SidebarMenuButton asChild tooltip="Doctors">
                   <Link href="#" className="flex items-center gap-3">
-                    <Briefcase />
-                    <span className="group-data-[collapsible=icon]:hidden">Medical Records</span>
+                    <Users />
+                    <span className="group-data-[collapsible=icon]:hidden">Doctors</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

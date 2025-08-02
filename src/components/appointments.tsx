@@ -110,7 +110,7 @@ export default function Appointments() {
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
                 <TabsTrigger value="appointments">Appointments</TabsTrigger>
                 <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
-                <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
+                <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
                 <TabsTrigger value="billing">Billing</TabsTrigger>
             </TabsList>
             <TabsContent value="appointments">

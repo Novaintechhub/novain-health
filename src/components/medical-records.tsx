@@ -9,50 +9,62 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Printer, Eye } from "lucide-react";
 import Link from "next/link";
 
-const prescriptions = [
+const medicalRecords = [
   {
+    id: "#MR-0010",
     date: "14 Nov 2019",
-    name: "Prescription 1",
+    description: "Dental Filling",
+    attachment: "dental-test.pdf",
     doctorName: "Dr. Ruby Perrin",
     doctorSpecialty: "Dental",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor",
   },
   {
+    id: "#MR-0009",
     date: "13 Nov 2019",
-    name: "Prescription 2",
+    description: "Teeth Cleaning",
+    attachment: "dental-test.pdf",
     doctorName: "Dr. Darren Elder",
     doctorSpecialty: "Dental",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "male doctor",
   },
   {
+    id: "#MR-0008",
     date: "12 Nov 2019",
-    name: "Prescription 3",
+    description: "General Checkup",
+    attachment: "cardio-test.pdf",
     doctorName: "Dr. Deborah Angel",
     doctorSpecialty: "Cardiology",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor portrait",
   },
   {
+    id: "#MR-0007",
     date: "11 Nov 2019",
-    name: "Prescription 4",
+    description: "General Test",
+    attachment: "general-test.pdf",
     doctorName: "Dr. Sofia Brient",
     doctorSpecialty: "Urology",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor smiling",
   },
   {
+    id: "#MR-0006",
     date: "10 Nov 2019",
-    name: "Prescription 5",
+    description: "Eye Test",
+    attachment: "eye-test.pdf",
     doctorName: "Dr. Marvin Campbell",
-    doctorSpecialty: "Dental",
+    doctorSpecialty: "Ophthalmology",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "male doctor portrait",
   },
    {
+    id: "#MR-0005",
     date: "9 Nov 2019",
-    name: "Prescription 6",
+    description: "Anaemia",
+    attachment: "anaemia-test.pdf",
     doctorName: "Dr. Katharine Berthold",
     doctorSpecialty: "Dental",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
@@ -60,43 +72,47 @@ const prescriptions = [
   },
 ];
 
-export default function Prescriptions() {
+export default function MedicalRecords() {
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Prescriptions</h1>
-        <Tabs defaultValue="prescriptions">
+      <h1 className="text-2xl font-bold">Medical Records</h1>
+        <Tabs defaultValue="medical-records">
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
                 <Link href="/patients/appointments" className="w-full"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
-                <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
-                <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
+                <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
+                <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
                 <TabsTrigger value="billing">Billing</TabsTrigger>
             </TabsList>
-            <TabsContent value="prescriptions">
+            <TabsContent value="medical-records">
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>ID</TableHead>
                                     <TableHead>Date</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Created by</TableHead>
+                                    <TableHead>Description</TableHead>
+                                    <TableHead>Attachment</TableHead>
+                                    <TableHead>Created</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {prescriptions.map((prescription, index) => (
+                                {medicalRecords.map((record, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{prescription.date}</TableCell>
-                                        <TableCell>{prescription.name}</TableCell>
+                                        <TableCell>{record.id}</TableCell>
+                                        <TableCell>{record.date}</TableCell>
+                                        <TableCell>{record.description}</TableCell>
+                                        <TableCell><Link href="#" className="text-blue-600 hover:underline">{record.attachment}</Link></TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10">
-                                                    <AvatarImage src={prescription.doctorAvatarUrl} alt={prescription.doctorName} data-ai-hint={prescription.doctorAvatarHint} />
-                                                    <AvatarFallback>{prescription.doctorName.charAt(0)}</AvatarFallback>
+                                                    <AvatarImage src={record.doctorAvatarUrl} alt={record.doctorName} data-ai-hint={record.doctorAvatarHint} />
+                                                    <AvatarFallback>{record.doctorName.charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <div className="font-medium">{prescription.doctorName}</div>
-                                                    <div className="text-sm text-muted-foreground">{prescription.doctorSpecialty}</div>
+                                                    <div className="font-medium">{record.doctorName}</div>
+                                                    <div className="text-sm text-muted-foreground">{record.doctorSpecialty}</div>
                                                 </div>
                                             </div>
                                         </TableCell>
