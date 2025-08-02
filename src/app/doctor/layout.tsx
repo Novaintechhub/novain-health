@@ -112,33 +112,33 @@ export default function DoctorLayout({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/doctor" tooltip="Dashboard" isActive={pathname === '/doctor'}>
-                  <Link href="/doctor">
+                  <Link href="/doctor" className="flex items-center gap-3">
                     <LayoutDashboard />
-                    Dashboard
+                    <span className="group-data-[collapsible=icon]:hidden">Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Appointments" isActive={pathname === '/doctor/appointments'}>
-                   <Link href="/doctor/appointments">
+                   <Link href="/doctor/appointments" className="flex items-center gap-3">
                     <Calendar />
-                    Appointments
+                    <span className="group-data-[collapsible=icon]:hidden">Appointments</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="My Patients" isActive={pathname === '/doctor/my-patients'}>
-                  <Link href="/doctor/my-patients">
+                  <Link href="/doctor/my-patients" className="flex items-center gap-3">
                     <Users />
-                    My Patients
+                    <span className="group-data-[collapsible=icon]:hidden">My Patients</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Schedule Timings" isActive={pathname === '/doctor/schedule-timings'}>
-                  <Link href="/doctor/schedule-timings">
+                  <Link href="/doctor/schedule-timings" className="flex items-center gap-3">
                     <Clock />
-                    Schedule Timings
+                    <span className="group-data-[collapsible=icon]:hidden">Schedule Timings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -147,8 +147,8 @@ export default function DoctorLayout({
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/doctor/transactions')}>
                         <CreditCard />
-                        Transactions
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                        <span className="group-data-[collapsible=icon]:hidden flex-grow text-left">Transactions</span>
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180 group-data-[collapsible=icon]:hidden" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -169,33 +169,33 @@ export default function DoctorLayout({
               </SidebarMenuItem>
                <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Reviews" isActive={pathname === '/doctor/reviews'}>
-                  <Link href="/doctor/reviews">
+                  <Link href="/doctor/reviews" className="flex items-center gap-3">
                     <Star />
-                    Reviews
+                    <span className="group-data-[collapsible=icon]:hidden">Reviews</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Message" isActive={pathname === '/doctor/messages'}>
-                  <Link href="/doctor/messages">
+                  <Link href="/doctor/messages" className="flex items-center gap-3">
                     <MessageSquare />
-                    Message
+                    <span className="group-data-[collapsible=icon]:hidden">Message</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/doctor/profile-settings'}>
-                  <Link href="/doctor/profile-settings">
+                  <Link href="/doctor/profile-settings" className="flex items-center gap-3">
                     <User />
-                    Profile settings
+                    <span className="group-data-[collapsible=icon]:hidden">Profile settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Social Media" isActive={pathname === '/doctor/social-media'}>
-                  <Link href="/doctor/social-media">
+                  <Link href="/doctor/social-media" className="flex items-center gap-3">
                     <Share2 />
-                    Social Media
+                    <span className="group-data-[collapsible=icon]:hidden">Social Media</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -206,7 +206,7 @@ export default function DoctorLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton href="#" tooltip="Logout">
                   <LogOut />
-                  Logout
+                  <span className="group-data-[collapsible=icon]:hidden">Logout</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

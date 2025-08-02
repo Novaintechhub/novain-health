@@ -11,12 +11,18 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Check, X } from "lucide-react";
+import { Eye, Check, X, MoreVertical } from "lucide-react";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
 } from "recharts";
 
 const patientData = [
@@ -122,7 +128,7 @@ const EarningCard = ({ label, value, icon, subtext, cta }: { label: string, valu
     <div className="flex flex-col">
       <p className="text-sm text-muted-foreground">{label}</p>
       <div className="flex items-center gap-2">
-        {icon && <div className="text-2xl font-bold">{icon}</div>}
+        {icon && <div className="text-2xl font-normal">{icon}</div>}
         <p className="text-2xl font-bold">{value}</p>
       </div>
       <p className="text-xs text-muted-foreground">{subtext}</p>
@@ -138,19 +144,31 @@ export default function Dashboard() {
     appointments: 85,
   };
 
+  const TotalPatientIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  );
+
+  const TodayPatientIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3a5 5 0 0 0-5-5z"/><path d="M20 10c0-2-3-3-3-3s-1 1-3 1-3-1-3-1-3 1-3 3c0 2.5 4 5 6 5s6-2.5 6-5zM12 19.5c-3.5 0-6-1-6-1s2.5-1 6-1 6 1 6 1-2.5 1-6 1z"/></svg>
+  );
+  
+  const AppointmentIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+  );
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard 
-            icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3a5 5 0 0 0-5-5z"/><path d="M20 10c0-2-3-3-3-3s-1 1-3 1-3-1-3-1-3 1-3 3c0 2.5 4 5 6 5s6-2.5 6-5zM12 19.5c-3.5 0-6-1-6-1s2.5-1 6-1 6 1 6 1-2.5 1-6 1z"/></svg>} 
+            icon={<TotalPatientIcon />}
             label="Total Patient" value={stats.totalPatients.toString()} subtext="Till today" 
             progress={(stats.totalPatients % 1000) / 10} color="#D90067" />
         <StatCard 
-            icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h20"/><path d="M2 8h20"/><path d="M2 13h20"/><path d="M2 18h20"/></svg>}
+            icon={<TodayPatientIcon />}
             label="Today Patient" value={stats.todayPatients.toString()} subtext="12, Nov 2024" 
             progress={stats.todayPatients} color="#00A76F" />
         <StatCard 
-            icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>}
+            icon={<AppointmentIcon />}
             label="Appointment" value={stats.appointments.toString()} subtext="06, Dec 2024"
             progress={stats.appointments} color="#46C8F5" />
       </div>
@@ -159,9 +177,11 @@ export default function Dashboard() {
         <CardContent className="p-4 flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
             <EarningCard label="Wallet Balance" value="150,000.00" icon={<span className="text-2xl font-normal">₦</span>} subtext="One hundred and fifty thousand naira" cta="View payouts"/>
             <EarningCard label="Total Withdrawal" value="65,000" icon={<span className="text-2xl font-normal">₦</span>} subtext="" />
-            <div className="flex justify-between items-center w-full md:w-1/3">
+            <div className="flex justify-between items-center w-full md:w-auto">
               <EarningCard label="Total Earnings" value="172,000" icon={<span className="text-2xl font-normal">₦</span>} subtext="After 20% commission" />
-              <Button variant="ghost" size="icon">...</Button>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </div>
         </CardContent>
       </Card>
@@ -211,13 +231,13 @@ export default function Dashboard() {
                     <TableCell>{patient.paidAmount}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                          <Button variant="ghost" size="sm" className="text-cyan-500 hover:bg-cyan-50">
+                          <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                               <Eye className="h-4 w-4 mr-1"/> View
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-green-500 hover:bg-green-50">
+                          <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
                               <Check className="h-4 w-4 mr-1"/> Accept
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50">
+                          <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
                               <X className="h-4 w-4 mr-1"/> Cancel
                           </Button>
                       </div>

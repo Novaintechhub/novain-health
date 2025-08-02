@@ -112,33 +112,33 @@ export default function DashboardLayout({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard" tooltip="Dashboard" isActive={pathname === '/dashboard'}>
-                  <Link href="/dashboard">
+                  <Link href="/dashboard" className="flex items-center gap-3">
                     <LayoutDashboard />
-                    Dashboard
+                    <span className="group-data-[collapsible=icon]:hidden">Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
-                   <Link href="/dashboard/appointments">
+                   <Link href="/dashboard/appointments" className="flex items-center gap-3">
                     <Calendar />
-                    Appointments
+                    <span className="group-data-[collapsible=icon]:hidden">Appointments</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
-                  <Link href="/dashboard/my-patients">
+                  <Link href="/dashboard/my-patients" className="flex items-center gap-3">
                     <Users />
-                    My Patients
+                    <span className="group-data-[collapsible=icon]:hidden">My Patients</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
-                  <Link href="/dashboard/schedule-timings">
+                  <Link href="/dashboard/schedule-timings" className="flex items-center gap-3">
                     <Clock />
-                    Schedule Timings
+                    <span className="group-data-[collapsible=icon]:hidden">Schedule Timings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -147,8 +147,8 @@ export default function DashboardLayout({
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/dashboard/transactions')}>
                         <CreditCard />
-                        Transactions
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                        <span className="group-data-[collapsible=icon]:hidden flex-grow text-left">Transactions</span>
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180 group-data-[collapsible=icon]:hidden" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -169,33 +169,33 @@ export default function DashboardLayout({
               </SidebarMenuItem>
                <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
-                  <Link href="/dashboard/reviews">
+                  <Link href="/dashboard/reviews" className="flex items-center gap-3">
                     <Star />
-                    Reviews
+                    <span className="group-data-[collapsible=icon]:hidden">Reviews</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Message" isActive={pathname === '/dashboard/messages'}>
-                  <Link href="/dashboard/messages">
+                  <Link href="/dashboard/messages" className="flex items-center gap-3">
                     <MessageSquare />
-                    Message
+                    <span className="group-data-[collapsible=icon]:hidden">Message</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
-                  <Link href="/dashboard/profile-settings">
+                  <Link href="/dashboard/profile-settings" className="flex items-center gap-3">
                     <User />
-                    Profile settings
+                    <span className="group-data-[collapsible=icon]:hidden">Profile settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
-                  <Link href="/dashboard/social-media">
+                  <Link href="/dashboard/social-media" className="flex items-center gap-3">
                     <Share2 />
-                    Social Media
+                    <span className="group-data-[collapsible=icon]:hidden">Social Media</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -206,7 +206,7 @@ export default function DashboardLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton href="#" tooltip="Logout">
                   <LogOut />
-                  Logout
+                  <span className="group-data-[collapsible=icon]:hidden">Logout</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -275,5 +275,3 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
-
-    
