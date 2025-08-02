@@ -102,6 +102,13 @@ export default function PatientLayout({
                 </Avatar>
                 <h3 className="mt-4 text-xl font-semibold">Tosin Chukwuka</h3>
                 <p className="text-sm text-muted-foreground">Patient</p>
+                <div className="text-center text-sm text-muted-foreground mt-2 space-y-1">
+                  <p>24 Jul 1983, 38 years</p>
+                  <p>Newyork, USA</p>
+                </div>
+                <Link href="/patients/profile" passHref legacyBehavior>
+                    <Button variant="outline" className="mt-4 text-primary border-primary">View Details</Button>
+                </Link>
               </div>
             </SidebarGroup>
             <SidebarMenu>
@@ -154,8 +161,8 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Profile Settings">
-                  <Link href="#" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/patients/profile'}>
+                  <Link href="/patients/profile" className="flex items-center gap-3">
                     <User />
                     <span className="group-data-[collapsible=icon]:hidden">Profile settings</span>
                   </Link>
