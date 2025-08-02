@@ -171,8 +171,8 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Messages">
-                  <Link href="#" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Messages" isActive={pathname === '/patients/messages'}>
+                  <Link href="/patients/messages" className="flex items-center gap-3">
                     <MessageSquare />
                     <span className="group-data-[collapsible=icon]:hidden">Messages</span>
                   </Link>
