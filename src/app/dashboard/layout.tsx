@@ -152,7 +152,7 @@ export default function DashboardLayout({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Collapsible>
-                  <CollapsibleTrigger className="w-full">
+                  <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/dashboard/transactions')} className="w-full">
                         <span>
                             <CreditCard />
