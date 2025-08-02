@@ -113,52 +113,42 @@ export default function DashboardLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard" tooltip="Dashboard" isActive={pathname === '/dashboard'}>
                   <Link href="/dashboard">
-                    <span>
-                      <LayoutDashboard />
-                      Dashboard
-                    </span>
+                    <LayoutDashboard />
+                    Dashboard
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/appointments" tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
                   <Link href="/dashboard/appointments">
-                    <span>
-                      <Calendar />
-                      Appointments
-                    </span>
+                    <Calendar />
+                    Appointments
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/my-patients" tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
                   <Link href="/dashboard/my-patients">
-                    <span>
-                      <Users />
-                      My Patients
-                    </span>
+                    <Users />
+                    My Patients
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/schedule-timings" tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
                   <Link href="/dashboard/schedule-timings">
-                    <span>
-                      <Clock />
-                      Schedule Timings
-                    </span>
+                    <Clock />
+                    Schedule Timings
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Collapsible>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/dashboard/transactions')} className="w-full">
-                        <span>
-                            <CreditCard />
-                            Transactions
-                            <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
-                        </span>
+                    <SidebarMenuButton tooltip="Transactions" isActive={pathname.startsWith('/dashboard/transactions')}>
+                        <CreditCard />
+                        Transactions
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -180,40 +170,32 @@ export default function DashboardLayout({
                <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/reviews" tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
                   <Link href="/dashboard/reviews">
-                    <span>
-                      <Star />
-                      Reviews
-                    </span>
+                    <Star />
+                    Reviews
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/messages" tooltip="Message" isActive={pathname === '/dashboard/messages'}>
                   <Link href="/dashboard/messages">
-                    <span>
-                      <MessageSquare />
-                      Message
-                    </span>
+                    <MessageSquare />
+                    Message
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/profile-settings" tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
                   <Link href="/dashboard/profile-settings">
-                    <span>
-                      <User />
-                      Profile settings
-                    </span>
+                    <User />
+                    Profile settings
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild href="/dashboard/social-media" tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
                   <Link href="/dashboard/social-media">
-                    <span>
-                      <Share2 />
-                      Social Media
-                    </span>
+                    <Share2 />
+                    Social Media
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -223,10 +205,8 @@ export default function DashboardLayout({
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
                 <SidebarMenuButton href="#" tooltip="Logout">
-                  <span>
-                    <LogOut />
-                    Logout
-                  </span>
+                  <LogOut />
+                  Logout
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
