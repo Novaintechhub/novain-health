@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Video, Phone, MessageSquare, Printer, Eye, Calendar, Clock, User, DollarSign } from "lucide-react";
 import Link from "next/link";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const appointments = [
   {
@@ -127,12 +128,15 @@ export default function Appointments() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Appointments</h1>
         <Tabs defaultValue="appointments">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-lg">
-                <TabsTrigger value="appointments">Appointments</TabsTrigger>
-                <Link href="/patients/prescriptions"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
-                <Link href="/patients/medical-records"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
-                <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
-            </TabsList>
+            <ScrollArea className="w-full whitespace-nowrap">
+                <TabsList className="inline-flex w-max">
+                    <TabsTrigger value="appointments">Appointments</TabsTrigger>
+                    <Link href="/patients/prescriptions"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
+                    <Link href="/patients/medical-records"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
+                    <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
+                </TabsList>
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
             <TabsContent value="appointments">
                 {/* Desktop View */}
                 <Card className="hidden md:block bg-white rounded-lg shadow-sm">
