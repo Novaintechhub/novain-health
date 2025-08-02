@@ -515,7 +515,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -541,26 +541,20 @@ const SidebarMenuButton = React.forwardRef<
   React.ComponentProps<typeof Button> & {
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
-    href?: string
   } & VariantProps<typeof sidebarMenuButtonVariants>
 >(
   (
     {
-      asChild: _asChild,
+      asChild = false,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
-      href,
-      children,
       ...props
     },
     ref
   ) => {
-    const isLink = !!href
-    const asChild = _asChild || isLink
-
     const { isMobile, state } = useSidebar()
 
     const button = (
@@ -572,9 +566,7 @@ const SidebarMenuButton = React.forwardRef<
         asChild={asChild}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
         {...props}
-      >
-        {children}
-      </Button>
+      />
     )
 
     if (!tooltip) {
@@ -583,9 +575,11 @@ const SidebarMenuButton = React.forwardRef<
 
     const tooltipContent = typeof tooltip === "string" ? { children: tooltip } : tooltip
 
+    const trigger = asChild ? <Slot>{button}</Slot> : button
+
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
         <TooltipContent
           side="right"
           align="center"
@@ -597,6 +591,7 @@ const SidebarMenuButton = React.forwardRef<
   }
 )
 SidebarMenuButton.displayName = "SidebarMenuButton"
+
 
 const SidebarMenuAction = React.forwardRef<
   HTMLButtonElement,
@@ -767,3 +762,5 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
+    

@@ -119,15 +119,15 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/appointments" tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
-                  <Link href="/dashboard/appointments">
+                <SidebarMenuButton asChild tooltip="Appointments" isActive={pathname === '/dashboard/appointments'}>
+                   <Link href="/dashboard/appointments">
                     <Calendar />
                     Appointments
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/my-patients" tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
+                <SidebarMenuButton asChild tooltip="My Patients" isActive={pathname === '/dashboard/my-patients'}>
                   <Link href="/dashboard/my-patients">
                     <Users />
                     My Patients
@@ -135,7 +135,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/schedule-timings" tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
+                <SidebarMenuButton asChild tooltip="Schedule Timings" isActive={pathname === '/dashboard/schedule-timings'}>
                   <Link href="/dashboard/schedule-timings">
                     <Clock />
                     Schedule Timings
@@ -154,13 +154,13 @@ export default function DashboardLayout({
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton href="/dashboard/transactions/consultation-payments" isActive={pathname === '/dashboard/transactions/consultation-payments'}>
-                          Consultation Payments
+                        <SidebarMenuSubButton asChild href="/dashboard/transactions/consultation-payments" isActive={pathname === '/dashboard/transactions/consultation-payments'}>
+                          <Link href="/dashboard/transactions/consultation-payments">Consultation Payments</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton href="/dashboard/transactions/payouts" isActive={pathname === '/dashboard/transactions/payouts'}>
-                          Payouts
+                         <SidebarMenuSubButton asChild href="/dashboard/transactions/payouts" isActive={pathname === '/dashboard/transactions/payouts'}>
+                          <Link href="/dashboard/transactions/payouts">Payouts</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
@@ -168,7 +168,7 @@ export default function DashboardLayout({
                 </Collapsible>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/reviews" tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
+                <SidebarMenuButton asChild tooltip="Reviews" isActive={pathname === '/dashboard/reviews'}>
                   <Link href="/dashboard/reviews">
                     <Star />
                     Reviews
@@ -176,7 +176,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/messages" tooltip="Message" isActive={pathname === '/dashboard/messages'}>
+                <SidebarMenuButton asChild tooltip="Message" isActive={pathname === '/dashboard/messages'}>
                   <Link href="/dashboard/messages">
                     <MessageSquare />
                     Message
@@ -184,7 +184,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/profile-settings" tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
+                <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/dashboard/profile-settings'}>
                   <Link href="/dashboard/profile-settings">
                     <User />
                     Profile settings
@@ -192,7 +192,7 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild href="/dashboard/social-media" tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
+                <SidebarMenuButton asChild tooltip="Social Media" isActive={pathname === '/dashboard/social-media'}>
                   <Link href="/dashboard/social-media">
                     <Share2 />
                     Social Media
@@ -275,3 +275,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    
