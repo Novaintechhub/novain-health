@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Video, Phone, MessageSquare, Printer, Eye } from "lucide-react";
+import Link from "next/link";
 
 const appointments = [
   {
@@ -108,7 +109,7 @@ export default function Appointments() {
         <Tabs defaultValue="appointments">
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
                 <TabsTrigger value="appointments">Appointments</TabsTrigger>
-                <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
+                <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
                 <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
                 <TabsTrigger value="billing">Billing</TabsTrigger>
             </TabsList>
@@ -177,4 +178,3 @@ export default function Appointments() {
     </div>
   );
 }
-

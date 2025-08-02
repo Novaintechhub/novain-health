@@ -38,6 +38,7 @@ import {
   Briefcase,
   Lock,
   Share,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -121,10 +122,18 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Appointments">
-                   <Link href="#" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Appointments" isActive={pathname === '/patients/appointments'}>
+                   <Link href="/patients/appointments" className="flex items-center gap-3">
                     <Calendar />
                     <span className="group-data-[collapsible=icon]:hidden">Appointments</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Prescriptions" isActive={pathname === '/patients/prescriptions'}>
+                   <Link href="/patients/prescriptions" className="flex items-center gap-3">
+                    <FileText />
+                    <span className="group-data-[collapsible=icon]:hidden">Prescriptions</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
