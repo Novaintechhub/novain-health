@@ -1,11 +1,12 @@
 
 "use client";
 
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, ArrowRight, FileText, Stethoscope, Tooth, HeartPulse } from "lucide-react";
+import { PlusCircle, ArrowRight, FileText, Stethoscope, HeartPulse } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const HealthCheckCard = ({ title, icon, lastUsed, bgColor, iconColor }: { title: string, icon: React.ReactNode, lastUsed: string, bgColor: string, iconColor: string }) => (
@@ -82,6 +83,16 @@ export default function PatientDashboard() {
       { name: "Full Body X-Ray", date: "28th Sep 2024", status: "Cancelled", statusColor: "bg-red-100 text-red-800" },
   ]
 
+  const ToothIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-cyan-600">
+        <path d="M9.5 3.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2.4a1 1 0 0 0 .6.9l5.1 2.9a1 1 0 0 1 .3 1.4l-1.9 3.2a1 1 0 0 1-1.4.3l-2-1.2a1 1 0 0 0-1 0l-2 1.2a1 1 0 0 1-1.4-.3l-1.9-3.2a1 1 0 0 1 .3-1.4l5.1-2.9a1 1 0 0 0 .6-.9V3.5Z" />
+        <path d="m5 14 2.4-1.4" />
+        <path d="M19 14l-2.4-1.4" />
+        <path d="m5 18 3.4-2.4" />
+        <path d="M19 18l-3.4-2.4" />
+    </svg>
+  );
+
   return (
     <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Welcome back, {patient.name.split(' ')[0]}!</h2>
@@ -128,7 +139,7 @@ export default function PatientDashboard() {
                     />
                      <HealthCheckCard
                         title="Dental Checkup"
-                        icon={<Tooth className="h-6 w-6 text-cyan-600" />}
+                        icon={<ToothIcon />}
                         lastUsed="2 Days ago"
                         bgColor="bg-cyan-100"
                         iconColor="text-cyan-600"
