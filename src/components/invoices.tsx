@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Eye, Printer } from "lucide-react";
+import Link from "next/link";
 
 const invoices = [
   {
@@ -142,12 +143,15 @@ export default function Invoices() {
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
                         <Button
+                          asChild
                           variant="outline"
                           size="sm"
                           className="bg-green-100 text-green-600 border-none hover:bg-green-200"
                         >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
+                          <Link href="/doctor/transactions/invoice-view">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Link>
                         </Button>
                         <Button
                           variant="outline"
