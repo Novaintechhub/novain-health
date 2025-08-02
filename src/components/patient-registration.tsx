@@ -39,7 +39,7 @@ const NovainHealthLogo = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function PatientRegistration() {
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       <div className="hidden lg:block lg:w-1/2 relative">
         <Image
           src="https://placehold.co/800x1200.png"
@@ -61,7 +61,7 @@ export default function PatientRegistration() {
             <NovainHealthLogo />
           </div>
           
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
             <h1 className="text-xl font-bold">Patient Registration</h1>
             <Link href="/doctor/register" className="text-sm text-cyan-500 hover:underline">Not a Patient?</Link>
           </div>
@@ -133,5 +133,3 @@ export default function PatientRegistration() {
     </div>
   );
 }
-
-    

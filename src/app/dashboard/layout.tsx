@@ -223,11 +223,11 @@ export default function DashboardLayout({
           <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
-              <h2 className="text-xl font-semibold">Dashboard</h2>
+              <h2 className="text-xl font-semibold hidden md:block">Dashboard</h2>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
                 Emergency
               </Button>
               <Button variant="ghost" size="icon">
@@ -282,5 +282,3 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
-
-    

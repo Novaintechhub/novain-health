@@ -127,7 +127,7 @@ export default function Appointments() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Appointments</h1>
         <Tabs defaultValue="appointments">
-            <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-lg">
                 <TabsTrigger value="appointments">Appointments</TabsTrigger>
                 <Link href="/patients/prescriptions" className="w-full"><TabsTrigger value="prescriptions" className="w-full">Prescriptions</TabsTrigger></Link>
                 <Link href="/patients/medical-records" className="w-full"><TabsTrigger value="medical-records" className="w-full">Medical Records</TabsTrigger></Link>
@@ -136,14 +136,15 @@ export default function Appointments() {
             <TabsContent value="appointments">
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
+                      <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Patient</TableHead>
                                     <TableHead>Appt Date</TableHead>
-                                    <TableHead>Booking Date</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Booking Date</TableHead>
                                     <TableHead>Type</TableHead>
-                                    <TableHead>Amount</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Amount</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
@@ -164,16 +165,16 @@ export default function Appointments() {
                                             <div>{appointment.date.split(',')[0]}</div>
                                             <div className="text-sm text-muted-foreground">{appointment.date.split(',')[1]}</div>
                                         </TableCell>
-                                        <TableCell>{appointment.bookingDate}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{appointment.bookingDate}</TableCell>
                                         <TableCell>
                                             <TypeIcon type={appointment.type} />
                                         </TableCell>
-                                        <TableCell>{appointment.amount}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{appointment.amount}</TableCell>
                                         <TableCell>
                                             <StatusBadge status={appointment.status} />
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex gap-2 justify-end">
+                                            <div className="flex flex-col sm:flex-row gap-2 justify-end">
                                                 <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                                     <Printer className="w-4 h-4 mr-1" />
                                                     Print
@@ -190,6 +191,7 @@ export default function Appointments() {
                                 ))}
                             </TableBody>
                         </Table>
+                      </div>
                     </CardContent>
                 </Card>
             </TabsContent>

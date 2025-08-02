@@ -190,7 +190,7 @@ export default function Dashboard() {
 
       <Card className="bg-white rounded-lg shadow-sm">
         <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <h3 className="text-lg font-semibold">Patient Appointment</h3>
             <div className="flex gap-2">
               <Button variant="outline" className="rounded-full bg-cyan-400 text-white border-cyan-400 hover:bg-cyan-500 hover:text-white">Upcoming</Button>
@@ -204,8 +204,8 @@ export default function Dashboard() {
                   <TableHead>Patient Name</TableHead>
                   <TableHead>Appointment</TableHead>
                   <TableHead className="hidden md:table-cell">Purpose</TableHead>
-                  <TableHead className="hidden md:table-cell">Type</TableHead>
-                  <TableHead>Paid Amount</TableHead>
+                  <TableHead className="hidden lg:table-cell">Type</TableHead>
+                  <TableHead className="hidden sm:table-cell">Paid Amount</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -229,8 +229,8 @@ export default function Dashboard() {
                       <div className="text-cyan-500">{patient.appointmentTime}</div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{patient.purpose}</TableCell>
-                    <TableCell className="hidden md:table-cell">{patient.type}</TableCell>
-                    <TableCell>{patient.paidAmount}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{patient.type}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{patient.paidAmount}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-col sm:flex-row gap-2 justify-end">
                           <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
