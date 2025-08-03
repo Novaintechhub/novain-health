@@ -4,6 +4,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import LandingHeader from "./landing-header";
+import LandingFooter from "./landing-footer";
 
 const NovainHealthLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="258" height="113" viewBox="0 0 258 113" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -29,8 +31,9 @@ const NovainHealthLogo = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function GeneralLogin() {
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <div className="flex-1 flex flex-col justify-center items-center p-4 md:p-8">
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <LandingHeader />
+      <main className="flex-1 flex flex-col justify-center items-center p-4 md:p-8">
         <div className="w-full max-w-4xl mx-auto">
           <Image
             src="https://placehold.co/1000x400.png"
@@ -59,18 +62,8 @@ export default function GeneralLogin() {
             </div>
           </div>
         </div>
-      </div>
-      <footer className="text-center p-4">
-        <div className="flex justify-center items-center space-x-4 text-xs text-gray-500">
-          <Link href="#" className="hover:underline">Terms & Conditions</Link>
-          <div className="border-l h-4 border-gray-300"></div>
-          <Link href="#" className="hover:underline">Privacy policy</Link>
-          <div className="border-l h-4 border-gray-300"></div>
-          <Link href="#" className="hover:underline">Cookies settings</Link>
-        </div>
-      </footer>
+      </main>
+      <LandingFooter />
     </div>
   );
 }
-
-    
