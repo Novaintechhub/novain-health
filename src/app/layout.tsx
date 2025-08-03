@@ -1,7 +1,9 @@
+
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import CookieBanner from "@/components/cookie-banner";
 
 
 const inter = Inter({
@@ -33,6 +35,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-body antialiased h-full`}>
         {children}
         <Toaster />
+        <CookieBanner />
       </body>
     </html>
   );
