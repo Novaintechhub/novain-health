@@ -1,80 +1,26 @@
+
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const patients = [
-  {
-    id: "P0017",
-    name: "Tosin Adebayo",
-    location: "New York, United States",
-    gender: "Female",
-    age: "29 Years",
-    genotype: "AS",
-    bloodGroup: "AB+",
-    avatarUrl: "https://placehold.co/100x100.png",
-    avatarHint: "woman portrait",
-  },
-  {
-    id: "P0018",
-    name: "Tosin Adebayo",
-    location: "New York, United States",
-    gender: "Female",
-    age: "29 Years",
-    genotype: "AS",
-    bloodGroup: "AB+",
-    avatarUrl: "https://placehold.co/100x100.png",
-    avatarHint: "woman portrait",
-  },
-  {
-    id: "P0019",
-    name: "Tosin Adebayo",
-    location: "New York, United States",
-    gender: "Female",
-    age: "29 Years",
-    genotype: "AS",
-    bloodGroup: "AB+",
-    avatarUrl: "https://placehold.co/100x100.png",
-    avatarHint: "woman portrait",
-  },
-  {
-    id: "P0020",
-    name: "Tosin Adebayo",
-    location: "New York, United States",
-    gender: "Female",
-    age: "29 Years",
-    genotype: "AS",
-    bloodGroup: "AB+",
-    avatarUrl: "https://placehold.co/100x100.png",
-    avatarHint: "woman portrait",
-  },
-  {
-    id: "P0021",
-    name: "Tosin Adebayo",
-    location: "New York, United States",
-    gender: "Female",
-    age: "29 Years",
-    genotype: "AS",
-    bloodGroup: "AB+",
-    avatarUrl: "https://placehold.co/100x100.png",
-    avatarHint: "woman portrait",
-  },
-  {
-    id: "P0022",
-    name: "Tosin Adebayo",
-    location: "New York, United States",
-    gender: "Female",
-    age: "29 Years",
-    genotype: "AS",
-    bloodGroup: "AB+",
-    avatarUrl: "https://placehold.co/100x100.png",
-    avatarHint: "woman portrait",
-  },
-];
+type Patient = {
+  id: string;
+  name: string;
+  location: string;
+  gender: string;
+  age: string;
+  genotype: string;
+  bloodGroup: string;
+  avatarUrl: string;
+  avatarHint: string;
+};
 
-const PatientCard = ({ patient }: { patient: (typeof patients)[0] }) => (
+const PatientCard = ({ patient }: { patient: Patient }) => (
   <Card className="bg-white rounded-lg shadow-sm">
     <CardContent className="p-6 flex flex-col items-center">
       <Avatar className="h-24 w-24 mb-4">
@@ -111,14 +57,54 @@ const PatientCard = ({ patient }: { patient: (typeof patients)[0] }) => (
 );
 
 export default function MyPatients() {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPatients() {
+      try {
+        const response = await fetch('/api/my-patients');
+        const data = await response.json();
+        setPatients(data);
+      } catch (error) {
+        console.error('Failed to fetch patients:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPatients();
+  }, []);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Patients</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {patients.map((patient) => (
-          <PatientCard key={patient.id} patient={patient} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="p-6">
+              <div className="flex flex-col items-center">
+                <Skeleton className="h-24 w-24 rounded-full mb-4" />
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <Separator className="my-4" />
+                <div className="w-full space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full mt-6" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {patients.map((patient) => (
+            <PatientCard key={patient.id} patient={patient} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,59 +9,36 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Printer, Eye } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const prescriptions = [
-  {
-    date: "14 Nov 2019",
-    name: "Prescription 1",
-    doctorName: "Dr. Ruby Perrin",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor",
-  },
-  {
-    date: "13 Nov 2019",
-    name: "Prescription 2",
-    doctorName: "Dr. Darren Elder",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "male doctor",
-  },
-  {
-    date: "12 Nov 2019",
-    name: "Prescription 3",
-    doctorName: "Dr. Deborah Angel",
-    doctorSpecialty: "Cardiology",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor portrait",
-  },
-  {
-    date: "11 Nov 2019",
-    name: "Prescription 4",
-    doctorName: "Dr. Sofia Brient",
-    doctorSpecialty: "Urology",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor smiling",
-  },
-  {
-    date: "10 Nov 2019",
-    name: "Prescription 5",
-    doctorName: "Dr. Marvin Campbell",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "male doctor portrait",
-  },
-   {
-    date: "9 Nov 2019",
-    name: "Prescription 6",
-    doctorName: "Dr. Katharine Berthold",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor glasses",
-  },
-];
+type Prescription = {
+  date: string;
+  name: string;
+  doctorName: string;
+  doctorSpecialty: string;
+  doctorAvatarUrl: string;
+  doctorAvatarHint: string;
+};
 
 export default function Prescriptions() {
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPrescriptions() {
+      try {
+        const response = await fetch('/api/prescriptions');
+        const data = await response.json();
+        setPrescriptions(data);
+      } catch (error) {
+        console.error('Failed to fetch prescriptions:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPrescriptions();
+  }, []);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Prescriptions</h1>
@@ -72,6 +50,21 @@ export default function Prescriptions() {
                 <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="prescriptions">
+              {loading ? (
+                 <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
                         {/* Desktop View */}
@@ -157,6 +150,7 @@ export default function Prescriptions() {
                         </div>
                     </CardContent>
                 </Card>
+              )}
             </TabsContent>
         </Tabs>
     </div>

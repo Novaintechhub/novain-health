@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,105 +14,20 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Search, CheckCircle2, Star, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const doctors = [
-  {
-    name: "Michael Smith",
-    specialty: "MBBS - Gynecology and Pediatric Medicine",
-    image: "https://placehold.co/250x250.png",
-    hint: "male doctor",
-    verified: true,
-    rating: 4.8,
-    reviews: 120,
-    location: "New York, USA",
-    availability: "Available Mon, 24 Dec",
-    price: "₦150 - ₦300",
-  },
-  {
-    name: "Tom Hanky",
-    specialty: "BDS, MDS - Oral & Maxillofacial Surgery",
-    image: "https://placehold.co/250x250.png",
-    hint: "doctor portrait",
-    verified: true,
-    rating: 4.9,
-    reviews: 215,
-    location: "Los Angeles, USA",
-    availability: "Available Tue, 25 Dec",
-    price: "₦200 - ₦400",
-  },
-  {
-    name: "Leke Alder",
-    specialty: "MDS - Periodontology and Oral implantology, BDS",
-    image: "https://placehold.co/250x250.png",
-    hint: "female doctor",
-    verified: true,
-    rating: 4.7,
-    reviews: 89,
-    location: "Chicago, USA",
-    availability: "Available Wed, 26 Dec",
-    price: "₦180 - ₦350",
-  },
-  {
-    name: "Chisom Agu",
-    specialty: "MDS - Periodontology and Oral implantology, BDS",
-    image: "https://placehold.co/250x250.png",
-    hint: "female doctor glasses",
-    verified: true,
-    rating: 5.0,
-    reviews: 302,
-    location: "Houston, USA",
-    availability: "Available Thu, 27 Dec",
-    price: "₦250 - ₦500",
-  },
-  {
-    name: "Precious Brownson",
-    specialty: "MDS - Periodontology and Oral implantology, BDS",
-    image: "https://placehold.co/250x250.png",
-    hint: "female doctor looking",
-    verified: true,
-    rating: 4.8,
-    reviews: 150,
-    location: "Phoenix, USA",
-    availability: "Available Fri, 28 Dec",
-    price: "Free",
-  },
-  {
-    name: "Gideon Anthony",
-    specialty: "MBBS - Neurosurgeon and Brain Expert",
-    image: "https://placehold.co/250x250.png",
-    hint: "doctor smiling",
-    verified: true,
-    rating: 4.9,
-    reviews: 180,
-    location: "Philadelphia, USA",
-    availability: "Available Sat, 29 Dec",
-    price: "₦300 - ₦600",
-  },
-  {
-    name: "Glory Felix",
-    specialty: "BDS, MDS - Optometrist, and Eye Surgeon",
-    image: "https://placehold.co/250x250.png",
-    hint: "woman smiling",
-    verified: true,
-    rating: 4.6,
-    reviews: 95,
-    location: "San Antonio, USA",
-    availability: "Available Sun, 30 Dec",
-    price: "₦120 - ₦250",
-  },
-  {
-    name: "Ferdinand Lucios",
-    specialty: "MDS - Obsteriology, Oncology, and Dietetics BDS",
-    image: "https://placehold.co/250x250.png",
-    hint: "male doctor portrait",
-    verified: true,
-    rating: 4.7,
-    reviews: 210,
-    location: "San Diego, USA",
-    availability: "Available Mon, 31 Dec",
-    price: "₦220 - ₦450",
-  },
-];
+type Doctor = {
+  name: string;
+  specialty: string;
+  image: string;
+  hint: string;
+  verified: boolean;
+  rating: number;
+  reviews: number;
+  location: string;
+  availability: string;
+  price: string;
+};
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center">
@@ -127,6 +43,24 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 export default function FindADoctor() {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchDoctors() {
+      try {
+        const response = await fetch('/api/doctors');
+        const data = await response.json();
+        setDoctors(data);
+      } catch (error) {
+        console.error('Failed to fetch doctors:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDoctors();
+  }, []);
+
   return (
     <div className="bg-gray-50/50 min-h-screen">
       <header className="bg-indigo-900 text-white py-12">
@@ -206,56 +140,75 @@ export default function FindADoctor() {
                 </Select>
             </div>
         </div>
+        
+        {loading ? (
+           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <Card key={i}>
+                <Skeleton className="h-48 w-full" />
+                <CardContent className="p-4 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex justify-between mt-4">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {doctors.map((doctor, index) => (
+              <Card
+                key={index}
+                className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300"
+              >
+                <img
+                  src={doctor.image}
+                  alt={doctor.name}
+                  className="w-full h-48 object-cover"
+                  data-ai-hint={doctor.hint}
+                />
+                <CardContent className="p-4 flex flex-col flex-grow">
+                  <div className="flex items-center">
+                    <h4 className="text-lg font-bold text-gray-800">{doctor.name}</h4>
+                    {doctor.verified && <CheckCircle2 className="w-4 h-4 text-green-500 ml-1 shrink-0" />}
+                  </div>
+                  <p className="text-muted-foreground text-xs mt-1 h-8">{doctor.specialty}</p>
+                  
+                  <div className="flex items-center mt-2">
+                      <StarRating rating={doctor.rating} />
+                      <span className="text-xs text-muted-foreground ml-2">({doctor.reviews} reviews)</span>
+                  </div>
 
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {doctors.map((doctor, index) => (
-            <Card
-              key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300"
-            >
-              <img
-                src={doctor.image}
-                alt={doctor.name}
-                className="w-full h-48 object-cover"
-                data-ai-hint={doctor.hint}
-              />
-              <CardContent className="p-4 flex flex-col flex-grow">
-                <div className="flex items-center">
-                  <h4 className="text-lg font-bold text-gray-800">{doctor.name}</h4>
-                  {doctor.verified && <CheckCircle2 className="w-4 h-4 text-green-500 ml-1 shrink-0" />}
-                </div>
-                <p className="text-muted-foreground text-xs mt-1 h-8">{doctor.specialty}</p>
-                
-                <div className="flex items-center mt-2">
-                    <StarRating rating={doctor.rating} />
-                    <span className="text-xs text-muted-foreground ml-2">({doctor.reviews} reviews)</span>
-                </div>
-
-                <div className="mt-4 space-y-2 text-sm text-gray-600 border-t pt-4">
-                    <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        <span>{doctor.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{doctor.availability}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span className={`font-semibold ${doctor.price === 'Free' ? 'text-green-600' : 'text-gray-800'}`}>{doctor.price}</span>
-                    </div>
-                </div>
-                
-                <div className="mt-auto pt-4 flex gap-2 w-full">
-                  <Button asChild variant="outline" className="w-full text-cyan-500 border-cyan-500 hover:bg-cyan-50 hover:text-cyan-600">
-                    <Link href="/patients/doctor-profile">View Profile</Link>
-                  </Button>
-                  <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white">Book Now</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <div className="mt-4 space-y-2 text-sm text-gray-600 border-t pt-4">
+                      <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-400" />
+                          <span>{doctor.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span>{doctor.availability}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className={`font-semibold ${doctor.price === 'Free' ? 'text-green-600' : 'text-gray-800'}`}>{doctor.price}</span>
+                      </div>
+                  </div>
+                  
+                  <div className="mt-auto pt-4 flex gap-2 w-full">
+                    <Button asChild variant="outline" className="w-full text-cyan-500 border-cyan-500 hover:bg-cyan-50 hover:text-cyan-600">
+                      <Link href="/patients/doctor-profile">View Profile</Link>
+                    </Button>
+                    <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white">Book Now</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
         <div className="mt-12 text-center">
             <Button size="lg" className="bg-cyan-500 hover:bg-cyan-600 text-white">Load More</Button>
         </div>

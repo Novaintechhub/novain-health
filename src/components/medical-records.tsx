@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,71 +9,38 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Printer, Eye } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const medicalRecords = [
-  {
-    id: "#MR-0010",
-    date: "14 Nov 2019",
-    description: "Dental Filling",
-    attachment: "dental-test.pdf",
-    doctorName: "Dr. Ruby Perrin",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor",
-  },
-  {
-    id: "#MR-0009",
-    date: "13 Nov 2019",
-    description: "Teeth Cleaning",
-    attachment: "dental-test.pdf",
-    doctorName: "Dr. Darren Elder",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "male doctor",
-  },
-  {
-    id: "#MR-0008",
-    date: "12 Nov 2019",
-    description: "General Checkup",
-    attachment: "cardio-test.pdf",
-    doctorName: "Dr. Deborah Angel",
-    doctorSpecialty: "Cardiology",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor portrait",
-  },
-  {
-    id: "#MR-0007",
-    date: "11 Nov 2019",
-    description: "General Test",
-    attachment: "general-test.pdf",
-    doctorName: "Dr. Sofia Brient",
-    doctorSpecialty: "Urology",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor smiling",
-  },
-  {
-    id: "#MR-0006",
-    date: "10 Nov 2019",
-    description: "Eye Test",
-    attachment: "eye-test.pdf",
-    doctorName: "Dr. Marvin Campbell",
-    doctorSpecialty: "Ophthalmology",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "male doctor portrait",
-  },
-   {
-    id: "#MR-0005",
-    date: "9 Nov 2019",
-    description: "Anaemia",
-    attachment: "anaemia-test.pdf",
-    doctorName: "Dr. Katharine Berthold",
-    doctorSpecialty: "Dental",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor glasses",
-  },
-];
+type MedicalRecord = {
+  id: string;
+  date: string;
+  description: string;
+  attachment: string;
+  doctorName: string;
+  doctorSpecialty: string;
+  doctorAvatarUrl: string;
+  doctorAvatarHint: string;
+};
 
 export default function MedicalRecords() {
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchRecords() {
+      try {
+        const response = await fetch('/api/medical-records');
+        const data = await response.json();
+        setMedicalRecords(data);
+      } catch (error) {
+        console.error('Failed to fetch medical records:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRecords();
+  }, []);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Medical Records</h1>
@@ -84,6 +52,21 @@ export default function MedicalRecords() {
                 <Link href="/patients/billing"><TabsTrigger value="billing" className="w-full">Billing</TabsTrigger></Link>
             </TabsList>
             <TabsContent value="medical-records">
+              {loading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
                         {/* Desktop View */}
@@ -176,6 +159,7 @@ export default function MedicalRecords() {
                         </div>
                     </CardContent>
                 </Card>
+              )}
             </TabsContent>
         </Tabs>
     </div>

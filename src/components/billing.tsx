@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,65 +9,37 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Printer, Eye } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const billingData = [
-  {
-    invoiceNo: "#INV-0010",
-    doctorName: "Dr. Ruby Perrin",
-    doctorSpecialty: "Dental",
-    amount: "₦450",
-    paidOn: "14 Nov 2019",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor",
-  },
-  {
-    invoiceNo: "#INV-0009",
-    doctorName: "Dr. Darren Elder",
-    doctorSpecialty: "Dental",
-    amount: "₦300",
-    paidOn: "13 Nov 2019",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "male doctor",
-  },
-  {
-    invoiceNo: "#INV-0008",
-    doctorName: "Dr. Deborah Angel",
-    doctorSpecialty: "Cardiology",
-    amount: "₦150",
-    paidOn: "12 Nov 2019",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor portrait",
-  },
-  {
-    invoiceNo: "#INV-0007",
-    doctorName: "Dr. Sofia Brient",
-    doctorSpecialty: "Urology",
-    amount: "₦50",
-    paidOn: "11 Nov 2019",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor smiling",
-  },
-  {
-    invoiceNo: "#INV-0006",
-    doctorName: "Dr. Marvin Campbell",
-    doctorSpecialty: "Ophthalmology",
-    amount: "₦600",
-    paidOn: "10 Nov 2019",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "male doctor portrait",
-  },
-   {
-    invoiceNo: "#INV-0005",
-    doctorName: "Dr. Katharine Berthold",
-    doctorSpecialty: "Dental",
-    amount: "₦200",
-    paidOn: "9 Nov 2019",
-    doctorAvatarUrl: "https://placehold.co/40x40.png",
-    doctorAvatarHint: "female doctor glasses",
-  },
-];
+type Billing = {
+  invoiceNo: string;
+  doctorName: string;
+  doctorSpecialty: string;
+  amount: string;
+  paidOn: string;
+  doctorAvatarUrl: string;
+  doctorAvatarHint: string;
+};
 
 export default function Billing() {
+  const [billingData, setBillingData] = useState<Billing[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchBilling() {
+      try {
+        const response = await fetch('/api/billing');
+        const data = await response.json();
+        setBillingData(data);
+      } catch (error) {
+        console.error('Failed to fetch billing data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchBilling();
+  }, []);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Billing</h1>
@@ -78,6 +51,21 @@ export default function Billing() {
                 <TabsTrigger value="billing">Billing</TabsTrigger>
             </TabsList>
             <TabsContent value="billing">
+              {loading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="p-4">
+                       <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
                 <Card className="bg-white rounded-lg shadow-sm">
                     <CardContent className="p-0">
                         {/* Desktop View */}
@@ -174,6 +162,7 @@ export default function Billing() {
                         </div>
                     </CardContent>
                 </Card>
+              )}
             </TabsContent>
         </Tabs>
     </div>
