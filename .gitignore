@@ -41,7 +41,7 @@ next-env.d.ts
 .env*
 .env.local
 serviceAccountKey.json
-
+api-documentation.md
 
 # firebase
 firebase-debug.log
