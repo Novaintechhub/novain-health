@@ -67,16 +67,16 @@ export default function LandingFooter() {
           <div>
             <h4 className="font-bold text-white">About</h4>
             <ul className="mt-4 space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white">About Us</a></li>
-              <li><a href="#" className="hover:text-white">How It Works</a></li>
-              <li><a href="#" className="hover:text-white">For Patients</a></li>
-              <li><a href="#" className="hover:text-white">For Doctors</a></li>
+              <li><Link href="/about" className="hover:text-white">About Us</Link></li>
+              <li><Link href="#" className="hover:text-white">How It Works</Link></li>
+              <li><Link href="/patients/dashboard" className="hover:text-white">For Patients</Link></li>
+              <li><Link href="/doctor" className="hover:text-white">For Doctors</Link></li>
             </ul>
              <h4 className="font-bold text-white mt-8">Support</h4>
             <ul className="mt-4 space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white">FAQs</a></li>
-              <li><a href="#" className="hover:text-white">Help Center</a></li>
-              <li><a href="#" className="hover:text-white">Emergency Response Info</a></li>
+              <li><Link href="/faq" className="hover:text-white">FAQs</Link></li>
+              <li><Link href="/help-center" className="hover:text-white">Help Center</Link></li>
+              <li><Link href="/emergency-response" className="hover:text-white">Emergency Response Info</Link></li>
             </ul>
           </div>
           <div>
@@ -104,12 +104,11 @@ export default function LandingFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 pt-8 border-t border-gray-700 flex justify-between items-center text-sm relative z-10">
+        <div className="mt-12 pt-8 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center text-sm relative z-10 gap-4">
           <p>&copy; 2024 Novain Health. All Rights Reserved.</p>
-          <div className="flex space-x-6">
-            <a href="#" className="hover:text-white">Data Protection Policy</a>
-            <a href="#" className="hover:text-white">Privacy Policy</a>
-            <a href="#" className="hover:text-white">Terms and Conditions</a>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+            <Link href="/terms-of-service" className="hover:text-white">Terms and Conditions</Link>
+            <Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
           </div>
         </div>
       </footer>
