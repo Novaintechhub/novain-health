@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import LandingHeader from "./landing-header";
+import LandingFooter from "./landing-footer";
 
 const NovainLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} width="124" height="34" viewBox="0 0 124 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -57,80 +59,86 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function Login() {
   return (
-    <div className="flex h-screen">
-      <div className="hidden lg:block lg:w-1/2 relative">
-        <Image
-          src="https://placehold.co/800x1200.png"
-          alt="Doctor smiling"
-          layout="fill"
-          objectFit="cover"
-          data-ai-hint="female doctor"
-        />
-      </div>
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 overflow-y-auto">
-        <div className="w-full max-w-md">
-          <div className="flex justify-center mb-8">
-            <NovainLogo />
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <LandingHeader />
+      <main className="flex-grow">
+        <div className="flex h-full">
+          <div className="hidden lg:block lg:w-1/2 relative">
+            <Image
+              src="https://placehold.co/800x1200.png"
+              alt="Doctor smiling"
+              layout="fill"
+              objectFit="cover"
+              data-ai-hint="female doctor"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-center mb-2">Login</h1>
-          <p className="text-center text-muted-foreground mb-6">Hello Doc, welcome back!</p>
+          <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 overflow-y-auto bg-white">
+            <div className="w-full max-w-md">
+              <div className="flex justify-center mb-8">
+                <NovainLogo />
+              </div>
+              <h1 className="text-3xl font-bold text-center mb-2">Login</h1>
+              <p className="text-center text-muted-foreground mb-6">Hello Doc, welcome back!</p>
 
-          <div className="flex flex-col items-center mb-6">
-            <Avatar className="h-20 w-20 mb-3">
-              <AvatarImage src="https://placehold.co/80x80.png" alt="Dr. Susan" data-ai-hint="woman doctor"/>
-              <AvatarFallback>DS</AvatarFallback>
-            </Avatar>
-            <p className="font-medium">susanmandible@gmail.com</p>
-          </div>
+              <div className="flex flex-col items-center mb-6">
+                <Avatar className="h-20 w-20 mb-3">
+                  <AvatarImage src="https://placehold.co/80x80.png" alt="Dr. Susan" data-ai-hint="woman doctor"/>
+                  <AvatarFallback>DS</AvatarFallback>
+                </Avatar>
+                <p className="font-medium">susanmandible@gmail.com</p>
+              </div>
 
-          <Button variant="outline" className="w-full mb-4">
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center">
-                    <Avatar className="h-6 w-6 mr-2">
-                        <AvatarImage src="https://placehold.co/24x24.png" alt="Dr. Susan" data-ai-hint="woman doctor"/>
-                        <AvatarFallback>DS</AvatarFallback>
-                    </Avatar>
-                    <div className="text-left">
-                        <p className="text-sm font-semibold">Continue as Dr. Susan</p>
-                        <p className="text-xs text-muted-foreground">susanmandible@gmail.com</p>
+              <Button variant="outline" className="w-full mb-4">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                        <Avatar className="h-6 w-6 mr-2">
+                            <AvatarImage src="https://placehold.co/24x24.png" alt="Dr. Susan" data-ai-hint="woman doctor"/>
+                            <AvatarFallback>DS</AvatarFallback>
+                        </Avatar>
+                        <div className="text-left">
+                            <p className="text-sm font-semibold">Continue as Dr. Susan</p>
+                            <p className="text-xs text-muted-foreground">susanmandible@gmail.com</p>
+                        </div>
                     </div>
+                    <GoogleIcon className="h-6 w-6" />
                 </div>
-                <GoogleIcon className="h-6 w-6" />
+              </Button>
+
+              <div className="flex items-center my-6">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="flex-shrink mx-4 text-muted-foreground text-sm">Or</span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+              
+              <form className="space-y-4">
+                <Input type="email" placeholder="Email Address" />
+                <Input type="password" placeholder="Input password" />
+                <Link href="/doctor" className="w-full block">
+                  <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="button">Sign In</Button>
+                </Link>
+              </form>
+
+              <p className="text-center text-sm mt-4">
+                Not you? <Link href="#" className="text-cyan-500 hover:underline">Use another account</Link>
+              </p>
+
+              <div className="border-t border-gray-300 my-8"></div>
+
+              <p className="text-center text-sm">
+                Don't have an account? <Link href="/signup" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
+              </p>
+
+               <div className="flex justify-between text-xs text-muted-foreground mt-12">
+                <Link href="#" className="hover:underline">Terms & Conditions</Link>
+                <Link href="#" className="hover:underline">Privacy policy</Link>
+                <Link href="#" className="hover:underline">Cookies settings</Link>
+              </div>
+
             </div>
-          </Button>
-
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-muted-foreground text-sm">Or</span>
-            <div className="flex-grow border-t border-gray-300"></div>
           </div>
-          
-          <form className="space-y-4">
-            <Input type="email" placeholder="Email Address" />
-            <Input type="password" placeholder="Input password" />
-            <Link href="/doctor" className="w-full block">
-              <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="button">Sign In</Button>
-            </Link>
-          </form>
-
-          <p className="text-center text-sm mt-4">
-            Not you? <Link href="#" className="text-cyan-500 hover:underline">Use another account</Link>
-          </p>
-
-          <div className="border-t border-gray-300 my-8"></div>
-
-          <p className="text-center text-sm">
-            Don't have an account? <Link href="/signup" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
-          </p>
-
-           <div className="flex justify-between text-xs text-muted-foreground mt-12">
-            <Link href="#" className="hover:underline">Terms & Conditions</Link>
-            <Link href="#" className="hover:underline">Privacy policy</Link>
-            <Link href="#" className="hover:underline">Cookies settings</Link>
-          </div>
-
         </div>
-      </div>
+      </main>
+      <LandingFooter />
     </div>
   );
 }
