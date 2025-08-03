@@ -68,9 +68,9 @@ export default function LandingFooter() {
             <h4 className="font-bold text-white">About</h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/about" className="hover:text-white">About Us</Link></li>
-              <li><Link href="#" className="hover:text-white">How It Works</Link></li>
-              <li><Link href="/patients/dashboard" className="hover:text-white">For Patients</Link></li>
-              <li><Link href="/doctor" className="hover:text-white">For Doctors</Link></li>
+              <li><Link href="/how-it-works" className="hover:text-white">How It Works</Link></li>
+              <li><Link href="/patients/register" className="hover:text-white">For Patients</Link></li>
+              <li><Link href="/doctor-registration" className="hover:text-white">For Doctors</Link></li>
             </ul>
              <h4 className="font-bold text-white mt-8">Support</h4>
             <ul className="mt-4 space-y-2 text-sm">

@@ -93,7 +93,7 @@ export default function Blog() {
                                 <h3 className="text-xl font-bold mt-2 text-gray-800">{post.title}</h3>
                                 <p className="mt-2 text-sm text-muted-foreground">{post.excerpt}</p>
                                 <Button asChild variant="link" className="p-0 h-auto mt-4 text-cyan-500 hover:text-cyan-600">
-                                    <Link href="#">Read More &rarr;</Link>
+                                    <Link href="/blog/post">Read More &rarr;</Link>
                                 </Button>
                             </CardContent>
                         </Card>
