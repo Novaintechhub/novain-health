@@ -52,18 +52,18 @@ export default function LandingHeader() {
           <NovainLogo />
         </div>
         <nav className="hidden lg:flex items-center gap-8">
-          <a href="#" className="text-sm font-medium text-cyan-500 border-b-2 border-cyan-500 pb-1">
+          <Link href="/" className="text-sm font-medium text-cyan-500 border-b-2 border-cyan-500 pb-1">
             Home
-          </a>
-          <a href="#" className="text-sm font-medium text-gray-600 hover:text-cyan-500">
-            Blog
-          </a>
-          <a href="#" className="text-sm font-medium text-gray-600 hover:text-cyan-500">
+          </Link>
+          <Link href="/about" className="text-sm font-medium text-gray-600 hover:text-cyan-500">
             About Us
-          </a>
-          <a href="#" className="text-sm font-medium text-gray-600 hover:text-cyan-500">
+          </Link>
+          <Link href="/contact" className="text-sm font-medium text-gray-600 hover:text-cyan-500">
             Contact Us
-          </a>
+          </Link>
+           <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-cyan-500">
+            Blog
+          </Link>
         </nav>
         <div className="hidden sm:flex items-center gap-4">
           <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
@@ -87,18 +87,18 @@ export default function LandingHeader() {
                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-4 mt-8">
-                <a href="#" className="text-lg font-medium text-cyan-500">
+                <Link href="/" className="text-lg font-medium text-cyan-500">
                   Home
-                </a>
-                <a href="#" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
-                  Blog
-                </a>
-                <a href="#" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
+                </Link>
+                <Link href="/about" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
                   About Us
-                </a>
-                <a href="#" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
+                </Link>
+                <Link href="/contact" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
                   Contact Us
-                </a>
+                </Link>
+                <Link href="/blog" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
+                  Blog
+                </Link>
                 <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', marginTop: '1rem' }}>
                   Emergency
                 </Button>
