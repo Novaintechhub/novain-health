@@ -21,26 +21,46 @@ export default function TermsOfService() {
 
         <section className="py-16 px-4 sm:px-8 lg:px-16">
             <div className="max-w-4xl mx-auto prose prose-lg">
+                <p>Welcome to NovainHealth. These Terms of Service ("Terms") govern your use of our website, mobile applications, and services (collectively, the "Services"). By accessing or using our Services, you agree to be bound by these Terms and our Privacy Policy.</p>
+                
                 <h2>1. Acceptance of Terms</h2>
-                <p>By accessing and using NovainHealth ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. In addition, when using these particular services, you shall be subject to any posted guidelines or rules applicable to such services.</p>
+                <p>By creating an account or using our Services, you confirm that you are at least 18 years old and legally capable of entering into a binding contract. You accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these terms, you must not use our Services.</p>
 
                 <h2>2. Description of Service</h2>
-                <p>NovainHealth provides a platform for connecting patients with healthcare professionals for consultations and related services. The service is provided "as is" and we assume no responsibility for the timeliness, deletion, mis-delivery or failure to store any user communications or personalization settings.</p>
+                <p>NovainHealth provides a telehealth platform connecting patients with licensed healthcare professionals ("Providers") for virtual consultations and related services. Our services include appointment scheduling, secure messaging, and access to medical information. The service is provided "as is," and we assume no responsibility for the timeliness, deletion, or mis-delivery of user communications.</p>
 
-                <h2>3. User Responsibilities</h2>
-                <p>You are responsible for your own communications and are responsible for the consequences of their posting. You must not, in connection with the Service, do any of the following: post materials that are copyrighted, unless you are the copyright owner or have the permission of the copyright owner to post it; post material that reveals trade secrets, unless you own them or have the permission of the owner.</p>
+                <h3>2.1. Medical Disclaimer</h3>
+                <p><strong>NovainHealth does not provide medical advice.</strong> The platform is for informational and communicational purposes only and is not a substitute for professional medical diagnosis, advice, or treatment. Always seek the advice of your physician or another qualified health provider with any questions you may have regarding a medical condition. <strong>If you are experiencing a medical emergency, call your local emergency number immediately.</strong></p>
+
+                <h2>3. User Responsibilities and Conduct</h2>
+                <p>You are responsible for all activities that occur under your account. You agree to:</p>
+                <ul>
+                    <li>Provide accurate, current, and complete information during the registration process and to update such information to keep it accurate.</li>
+                    <li>Maintain the security of your password and identification.</li>
+                    <li>Not post or transmit any material that is knowingly false, defamatory, abusive, harassing, or obscene.</li>
+                    <li>Not impersonate any person or entity or falsely state or otherwise misrepresent your affiliation with a person or entity.</li>
+                </ul>
+
+                <h2>4. Privacy Policy</h2>
+                <p>Our Privacy Policy, which details how we collect and use your information, is available at <a href="/privacy-policy">Privacy Policy</a>. By using our Services, you consent to the data practices described in the Privacy Policy.</p>
+
+                <h2>5. Consultations and Prescriptions</h2>
+                <p>Providers on our platform may, in their professional judgment, issue prescriptions based on their consultations. You agree that you will use any prescriptions obtained through our Services as directed. NovainHealth is not responsible for the actions or inactions of any Provider when it comes to prescription writing or medical advice.</p>
+
+                <h2>6. Fees and Payment</h2>
+                <p>You agree to pay all fees or charges to your account in accordance with the fees, charges, and billing terms in effect at the time a fee or charge is due and payable. You must provide a valid credit card or other payment method to pay for services.</p>
+
+                <h2>7. Termination of Service</h2>
+                <p>We may terminate or suspend your access to our Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the Service will immediately cease.</p>
+
+                <h2>8. Limitation of Liability</h2>
+                <p>To the fullest extent permitted by applicable law, NovainHealth shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the services.</p>
+
+                <h2>9. Changes to Terms</h2>
+                <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.</p>
                 
-                <h2>4. Medical Disclaimer</h2>
-                <p>The content on NovainHealth is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
-
-                <h2>5. Privacy Policy</h2>
-                <p>Our Privacy Policy, which sets out how we will use your information, can be found at <a href="/privacy-policy">Privacy Policy</a>. By using this Website, you consent to the processing described therein and warrant that all data provided by you is accurate.</p>
-
-                <h2>6. Termination</h2>
-                <p>We may terminate or suspend your access to our Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
-
-                <h2>7. Changes to Terms</h2>
-                <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. What constitutes a material change will be determined at our sole discretion.</p>
+                <h2>10. Contact Information</h2>
+                <p>If you have any questions about these Terms, please contact us at <a href="mailto:support@novainhealth.com">support@novainhealth.com</a>.</p>
             </div>
         </section>
       </main>
