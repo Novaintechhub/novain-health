@@ -124,21 +124,21 @@ export default function PatientDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="md:col-span-3">
+      <div className="grid grid-cols-1 gap-6">
+        <div>
           <StatCard 
               icon={<Calendar />}
               label="Appointments" value={stats.appointments.toString()} subtext="Scheduled" 
               progress={75} color="#D90067" />
         </div>
-        <div className="col-span-1 grid grid-cols-2 gap-6 md:col-span-3 md:grid-cols-3">
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-2 gap-6">
+          <div>
             <StatCard 
                 icon={<Briefcase />}
                 label="Medical Records" value={stats.medicalRecords.toString()} subtext="Files" 
                 progress={40} color="#00A76F" />
           </div>
-          <div className="col-span-2 md:col-span-1">
+          <div>
             <StatCard 
                 icon={<FlaskConical />}
                 label="Lab Tests" value={stats.labTests.toString()} subtext="Results Pending"
