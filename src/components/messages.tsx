@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Paperclip, Mic, Send, Bookmark, Phone, Video } from "lucide-react";
+import { Search, Paperclip, Mic, Send, Bookmark, Phone, Video, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const conversations = [
   {
@@ -102,6 +103,7 @@ export default function Messages() {
   const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
   const [messages, setMessages] = useState(initialMessages);
   const [newMessage, setNewMessage] = useState('');
+  const [isChatActive, setIsChatActive] = useState(false); // State for mobile view
 
   const handleSendMessage = () => {
       if (newMessage.trim()) {
@@ -110,10 +112,18 @@ export default function Messages() {
       }
   };
 
+  const handleConversationSelect = (convo: typeof conversations[0]) => {
+    setSelectedConversation(convo);
+    setIsChatActive(true);
+  };
+
 
   return (
-    <div className="flex h-screen bg-white">
-      <aside className="w-80 border-r flex flex-col">
+    <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-white">
+      <aside className={cn(
+        "w-full md:w-80 border-r flex-col",
+        isChatActive ? "hidden md:flex" : "flex"
+      )}>
         <div className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -125,7 +135,7 @@ export default function Messages() {
             <div
               key={index}
               className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 ${selectedConversation.name === convo.name ? 'bg-blue-50' : ''}`}
-              onClick={() => setSelectedConversation(convo)}
+              onClick={() => handleConversationSelect(convo)}
             >
               <div className="relative">
                 <Avatar className="h-12 w-12">
@@ -143,9 +153,15 @@ export default function Messages() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col" style={{ backgroundImage: "url('/background-pattern.png')", backgroundRepeat: 'repeat' }}>
+      <main className={cn(
+          "flex-1 flex-col",
+          isChatActive ? "flex" : "hidden md:flex"
+      )} style={{ backgroundImage: "url('/background-pattern.png')", backgroundRepeat: 'repeat' }}>
         <header className="flex items-center justify-between p-4 border-b bg-white">
           <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsChatActive(false)}>
+                <ArrowLeft className="h-5 w-5"/>
+            </Button>
             <Avatar className="h-10 w-10">
               <AvatarImage src={selectedConversation.avatar} alt={selectedConversation.name} data-ai-hint={selectedConversation.avatarHint} />
               <AvatarFallback>{selectedConversation.name.charAt(0)}</AvatarFallback>
@@ -155,7 +171,7 @@ export default function Messages() {
               <p className="text-sm text-green-500">Online</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-gray-500">
+          <div className="flex items-center gap-1 sm:gap-4 text-gray-500">
             <Button variant="ghost" size="icon"><Bookmark className="h-5 w-5"/></Button>
             <Link href="/patients/voice-call">
               <Button variant="ghost" size="icon"><Phone className="h-5 w-5"/></Button>
