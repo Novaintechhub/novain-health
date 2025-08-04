@@ -99,7 +99,7 @@ export default function LandingPage() {
       <LandingHeader />
 
       <main>
-        <section className="relative py-24 sm:py-32 lg:py-40 text-center bg-cover bg-center" style={{ backgroundImage: "url('https://placehold.co/1600x800.png')" }} data-ai-hint="medical team">
+        <section className="relative py-24 sm:py-32 lg:py-40 text-center bg-cover bg-center" style={{ backgroundImage: "url('/Group of african medical students posed outdoor against university door.png')" }} data-ai-hint="medical team">
           <div className="absolute inset-0 bg-white/50" />
           <div className="relative z-10 px-4">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black font-serif">
@@ -277,14 +277,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="relative py-24 sm:py-32 lg:py-40 text-center text-white bg-cover bg-center" style={{ backgroundImage: "url('https://placehold.co/1600x600.png')" }} data-ai-hint="doctor smiling">
+        <section className="relative py-24 sm:py-32 lg:py-40 text-center text-white bg-cover bg-center" style={{ backgroundImage: "url('Frame 3186.png')" }} data-ai-hint="doctor smiling">
           <div className="absolute inset-0 bg-black/60" />
-          <div className="relative z-10 px-4">
-            <h3 className="text-4xl font-bold">24/7 Real-Time Emergency Care</h3>
-            <p className="mt-4 max-w-3xl mx-auto text-lg">
-              In an emergency, every second counts. Connect instantly with our doctors and specialists for urgent medical help and advice, available 24/7, wherever you are.
-            </p>
-          </div>
+         
         </section>
 
         <section className="py-16 px-4 sm:px-8 lg:px-16 bg-gray-50">
@@ -330,13 +325,13 @@ export default function LandingPage() {
                 Download the Hovain app to get all your healthcare needs in one place. You can book appointments, consult with doctors, get prescriptions, and more.
               </p>
               <div className="mt-8 flex gap-4">
-                <img src="https://placehold.co/150x50.png" alt="App Store" data-ai-hint="app store" />
-                <img src="https://placehold.co/150x50.png" alt="Google Play" data-ai-hint="google play" />
+                <img src="/google.png" width={165} height={45} alt="App Store" data-ai-hint="app store" />
+                <img src="/apple.png" width={165} height={45} alt="Google Play" data-ai-hint="google play" />
               </div>
             </div>
             <div>
               <img
-                src="https://placehold.co/600x400.png"
+                src="African american medical doctor man..png"
                 alt="Doctor with phone"
                 className="rounded-lg shadow-lg"
                 data-ai-hint="doctor phone"
@@ -349,7 +344,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <img
-                src="https://placehold.co/600x400.png"
+                src="/ward.png"
                 alt="Hospital room"
                 className="rounded-lg shadow-lg"
                 data-ai-hint="hospital room"

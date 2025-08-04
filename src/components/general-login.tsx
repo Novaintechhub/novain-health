@@ -14,7 +14,7 @@ export default function GeneralLogin() {
       <main className="flex-1 flex flex-col justify-center items-center p-4 md:p-8">
         <div className="w-full max-w-4xl mx-auto">
           <Image
-            src="https://placehold.co/1000x400.png"
+            src="/general.png"
             alt="Doctor with a patient"
             width={1000}
             height={400}

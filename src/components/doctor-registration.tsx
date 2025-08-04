@@ -24,7 +24,7 @@ export default function DoctorRegistration() {
         <div className="flex min-h-full">
           <div className="hidden lg:block lg:w-1/2 relative">
             <Image
-              src="https://placehold.co/800x1200.png"
+              src="/doc_signup.png"
               alt="Smiling doctor"
               layout="fill"
               objectFit="cover"
