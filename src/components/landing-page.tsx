@@ -130,7 +130,7 @@ export default function LandingPage() {
                           className="pl-10 flex-grow text-gray-900"
                       />
                     </div>
-                    <Button size="icon" style={{ backgroundColor: '#D90067' }}>
+                    <Button type="button" size="icon" style={{ backgroundColor: '#D90067' }}>
                       <Search className="h-5 w-5" />
                     </Button>
                   </div>
@@ -182,12 +182,12 @@ export default function LandingPage() {
                 <p className="mt-4 text-muted-foreground text-sm">
                 Our network includes certified doctors and healthcare professionals with diverse expertise, from general practitioners to specialists, ready to help you on your journey to living a healthy life. Our medical professionals are rigorously vetted to ensure you receive the highest standard of care; each doctor is fully licensed and certified in their field, bringing years of experience and dedication to patient well-being.
                 </p>
-                <Button className="mt-6" style={{ backgroundColor: '#38bdf8' }}>Read More</Button>
+                <Button type="button" className="mt-6" style={{ backgroundColor: '#38bdf8' }}>Read More</Button>
             </div>
 
             <div className="lg:col-span-2 relative">
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10">
-                    <Button variant="ghost" size="icon" className="bg-white rounded-full shadow-md w-8 h-8 flex items-center justify-center">
+                    <Button type="button" variant="ghost" size="icon" className="bg-white rounded-full shadow-md w-8 h-8 flex items-center justify-center">
                         <ChevronLeft className="h-5 w-5" />
                     </Button>
                 </div>
@@ -260,16 +260,16 @@ export default function LandingPage() {
                         </div>
 
                         <div className="mt-4 flex gap-2 w-full">
-                          <Button variant="outline" className="w-full text-cyan-500 border-cyan-500">
+                          <Button type="button" variant="outline" className="w-full text-cyan-500 border-cyan-500">
                             View Profile
                           </Button>
-                          <Button className="w-full" style={{ backgroundColor: '#38bdf8' }}>Book Now</Button>
+                          <Button type="button" className="w-full" style={{ backgroundColor: '#38bdf8' }}>Book Now</Button>
                         </div>
                       </div>
                     ))}
                 </div>
                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10">
-                    <Button variant="ghost" size="icon" className="bg-white rounded-full shadow-md w-8 h-8 flex items-center justify-center">
+                    <Button type="button" variant="ghost" size="icon" className="bg-white rounded-full shadow-md w-8 h-8 flex items-center justify-center">
                         <ChevronRight className="h-5 w-5" />
                     </Button>
                 </div>
@@ -307,7 +307,10 @@ export default function LandingPage() {
                 className="flex justify-between items-center p-4 border rounded-lg bg-white shadow-sm"
               >
                 <span>{service}</span>
-                <button className="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                <button
+                  type="button"
+                  className="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center"
+                >
                     <ChevronRight className="h-5 w-5" />
                 </button>
               </div>

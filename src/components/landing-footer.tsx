@@ -15,7 +15,7 @@ export default function LandingFooter() {
           </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 relative z-10">
           <div className="md:col-span-2">
-            <Image src="/logo.png" alt="NovainHealth Logo" width={165} height={45} className="brightness-0 invert"/>
+            <Image src="/publiclogo.png" alt="NovainHealth Logo" width={165} height={45} className="brightness-0 invert"/>
             <p className="mt-4 text-sm max-w-md">
               Bringing quality healthcare to your fingertips. Novain Health connects you with trusted medical professionals anytime, anywhere, so you’re never alone on your health journey. Our mission is to make professional medical assistance accessible to all by connecting patients with certified doctors and healthcare professionals anytime, anywhere.
             </p>

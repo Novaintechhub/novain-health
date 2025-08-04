@@ -49,7 +49,7 @@ export default function Login() {
                 <p className="font-medium">susanmandible@gmail.com</p>
               </div>
 
-              <Button variant="outline" className="w-full mb-4">
+              <Button type="button" variant="outline" className="w-full mb-4">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center">
                         <Avatar className="h-6 w-6 mr-2">
