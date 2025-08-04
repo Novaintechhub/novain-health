@@ -28,14 +28,14 @@ export default function LandingHeader() {
           </Link>
         </nav>
         <div className="hidden sm:flex items-center gap-4">
-          <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
+          <Button type="button" style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
             Emergency
           </Button>
-          <Link href="/general-login">
-            <Button style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', padding: '0 24px' }}>
+          <Button asChild style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', padding: '0 24px' }}>
+            <Link href="/general-login">
               LOGIN/SIGN UP
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
         <div className="lg:hidden">
           <Sheet>
