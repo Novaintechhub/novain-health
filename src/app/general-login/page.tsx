@@ -1,4 +1,4 @@
-import GeneralLogin from "@/components/shared/general-login";
+import GeneralLogin from "@/components/general-login";
 
 export default function GeneralLoginPage() {
   return <GeneralLogin />;
