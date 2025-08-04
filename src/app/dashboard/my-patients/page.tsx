@@ -1,4 +1,5 @@
-import MyPatients from "@/components/doctor/my-patients";
+
+import MyPatients from "@/components/my-patients";
 
 export default function MyPatientsPage() {
   return <MyPatients />;
