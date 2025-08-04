@@ -54,7 +54,7 @@ export default function PatientLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gray-50/50 w-full">
+      <div className="flex h-screen w-full bg-gray-50/50">
         <Sidebar className="bg-white border-r" collapsible="icon">
           <SidebarContent className="p-4">
             <SidebarGroup>
@@ -148,8 +148,8 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Referrals">
-                  <Link href="#" className="flex items-center gap-3">
+                <SidebarMenuButton asChild tooltip="Referrals" isActive={pathname === '/patients/referrals'}>
+                  <Link href="/patients/referrals" className="flex items-center gap-3">
                     <Share />
                     <span className="group-data-[collapsible=icon]:hidden">Referrals</span>
                   </Link>
@@ -170,8 +170,8 @@ export default function PatientLayout({
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset className="flex flex-col h-screen">
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
+        <SidebarInset className="flex flex-col">
+          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div className="hidden md:block">
