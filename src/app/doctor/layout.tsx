@@ -43,6 +43,7 @@ import {
   ChevronDown,
   Bell,
   FileText,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -85,6 +86,30 @@ export default function DoctorLayout({
                    <Link href="/doctor/appointments" className="flex items-center gap-3">
                     <Calendar />
                     <span className="group-data-[collapsible=icon]:hidden">Appointments</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Prescriptions" isActive={pathname === '/doctor/prescriptions'}>
+                   <Link href="/doctor/prescriptions" className="flex items-center gap-3">
+                    <FileText />
+                    <span className="group-data-[collapsible=icon]:hidden">Prescriptions</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Medical Records" isActive={pathname === '/doctor/medical-records'}>
+                   <Link href="/doctor/medical-records" className="flex items-center gap-3">
+                    <Briefcase />
+                    <span className="group-data-[collapsible=icon]:hidden">Medical Records</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Billing" isActive={pathname === '/doctor/billing'}>
+                   <Link href="/doctor/billing" className="flex items-center gap-3">
+                    <CreditCard />
+                    <span className="group-data-[collapsible=icon]:hidden">Billing</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
