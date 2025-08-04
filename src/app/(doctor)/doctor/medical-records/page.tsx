@@ -1,5 +1,5 @@
-import MedicalRecords from "@/components/medical-records";
+import DoctorMedicalRecords from "@/components/doctor/doctor-medical-records";
 
 export default function MedicalRecordsPage() {
-  return <MedicalRecords />;
+  return <DoctorMedicalRecords />;
 }

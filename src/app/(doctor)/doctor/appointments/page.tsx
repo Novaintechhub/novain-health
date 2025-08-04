@@ -1,5 +1,5 @@
-import Appointments from "@/components/appointments";
+import DoctorAppointments from "@/components/doctor/doctor-appointments";
 
 export default function AppointmentsPage() {
-  return <Appointments />;
+  return <DoctorAppointments />;
 }

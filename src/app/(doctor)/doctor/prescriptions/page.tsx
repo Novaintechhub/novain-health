@@ -1,5 +1,5 @@
-import Prescriptions from "@/components/prescriptions";
+import DoctorPrescriptions from "@/components/doctor/doctor-prescriptions";
 
 export default function PrescriptionsPage() {
-  return <Prescriptions />;
+  return <DoctorPrescriptions />;
 }
