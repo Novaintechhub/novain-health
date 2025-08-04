@@ -1,4 +1,5 @@
-import PatientRegistration from "@/components/patient/patient-registration";
+
+import PatientRegistration from "@/components/patient-registration";
 
 export default function PatientRegistrationPage() {
   return (
