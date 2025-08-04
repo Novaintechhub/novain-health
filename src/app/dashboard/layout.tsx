@@ -182,8 +182,8 @@ export default function DashboardLayout({
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset>
-          <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
+        <SidebarInset className="flex flex-col h-screen">
+          <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <h2 className="text-xl font-semibold hidden md:block">Dashboard</h2>
@@ -241,7 +241,7 @@ export default function DashboardLayout({
                 </DropdownMenu>
             </div>
           </header>
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
