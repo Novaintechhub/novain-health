@@ -86,7 +86,7 @@ export default function Login() {
               <div className="border-t border-gray-300 my-8"></div>
 
               <p className="text-center text-sm">
-                Don't have an account? <Link href="/signup" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
+                Don't have an account? <Link href="/doctor/register" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
               </p>
 
                <div className="flex justify-between text-xs text-muted-foreground mt-12">
