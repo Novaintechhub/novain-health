@@ -307,12 +307,14 @@ export default function LandingPage() {
                 className="flex justify-between items-center p-4 border rounded-lg bg-white shadow-sm"
               >
                 <span>{service}</span>
-                <button
+                <Button
                   type="button"
-                  className="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center"
+                  variant="ghost"
+                  size="icon"
+                  className="w-8 h-8 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200"
                 >
                     <ChevronRight className="h-5 w-5" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
