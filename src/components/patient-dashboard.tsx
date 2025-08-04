@@ -124,19 +124,27 @@ export default function PatientDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard 
-            icon={<Calendar />}
-            label="Appointments" value={stats.appointments.toString()} subtext="Scheduled" 
-            progress={75} color="#D90067" />
-        <StatCard 
-            icon={<Briefcase />}
-            label="Medical Records" value={stats.medicalRecords.toString()} subtext="Files" 
-            progress={40} color="#00A76F" />
-        <StatCard 
-            icon={<FlaskConical />}
-            label="Lab Tests" value={stats.labTests.toString()} subtext="Results Pending"
-            progress={60} color="#46C8F5" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="md:col-span-3">
+          <StatCard 
+              icon={<Calendar />}
+              label="Appointments" value={stats.appointments.toString()} subtext="Scheduled" 
+              progress={75} color="#D90067" />
+        </div>
+        <div className="col-span-1 grid grid-cols-2 gap-6 md:col-span-3 md:grid-cols-3">
+          <div className="col-span-2 md:col-span-1">
+            <StatCard 
+                icon={<Briefcase />}
+                label="Medical Records" value={stats.medicalRecords.toString()} subtext="Files" 
+                progress={40} color="#00A76F" />
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <StatCard 
+                icon={<FlaskConical />}
+                label="Lab Tests" value={stats.labTests.toString()} subtext="Results Pending"
+                progress={60} color="#46C8F5" />
+          </div>
+        </div>
       </div>
 
       <Card className="bg-white rounded-lg shadow-sm">
