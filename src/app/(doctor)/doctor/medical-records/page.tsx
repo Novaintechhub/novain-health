@@ -1,4 +1,4 @@
-import MedicalRecords from "@/components/shared/medical-records";
+import MedicalRecords from "@/components/medical-records";
 
 export default function MedicalRecordsPage() {
   return <MedicalRecords />;
