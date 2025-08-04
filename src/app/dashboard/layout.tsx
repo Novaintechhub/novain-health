@@ -190,7 +190,7 @@ export default function DashboardLayout({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              <Button style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
+              <Button type="button" style={{ backgroundColor: '#D90067', color: 'white' }} className="rounded-full px-2 sm:px-4">
                 Emergency
               </Button>
               <Button variant="ghost" size="icon">

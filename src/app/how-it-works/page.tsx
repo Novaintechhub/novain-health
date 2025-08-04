@@ -1,5 +1,5 @@
 
-import HowItWorks from "@/components/how-it-works";
+import HowItWorks from "@/components/shared/how-it-works";
 
 export default function HowItWorksPage() {
   return <HowItWorks />;
