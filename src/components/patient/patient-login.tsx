@@ -90,9 +90,9 @@ export default function PatientLogin() {
               </p>
 
                <div className="flex justify-between text-xs text-muted-foreground mt-12">
-                <Link href="#" className="hover:underline">Terms & Conditions</Link>
-                <Link href="#" className="hover:underline">Privacy policy</Link>
-                <Link href="#" className="hover:underline">Cookies settings</Link>
+                <Link href="/terms-of-service" className="hover:underline">Terms & Conditions</Link>
+                <Link href="/privacy-policy" className="hover:underline">Privacy policy</Link>
+                <Link href="/privacy-policy" className="hover:underline">Cookies settings</Link>
               </div>
 
             </div>

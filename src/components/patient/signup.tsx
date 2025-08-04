@@ -71,11 +71,11 @@ export default function Signup() {
 
           <p className="text-xs text-muted-foreground text-center mt-6">
             By continuing, you agree to Novain Health's{" "}
-            <Link href="#" className="text-cyan-500 hover:underline">
+            <Link href="/terms-of-service" className="text-cyan-500 hover:underline">
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="#" className="text-cyan-500 hover:underline">
+            <Link href="/privacy-policy" className="text-cyan-500 hover:underline">
               Privacy Policy
             </Link>
             .
@@ -93,9 +93,9 @@ export default function Signup() {
           </p>
 
            <div className="flex justify-between text-xs text-muted-foreground mt-12">
-            <Link href="#" className="hover:underline">Terms & Conditions</Link>
-            <Link href="#" className="hover:underline">Privacy policy</Link>
-            <Link href="#" className="hover:underline">Cookies settings</Link>
+            <Link href="/terms-of-service" className="hover:underline">Terms & Conditions</Link>
+            <Link href="/privacy-policy" className="hover:underline">Privacy policy</Link>
+            <Link href="/privacy-policy" className="hover:underline">Cookies settings</Link>
           </div>
         </div>
       </div>
