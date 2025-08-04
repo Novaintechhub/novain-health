@@ -39,14 +39,14 @@ type Stats = {
     appointments: number;
 };
 
-const StatCard = ({ icon, label, value, subtext, progress, color }: { icon: React.ReactNode, label: string, value: string, subtext: string, progress: number, color: string }) => {
+const StatCard = ({ icon, label, value, subtext, progress, color, className }: { icon: React.ReactNode, label: string, value: string, subtext: string, progress: number, color: string, className?: string }) => {
   const data = [
     { name: 'Progress', value: progress },
     { name: 'Remaining', value: 100 - progress }
   ];
 
   return (
-    <Card className="bg-white rounded-lg shadow-sm p-4">
+    <Card className={`bg-white rounded-lg shadow-sm p-4 ${className}`}>
       <CardContent className="flex items-center gap-4 p-0">
         <div className="relative h-20 w-20">
           <ResponsiveContainer width="100%" height="100%">
@@ -143,10 +143,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         {loadingStats || !stats ? (
           <>
-            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full col-span-2 md:col-span-1" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
           </>
@@ -155,7 +155,8 @@ export default function Dashboard() {
             <StatCard 
                 icon={<TotalPatientIcon />}
                 label="Total Patient" value={stats.totalPatients.toString()} subtext="Till today" 
-                progress={(stats.totalPatients % 1000) / 10} color="#D90067" />
+                progress={(stats.totalPatients % 1000) / 10} color="#D90067"
+                className="col-span-2 md:col-span-1" />
             <StatCard 
                 icon={<TodayPatientIcon />}
                 label="Today Patient" value={stats.todayPatients.toString()} subtext="12, Nov 2024" 
