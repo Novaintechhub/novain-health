@@ -1,4 +1,4 @@
-import ConsultationPayments from "@/components/shared/consultation-payments";
+import ConsultationPayments from "@/components/consultation-payments";
 
 export default function ConsultationPaymentsPage() {
   return <ConsultationPayments />;
