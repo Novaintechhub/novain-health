@@ -1,4 +1,4 @@
-import Prescriptions from "@/components/shared/prescriptions";
+import Prescriptions from "@/components/prescriptions";
 
 export default function PrescriptionsPage() {
   return <Prescriptions />;
