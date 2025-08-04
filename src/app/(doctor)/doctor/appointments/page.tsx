@@ -1,4 +1,4 @@
-import Appointments from "@/components/shared/appointments";
+import Appointments from "@/components/appointments";
 
 export default function AppointmentsPage() {
   return <Appointments />;
