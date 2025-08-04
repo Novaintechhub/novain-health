@@ -106,7 +106,7 @@ export default function DoctorRegistration() {
 
               <p className="text-center text-sm">
                 Already have an account?{" "}
-                <Link href="/doctor/login" className="text-cyan-500 font-semibold hover:underline">
+                <Link href="/doctor-login" className="text-cyan-500 font-semibold hover:underline">
                   Log in
                 </Link>
               </p>
