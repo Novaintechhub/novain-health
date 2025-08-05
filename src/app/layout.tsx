@@ -1,14 +1,20 @@
 
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
-import { Inter } from "next/font/google";
+import { Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/cookie-banner";
 
-
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "700"],
+  variable: "--font-poppins",
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-playfair-display",
 });
 
 
@@ -25,14 +31,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap"
-          rel="stylesheet"
-        />
       </head>
-      <body className={`${inter.variable} font-body antialiased h-full`}>
+      <body className={`${poppins.variable} ${playfairDisplay.variable} font-body antialiased h-full`}>
         {children}
         <Toaster />
         <CookieBanner />
