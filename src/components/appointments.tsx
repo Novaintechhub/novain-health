@@ -97,7 +97,7 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
 
   return (
     <>
-      <div className="flex flex-row gap-2 justify-end">
+      <div className="flex flex-wrap gap-2 justify-end">
         {appointment.status === 'Cancelled' && (
           <AlertDialog open={showReasonDialog} onOpenChange={setShowReasonDialog}>
             <AlertDialogTrigger asChild>
@@ -167,7 +167,7 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
                     Print
                 </Button>
                 <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                    <Link href="/patients/reschedule-appointment">
+                    <Link href="/patients/view-appointment">
                         <Eye className="w-4 h-4 mr-1" />
                         View
                     </Link>
