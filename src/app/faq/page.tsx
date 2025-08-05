@@ -1,4 +1,4 @@
-import FAQ from "@/components/shared/faq";
+import FAQ from "@/components/faq";
 
 export default function FAQPage() {
   return <FAQ />;

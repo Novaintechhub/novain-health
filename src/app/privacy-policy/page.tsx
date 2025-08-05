@@ -1,4 +1,4 @@
-import PrivacyPolicy from "@/components/shared/privacy-policy";
+import PrivacyPolicy from "@/components/privacy-policy";
 
 export default function PrivacyPolicyPage() {
   return <PrivacyPolicy />;

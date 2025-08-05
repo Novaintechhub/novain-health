@@ -1,5 +1,4 @@
-
-import BlogPost from "@/components/shared/blog-post";
+import BlogPost from "@/components/blog-post";
 
 export default function BlogPostPage() {
   return <BlogPost />;

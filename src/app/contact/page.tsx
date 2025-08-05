@@ -1,4 +1,4 @@
-import ContactUs from "@/components/shared/contact-us";
+import ContactUs from "@/components/contact-us";
 
 export default function ContactUsPage() {
   return <ContactUs />;
