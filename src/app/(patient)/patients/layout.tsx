@@ -40,6 +40,7 @@ import {
   Share,
   FileText,
   CreditCard,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -112,6 +113,14 @@ export default function PatientLayout({
                   <Link href="/patients/billing" className="flex items-center gap-3">
                     <CreditCard />
                     <span className="group-data-[collapsible=icon]:hidden">Billing</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Wallet" isActive={pathname === '/patients/wallet'}>
+                  <Link href="/patients/wallet" className="flex items-center gap-3">
+                    <Wallet />
+                    <span className="group-data-[collapsible=icon]:hidden">Wallet</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
