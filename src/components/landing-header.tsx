@@ -28,8 +28,8 @@ export default function LandingHeader() {
           </Link>
         </nav>
         <div className="hidden sm:flex items-center gap-4">
-          <Button type="button" style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
-            Emergency
+          <Button asChild type="button" style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', padding: '0 24px' }}>
+            <Link href="/emergency-response">Emergency</Link>
           </Button>
           <Button asChild style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', padding: '0 24px' }}>
             <Link href="/general-login">
@@ -61,8 +61,8 @@ export default function LandingHeader() {
                 <Link href="/blog" className="text-lg font-medium text-gray-600 hover:text-cyan-500">
                   Blog
                 </Link>
-                <Button style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', marginTop: '1rem' }}>
-                  Emergency
+                <Button asChild style={{ backgroundColor: '#D90067', color: 'white', borderRadius: '9999px', marginTop: '1rem' }}>
+                  <Link href="/emergency-response">Emergency</Link>
                 </Button>
                 <Link href="/general-login">
                   <Button style={{ backgroundColor: '#46C8F5', color: 'white', borderRadius: '8px', width: '100%' }}>
