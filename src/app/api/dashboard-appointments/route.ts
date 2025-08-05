@@ -17,7 +17,7 @@ const patientData = [
         appointmentDate: "14th Dec 2024",
         appointmentTime: "1:00pm",
         purpose: "General",
-        type: "Old Patient",
+        type: "Returning Patient",
         paidAmount: "₦350",
     },
     {
@@ -26,7 +26,7 @@ const patientData = [
         appointmentDate: "16th Dec 2024",
         appointmentTime: "9:30am",
         purpose: "General",
-        type: "Old Patient",
+        type: "Returning Patient",
         paidAmount: "₦50",
     },
     {
@@ -44,7 +44,7 @@ const patientData = [
         appointmentDate: "3rd Dec 2024",
         appointmentTime: "3:00pm",
         purpose: "General",
-        type: "Old Patient",
+        type: "Returning Patient",
         paidAmount: "₦85",
     },
     {
