@@ -1,13 +1,13 @@
 
 "use client";
 
-import LandingHeader from "../landing-header";
-import LandingFooter from "../landing-footer";
+import LandingHeader from "@/components/landing-header";
+import LandingFooter from "@/components/landing-footer";
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Card, CardContent } from "../ui/card";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import Link from "next/link";
 
