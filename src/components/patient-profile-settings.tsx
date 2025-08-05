@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const TagInput = ({
   tags,
@@ -69,6 +70,17 @@ export default function PatientProfileSettings() {
                     <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    <div className="flex items-center gap-6">
+                        <Avatar className="h-24 w-24">
+                            <AvatarImage src="https://placehold.co/96x96.png" alt="Tosin Chukwuka" data-ai-hint="woman portrait" />
+                            <AvatarFallback>TC</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col gap-2">
+                            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">Upload New Photo</Button>
+                            <Button variant="destructive">Remove Photo</Button>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="first-name">First Name</Label>
