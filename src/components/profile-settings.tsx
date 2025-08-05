@@ -96,6 +96,8 @@ export default function ProfileSettings() {
   const [awards, setAwards] = useState([{ name: "", year: "" }]);
   const [memberships, setMemberships] = useState([{ organization: "" }]);
   const [registrations, setRegistrations] = useState([{ registration: "", year: "" }]);
+  const [pricingOption, setPricingOption] = useState("free");
+
 
   const addEducationField = () => {
     setEducationFields([
@@ -176,6 +178,20 @@ export default function ProfileSettings() {
                     <SelectContent>
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="marital-status">Marital Status</Label>
+                  <Select>
+                    <SelectTrigger id="marital-status">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">Single</SelectItem>
+                      <SelectItem value="married">Married</SelectItem>
+                      <SelectItem value="divorced">Divorced</SelectItem>
+                      <SelectItem value="widowed">Widowed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -270,16 +286,42 @@ export default function ProfileSettings() {
               <CardTitle>Pricing</CardTitle>
             </CardHeader>
             <CardContent>
-              <RadioGroup defaultValue="free" className="flex items-center gap-8">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="free" id="free" />
-                  <Label htmlFor="free">Free</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="custom" id="custom" />
-                  <Label htmlFor="custom">Custom price (per hour)</Label>
-                </div>
-              </RadioGroup>
+                <RadioGroup value={pricingOption} onValueChange={setPricingOption} className="flex items-center gap-8 mb-6">
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="free" id="free" />
+                        <Label htmlFor="free">Free</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="custom" id="custom" />
+                        <Label htmlFor="custom">Custom price</Label>
+                    </div>
+                </RadioGroup>
+
+                {pricingOption === "custom" && (
+                    <div className="space-y-4 pt-6 border-t">
+                        <h4 className="font-semibold text-cyan-500">Consultation Fees</h4>
+                        <div className="space-y-2">
+                            <Label htmlFor="text-fee">Text Consultation Fee (₦)</Label>
+                            <Input id="text-fee" type="number" placeholder="e.g. 50" />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="audio-fee">Audio Consultation Fee (₦)</Label>
+                            <Input id="audio-fee" type="number" placeholder="e.g. 100" />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="video-fee">Video Consultation Fee (₦)</Label>
+                            <Input id="video-fee" type="number" placeholder="e.g. 150" />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="followup-fee">Follow-up Consultation Fee (₦)</Label>
+                            <Input id="followup-fee" type="number" placeholder="e.g. 75" />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="emergency-fee">Emergency Consultation Fee (₦)</Label>
+                            <Input id="emergency-fee" type="number" placeholder="e.g. 250" />
+                        </div>
+                    </div>
+                )}
             </CardContent>
           </Card>
 
