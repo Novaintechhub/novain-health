@@ -2,14 +2,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Printer, Eye } from "lucide-react";
+import { Printer, Eye, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+
 
 type MedicalRecord = {
   id: string;
@@ -42,8 +45,32 @@ export default function MedicalRecords() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">Medical Records</h1>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload New Medical Record</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="record-description">Description</Label>
+              <Input id="record-description" placeholder="e.g., Blood Test Results from City Hospital" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="record-file">File</Label>
+              <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary">
+                <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
+                <p className="text-sm text-muted-foreground">Drag & drop your file here, or <span className="text-primary font-semibold">click to select a file</span></p>
+                <Input id="record-file" type="file" className="sr-only" />
+              </div>
+            </div>
+            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
+              Upload Record
+            </Button>
+        </CardContent>
+      </Card>
+
         <Tabs defaultValue="medical-records">
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
                 <Link href="/patients/appointments"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
