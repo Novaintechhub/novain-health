@@ -8,11 +8,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle } from "lucide-react";
+import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { parse } from 'date-fns';
+import { parse, isPast } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type Appointment = {
   name: string;
@@ -23,6 +34,7 @@ type Appointment = {
   type: string;
   status: string;
   amount: string;
+  cancellationReason?: string;
 };
 
 const TypeIcon = ({ type }: { type: string }) => {
@@ -63,9 +75,114 @@ const StatusBadge = ({ status }: { status: string }) => {
     Confirm: 'bg-green-100 text-green-800',
     Cancelled: 'bg-red-100 text-red-800',
     Pending: 'bg-yellow-100 text-yellow-800',
+    Completed: 'bg-blue-100 text-blue-800',
   };
 
   return <Badge className={`capitalize ${statusClasses[status] || ''}`}>{status}</Badge>;
+};
+
+const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
+  const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  const cleanDateStr = appointment.date.replace(/(\d+)(st|nd|rd|th)/, '$1');
+  const appointmentDate = parse(cleanDateStr, "do MMMM yyyy, h:mm a", new Date());
+  const isAppointmentPast = isPast(appointmentDate);
+
+  const handleCancel = () => {
+    // Logic to cancel appointment would go here
+    console.log("Appointment cancelled");
+    setShowCancelDialog(false);
+  };
+
+  return (
+    <>
+      <div className="flex flex-row gap-2 justify-end">
+        {appointment.status === 'Cancelled' && (
+          <AlertDialog open={showReasonDialog} onOpenChange={setShowReasonDialog}>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm">Reason</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reason for Cancellation</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {appointment.cancellationReason || "No reason provided."}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction>Close</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {appointment.status === 'Pending' && (
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/patients/reschedule-appointment"><Edit className="w-4 h-4 mr-1" /> Edit</Link>
+            </Button>
+            <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm"><XCircle className="w-4 h-4 mr-1" /> Cancel</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently cancel your appointment.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Back</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleCancel}>Confirm Cancellation</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+          </>
+        )}
+        
+        {appointment.status === 'Confirm' && !isAppointmentPast && (
+             <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                <Link href="/patients/reschedule-appointment">
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
+                </Link>
+            </Button>
+        )}
+
+        {appointment.status === 'Confirm' && isAppointmentPast && (
+          <Button asChild variant="destructive" size="sm">
+            <Link href="/patients/report-no-show">
+              <AlertCircle className="w-4 h-4 mr-1" />
+              Report No-Show
+            </Link>
+          </Button>
+        )}
+
+        {appointment.status === 'Completed' && (
+            <>
+                <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                    <Printer className="w-4 h-4 mr-1" />
+                    Print
+                </Button>
+                <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                    <Link href="/patients/reschedule-appointment">
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/patients/request-appointment">
+                        <CalendarPlus className="w-4 h-4 mr-1" />
+                        Follow-up
+                    </Link>
+                </Button>
+            </>
+        )}
+      </div>
+    </>
+  );
 };
 
 
@@ -87,19 +204,6 @@ export default function Appointments() {
     }
     fetchAppointments();
   }, []);
-
-  const isPastAppointment = (dateStr: string) => {
-    try {
-      // The format is like "12th October 2025, 4:00 PM"
-      // We need to remove the ordinal suffixes (st, nd, rd, th) for parsing
-      const cleanDateStr = dateStr.replace(/(\d+)(st|nd|rd|th)/, '$1');
-      const appointmentDate = parse(cleanDateStr, "do MMMM yyyy, h:mm a", new Date());
-      return appointmentDate < new Date();
-    } catch (e) {
-      console.error("Failed to parse date:", dateStr, e);
-      return false;
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -172,26 +276,7 @@ export default function Appointments() {
                                                 <StatusBadge status={appointment.status} />
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <div className="flex flex-row gap-2 justify-end">
-                                                    {appointment.status === 'Confirm' && isPastAppointment(appointment.date) && (
-                                                        <Button asChild variant="destructive" size="sm">
-                                                            <Link href="/patients/report-no-show">
-                                                                <AlertCircle className="w-4 h-4 mr-1" />
-                                                                Report No-Show
-                                                            </Link>
-                                                        </Button>
-                                                    )}
-                                                    <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                        <Printer className="w-4 h-4 mr-1" />
-                                                        Print
-                                                    </Button>
-                                                    <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                        <Link href="/patients/reschedule-appointment">
-                                                            <Eye className="w-4 h-4 mr-1" />
-                                                            View
-                                                        </Link>
-                                                    </Button>
-                                                </div>
+                                               <AppointmentActions appointment={appointment} />
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -233,25 +318,8 @@ export default function Appointments() {
                                     <span className="font-medium">{appointment.amount}</span>
                                 </div>
                                 </div>
-                                <div className="flex gap-2 justify-end border-t pt-3">
-                                    {appointment.status === 'Confirm' && isPastAppointment(appointment.date) && (
-                                        <Button asChild variant="destructive" size="sm" className="flex-1">
-                                            <Link href="/patients/report-no-show">
-                                                <AlertCircle className="w-4 h-4 mr-1" />
-                                                Report No-Show
-                                            </Link>
-                                        </Button>
-                                    )}
-                                    <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                        <Printer className="w-4 h-4 mr-1" />
-                                        Print
-                                    </Button>
-                                    <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                        <Link href="/patients/reschedule-appointment">
-                                            <Eye className="w-4 h-4 mr-1" />
-                                            View
-                                        </Link>
-                                    </Button>
+                                <div className="border-t pt-3">
+                                    <AppointmentActions appointment={appointment} />
                                 </div>
                             </CardContent>
                             </Card>

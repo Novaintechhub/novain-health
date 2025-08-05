@@ -21,6 +21,7 @@ const appointments = [
     type: "Audio Call",
     status: "Cancelled",
     amount: "₦150",
+    cancellationReason: "Doctor had a personal emergency.",
   },
   {
     name: "Kanayo Ike",
@@ -46,10 +47,10 @@ const appointments = [
     name: "Vera Ogechi",
     avatarUrl: "https://placehold.co/80x80.png",
     avatarHint: "woman happy",
-    date: "22nd January 2025, 10:00 AM",
-    bookingDate: "21st January 2025",
+    date: "22nd January 2024, 10:00 AM",
+    bookingDate: "21st January 2024",
     type: "Video Call",
-    status: "Confirm",
+    status: "Completed",
     amount: "₦250",
   },
   {
