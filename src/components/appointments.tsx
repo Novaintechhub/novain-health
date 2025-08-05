@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Video, Phone, MessageSquare, Printer, Eye } from "lucide-react";
+import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -87,6 +87,13 @@ export default function Appointments() {
     fetchAppointments();
   }, []);
 
+  // A simple way to check if an appointment date is in the past.
+  // In a real app, this would be more robust.
+  const isPastAppointment = (dateStr: string) => {
+    // This is a simplified check. A real implementation would parse the date properly.
+    return new Date(dateStr.replace(/(\d+)(st|nd|rd|th)/, "$1")) < new Date();
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Appointments</h1>
@@ -159,6 +166,14 @@ export default function Appointments() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex flex-row gap-2 justify-end">
+                                                    {appointment.status === 'Confirm' && isPastAppointment(appointment.date) && (
+                                                        <Button asChild variant="destructive" size="sm">
+                                                            <Link href="/patients/report-no-show">
+                                                                <AlertCircle className="w-4 h-4 mr-1" />
+                                                                Report No-Show
+                                                            </Link>
+                                                        </Button>
+                                                    )}
                                                     <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                                         <Printer className="w-4 h-4 mr-1" />
                                                         Print
@@ -212,6 +227,14 @@ export default function Appointments() {
                                 </div>
                                 </div>
                                 <div className="flex gap-2 justify-end border-t pt-3">
+                                    {appointment.status === 'Confirm' && isPastAppointment(appointment.date) && (
+                                        <Button asChild variant="destructive" size="sm" className="flex-1">
+                                            <Link href="/patients/report-no-show">
+                                                <AlertCircle className="w-4 h-4 mr-1" />
+                                                Report No-Show
+                                            </Link>
+                                        </Button>
+                                    )}
                                     <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                         <Printer className="w-4 h-4 mr-1" />
                                         Print
