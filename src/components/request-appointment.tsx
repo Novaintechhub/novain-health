@@ -11,13 +11,36 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const timeSlots = ["8:00am - 8:30am", "11:30am - 12:00pm", "3:00pm - 4:45pm", "5:00pm - 6:30pm"];
 
+const consultationMethods = [
+    { id: 'chat', label: 'Chat', price: 50 },
+    { id: 'voice', label: 'Voice call', price: 100 },
+    { id: 'video', label: 'Video call', price: 150 },
+];
+
 export default function RequestAppointment() {
   const [selectedDay, setSelectedDay] = React.useState<string>("TUE");
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
+  const [selectedMethods, setSelectedMethods] = React.useState<string[]>([]);
+
+  const handleMethodChange = (methodId: string) => {
+    setSelectedMethods(prev => 
+      prev.includes(methodId) 
+        ? prev.filter(id => id !== methodId) 
+        : [...prev, methodId]
+    );
+  };
+
+  const totalCost = React.useMemo(() => {
+    return selectedMethods.reduce((total, methodId) => {
+        const method = consultationMethods.find(m => m.id === methodId);
+        return total + (method ? method.price : 0);
+    }, 0);
+  }, [selectedMethods]);
 
   return (
     <div className="space-y-6">
@@ -127,29 +150,38 @@ export default function RequestAppointment() {
                 </RadioGroup>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
                 <Label>How would you like to speak with a doctor?</Label>
-                <RadioGroup className="flex gap-4">
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="chat" id="speak-chat" />
-                        <Label htmlFor="speak-chat">Chat</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="voice" id="speak-voice" />
-                        <Label htmlFor="speak-voice">Voice call</Label>
-                    </div>
-                     <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="video" id="speak-video" />
-                        <Label htmlFor="speak-video">Video call</Label>
-                    </div>
-                </RadioGroup>
+                <div className="space-y-3">
+                    {consultationMethods.map((method) => (
+                        <div key={method.id} className="flex items-center justify-between rounded-lg border p-3">
+                           <div className="flex items-center space-x-3">
+                                <Checkbox 
+                                    id={`method-${method.id}`} 
+                                    onCheckedChange={() => handleMethodChange(method.id)}
+                                    checked={selectedMethods.includes(method.id)}
+                                />
+                                <Label htmlFor={`method-${method.id}`} className="font-medium cursor-pointer">
+                                    {method.label}
+                                </Label>
+                            </div>
+                            <span className="font-semibold">₦{method.price}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
             
             <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center text-center">
                 <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
                 <p className="text-cyan-500 font-semibold">Upload recent medical records</p>
             </div>
+        </CardContent>
+      </Card>
 
+      <Card>
+        <CardContent className="p-4 flex justify-between items-center">
+            <h3 className="text-xl font-bold">Total</h3>
+            <p className="text-2xl font-bold">₦{totalCost.toFixed(2)}</p>
         </CardContent>
       </Card>
 
