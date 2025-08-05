@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { ChevronLeft, Mail } from "lucide-react";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
 import { signInWithGoogle, signInWithApple } from "@/lib/auth";
+import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -34,6 +36,9 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function DoctorRegistration() {
+  const [selectedState, setSelectedState] = useState('');
+  const [lgas, setLgas] = useState<string[]>([]);
+
   const handleGoogleSignIn = async () => {
     const user = await signInWithGoogle();
     if (user) {
@@ -46,6 +51,12 @@ export default function DoctorRegistration() {
     if (user) {
       window.location.href = "/doctor";
     }
+  };
+
+  const handleStateChange = (stateName: string) => {
+    const state = nigerianStates.find(state => state.name === stateName);
+    setSelectedState(stateName);
+    setLgas(state ? state.lgas : []);
   };
 
   return (
@@ -76,7 +87,7 @@ export default function DoctorRegistration() {
               
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
                 <h1 className="text-xl font-bold">Doctor Registration</h1>
-                <Link href="#" className="text-sm text-cyan-500 hover:underline">Not a Doctor?</Link>
+                <Link href="/patient-registration" className="text-sm text-cyan-500 hover:underline">Not a Doctor?</Link>
               </div>
               
               <div className="space-y-3">
@@ -106,26 +117,37 @@ export default function DoctorRegistration() {
                 <Input type="email" placeholder="Email Address" />
                 <Input type="password" placeholder="Input password" />
                 <Input type="password" placeholder="Confirm password" />
-                <Select>
+                
+                <Select onValueChange={handleStateChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Country of residence" />
+                    <SelectValue placeholder="State of Residence" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="us">United States</SelectItem>
-                    <SelectItem value="ca">Canada</SelectItem>
-                    <SelectItem value="ng">Nigeria</SelectItem>
+                    {nigerianStates.map(state => (
+                      <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <Input placeholder="State" />
-                <Input placeholder="Local Government of residence" />
+
+                <Select disabled={!selectedState}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Local Government of Residence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lgas.map(lga => (
+                       <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
                  <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
+                    {nigerianLanguages.map(lang => (
+                      <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
