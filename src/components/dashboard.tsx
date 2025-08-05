@@ -32,6 +32,8 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 type Patient = {
     id: string;
@@ -112,6 +114,7 @@ export default function Dashboard() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   useEffect(() => {
     async function fetchStats() {
@@ -151,6 +154,11 @@ export default function Dashboard() {
     setShowConfirmDialog(false);
     setShowSuccessDialog(true);
     // Here you would typically make an API call to confirm the appointment
+  };
+
+  const handleCancelClick = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setShowCancelDialog(true);
   };
 
   const TotalPatientIcon = () => (
@@ -274,7 +282,7 @@ export default function Dashboard() {
                                 <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleAcceptClick(patient)}>
                                     <Check className="h-4 w-4 mr-1"/> Accept
                                 </Button>
-                                <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
+                                <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200" onClick={() => handleCancelClick(patient)}>
                                     <X className="h-4 w-4 mr-1"/> Cancel
                                 </Button>
                             </div>
@@ -326,7 +334,7 @@ export default function Dashboard() {
                           <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleAcceptClick(patient)}>
                               <Check className="h-4 w-4 mr-1"/> Accept
                           </Button>
-                          <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1">
+                          <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1" onClick={() => handleCancelClick(patient)}>
                               <X className="h-4 w-4 mr-1"/> Cancel
                           </Button>
                         </div>
@@ -382,6 +390,34 @@ export default function Dashboard() {
               </DialogFooter>
           </DialogContent>
       </Dialog>
+      
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <DialogContent className="sm:max-w-md text-center p-8">
+              <DialogHeader className="items-center">
+                  <div className="p-3 bg-pink-600 rounded-full w-fit mb-4">
+                      <Check className="w-8 h-8 text-white" />
+                  </div>
+                  <DialogTitle className="text-2xl">Appointment canceled successfully</DialogTitle>
+                  {selectedPatient && (
+                    <DialogDescription>
+                        Appointment with {selectedPatient.name} has been <br/>
+                        canceled on {selectedPatient.appointmentDate} at {selectedPatient.appointmentTime}
+                    </DialogDescription>
+                  )}
+              </DialogHeader>
+              <div className="space-y-2 text-left mt-6">
+                <Label htmlFor="cancellation-reason">Reason for canceling appointment</Label>
+                <Textarea id="cancellation-reason" />
+              </div>
+              <DialogFooter className="sm:justify-center mt-6">
+                 <DialogClose asChild>
+                    <Button type="button" className="bg-cyan-400 hover:bg-cyan-500 w-full">Submit</Button>
+                  </DialogClose>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
+
