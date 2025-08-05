@@ -140,6 +140,14 @@ export default function PatientLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="My Chat" isActive={pathname === '/patients/my-chat'}>
+                  <Link href="/patients/my-chat" className="flex items-center gap-3">
+                    <MessageSquare />
+                    <span className="group-data-[collapsible=icon]:hidden">My Chat</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Profile Settings" isActive={pathname === '/patients/profile-settings'}>
                   <Link href="/patients/profile-settings" className="flex items-center gap-3">
                     <User />
