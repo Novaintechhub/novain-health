@@ -13,7 +13,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Check, X, MoreVertical, AlertCircle, CheckCircle } from "lucide-react";
+import { Eye, Check, X, MoreVertical, AlertCircle, CheckCircle, ThumbsUp } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -115,6 +115,7 @@ export default function Dashboard() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
 
   useEffect(() => {
     async function fetchStats() {
@@ -159,6 +160,12 @@ export default function Dashboard() {
   const handleCancelClick = (patient: Patient) => {
     setSelectedPatient(patient);
     setShowCancelDialog(true);
+  };
+  
+  const handleCancelSubmit = () => {
+    setShowCancelDialog(false);
+    setShowCancelSuccessDialog(true);
+    // Here you would typically make an API call to cancel the appointment
   };
 
   const TotalPatientIcon = () => (
@@ -410,8 +417,22 @@ export default function Dashboard() {
                 <Textarea id="cancellation-reason" />
               </div>
               <DialogFooter className="sm:justify-center mt-6">
+                 <Button type="button" className="bg-cyan-400 hover:bg-cyan-500 w-full" onClick={handleCancelSubmit}>Submit</Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+      
+      <Dialog open={showCancelSuccessDialog} onOpenChange={setShowCancelSuccessDialog}>
+          <DialogContent className="sm:max-w-md text-center p-8">
+              <DialogHeader className="items-center">
+                  <div className="p-3 bg-green-100 rounded-full w-fit mb-4">
+                      <ThumbsUp className="w-8 h-8 text-green-600" />
+                  </div>
+                  <DialogTitle className="text-2xl">Thank you for your feedback</DialogTitle>
+              </DialogHeader>
+              <DialogFooter className="sm:justify-center mt-6">
                  <DialogClose asChild>
-                    <Button type="button" className="bg-cyan-400 hover:bg-cyan-500 w-full">Submit</Button>
+                    <Button type="button" className="bg-cyan-400 hover:bg-cyan-500">Back to appointments</Button>
                   </DialogClose>
               </DialogFooter>
           </DialogContent>
@@ -421,3 +442,4 @@ export default function Dashboard() {
   );
 }
 
+    
