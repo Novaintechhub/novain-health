@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Printer, Eye, UploadCloud } from "lucide-react";
+import { Printer, Eye, UploadCloud, Lock, Users } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 
 type MedicalRecord = {
@@ -52,7 +53,7 @@ export default function MedicalRecords() {
         <CardHeader>
           <CardTitle>Upload New Medical Record</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="record-description">Description</Label>
               <Input id="record-description" placeholder="e.g., Blood Test Results from City Hospital" />
@@ -65,6 +66,37 @@ export default function MedicalRecords() {
                 <Input id="record-file" type="file" className="sr-only" />
               </div>
             </div>
+
+            <div className="space-y-3">
+                <Label>Record Visibility</Label>
+                <RadioGroup defaultValue="private" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Label htmlFor="private-option" className="flex items-start gap-4 rounded-lg border p-4 cursor-pointer hover:bg-accent has-[[data-state=checked]]:bg-accent has-[[data-state=checked]]:border-primary">
+                        <RadioGroupItem value="private" id="private-option" className="mt-1" />
+                        <div className="grid gap-1.5">
+                            <div className="font-semibold flex items-center gap-2">
+                                <Lock className="w-4 h-4" />
+                                Private
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                Only you will be able to see this record.
+                            </p>
+                        </div>
+                    </Label>
+                     <Label htmlFor="public-option" className="flex items-start gap-4 rounded-lg border p-4 cursor-pointer hover:bg-accent has-[[data-state=checked]]:bg-accent has-[[data-state=checked]]:border-primary">
+                        <RadioGroupItem value="public" id="public-option" className="mt-1" />
+                        <div className="grid gap-1.5">
+                            <div className="font-semibold flex items-center gap-2">
+                                <Users className="w-4 h-4" />
+                                Public
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                Doctors you have appointments with will be able to see this record.
+                            </p>
+                        </div>
+                    </Label>
+                </RadioGroup>
+            </div>
+
             <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
               Upload Record
             </Button>
