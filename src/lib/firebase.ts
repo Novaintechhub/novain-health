@@ -1,3 +1,4 @@
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -10,7 +11,7 @@ const firebaseConfig = {
   "appId": "1:50257127794:web:92ccd2ffd5e5a2d47755eb",
   "storageBucket": "novainhealth.firebasestorage.app",
   "apiKey": "AIzaSyD02JtH4VTE1pfpJyuhFNnrvLH2_vb4xuc",
-  "authDomain": "novainhealth.firebaseapp.com",
+  "authDomain": "novain-health.firebaseapp.com",
   "messagingSenderId": "50257127794"
 };
 
