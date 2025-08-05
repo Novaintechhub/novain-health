@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import type React from 'react';
 
 export default function OtpVerification() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
 
   const handleVerify = (e: React.FormEvent) => {
@@ -24,8 +25,16 @@ export default function OtpVerification() {
       description: "Your email has been verified successfully.",
     });
 
-    // Redirect to the general login page after verification
-    router.push('/general-login');
+    const role = searchParams.get('role');
+
+    if (role === 'doctor') {
+      router.push('/doctor');
+    } else if (role === 'patient') {
+      router.push('/patients/dashboard');
+    } else {
+      // Fallback to general login if role is not specified
+      router.push('/general-login');
+    }
   };
 
   return (
