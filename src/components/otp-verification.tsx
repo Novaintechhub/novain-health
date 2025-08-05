@@ -7,8 +7,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import type React from 'react';
 
 export default function OtpVerification() {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real application, you would add logic here to verify the OTP with your backend.
+    
+    toast({
+      title: "Success!",
+      description: "Your email has been verified successfully.",
+    });
+
+    // Redirect to the general login page after verification
+    router.push('/general-login');
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <LandingHeader />
@@ -33,7 +52,7 @@ export default function OtpVerification() {
                 We've sent a 6-digit code to your email address. Please enter it below to verify your account.
               </p>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleVerify}>
                 <div className="flex justify-center gap-2">
                   <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
                   <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
