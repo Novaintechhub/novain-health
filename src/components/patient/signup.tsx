@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail } from "lucide-react";
+import { signInWithGoogle, signInWithApple } from "@/lib/auth";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -25,6 +26,22 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function Signup() {
+  const handleGoogleSignIn = async () => {
+    const user = await signInWithGoogle();
+    if (user) {
+      // Redirect to patient dashboard or handle successful login
+      window.location.href = "/patients/dashboard";
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    const user = await signInWithApple();
+    if (user) {
+      // Redirect to patient dashboard or handle successful login
+      window.location.href = "/patients/dashboard";
+    }
+  };
+
   return (
     <div className="flex h-screen">
       <div className="hidden lg:block lg:w-1/2 relative">
@@ -44,11 +61,11 @@ export default function Signup() {
           <h1 className="text-2xl font-bold text-center mb-6">Create an account</h1>
 
           <div className="space-y-3">
-            <Button variant="outline" className="w-full justify-center">
+            <Button variant="outline" className="w-full justify-center" onClick={handleGoogleSignIn}>
               <GoogleIcon className="mr-2 h-5 w-5" />
               Continue with Google
             </Button>
-            <Button variant="outline" className="w-full justify-center">
+            <Button variant="outline" className="w-full justify-center" onClick={handleAppleSignIn}>
               <AppleIcon className="mr-2 h-5 w-5" />
               Continue with Apple
             </Button>
