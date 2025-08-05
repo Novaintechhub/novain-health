@@ -138,7 +138,7 @@ export default function Appointments() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Patient</TableHead>
+                                        <TableHead>Doctor</TableHead>
                                         <TableHead>Appt Date</TableHead>
                                         <TableHead>Booking Date</TableHead>
                                         <TableHead>Type</TableHead>
