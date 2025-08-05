@@ -12,6 +12,7 @@ import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle } from "lucide-r
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parse } from 'date-fns';
 
 type Appointment = {
   name: string;
@@ -87,12 +88,18 @@ export default function Appointments() {
     fetchAppointments();
   }, []);
 
-  // A simple way to check if an appointment date is in the past.
-  // In a real app, this would be more robust.
   const isPastAppointment = (dateStr: string) => {
-    // This is a simplified check. A real implementation would parse the date properly.
-    return new Date(dateStr.replace(/(\d+)(st|nd|rd|th)/, "$1")) < new Date();
-  }
+    try {
+      // The format is like "12th October 2025, 4:00 PM"
+      // We need to remove the ordinal suffixes (st, nd, rd, th) for parsing
+      const cleanDateStr = dateStr.replace(/(\d+)(st|nd|rd|th)/, '$1');
+      const appointmentDate = parse(cleanDateStr, "do MMMM yyyy, h:mm a", new Date());
+      return appointmentDate < new Date();
+    } catch (e) {
+      console.error("Failed to parse date:", dateStr, e);
+      return false;
+    }
+  };
 
   return (
     <div className="space-y-4">
