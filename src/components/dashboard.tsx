@@ -13,7 +13,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Check, X, MoreVertical } from "lucide-react";
+import { Eye, Check, X, MoreVertical, AlertCircle } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -22,6 +22,17 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Patient = {
     id: string;
@@ -241,19 +252,38 @@ export default function Dashboard() {
                         <TableCell>{patient.type}</TableCell>
                         <TableCell>{patient.paidAmount}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex flex-row gap-2 justify-end">
-                              <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                  <Link href="/doctor/view-appointment">
-                                    <Eye className="h-4 w-4 mr-1"/> View
-                                  </Link>
-                              </Button>
-                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                  <Check className="h-4 w-4 mr-1"/> Accept
-                              </Button>
-                              <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
-                                  <X className="h-4 w-4 mr-1"/> Cancel
-                              </Button>
-                          </div>
+                          <AlertDialog>
+                            <div className="flex flex-row gap-2 justify-end">
+                                <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                                    <Link href="/doctor/view-appointment">
+                                      <Eye className="h-4 w-4 mr-1"/> View
+                                    </Link>
+                                </Button>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                      <Check className="h-4 w-4 mr-1"/> Accept
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
+                                    <X className="h-4 w-4 mr-1"/> Cancel
+                                </Button>
+                            </div>
+                            <AlertDialogContent>
+                              <AlertDialogHeader className="items-center">
+                                <div className="p-3 bg-pink-100 rounded-full w-fit">
+                                  <AlertCircle className="w-8 h-8 text-pink-500" />
+                                </div>
+                                <AlertDialogTitle className="text-pink-500">Confirm appointment details</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Please note that this Appointment cannot be canceled after being booked with patient
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="sm:justify-center">
+                                <AlertDialogCancel className="border-cyan-400 text-cyan-400">Cancel</AlertDialogCancel>
+                                <AlertDialogAction className="bg-cyan-400 hover:bg-cyan-500">Confirm and Schedule</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -293,19 +323,38 @@ export default function Dashboard() {
                           <span className="font-medium">{patient.paidAmount}</span>
                         </div>
                       </div>
-                      <div className="flex gap-2 justify-end border-t pt-3">
-                        <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200 flex-1">
-                            <Link href="/doctor/view-appointment">
-                              <Eye className="w-4 h-4 mr-1"/> View
-                            </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1">
-                            <Check className="h-4 w-4 mr-1"/> Accept
-                        </Button>
-                        <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1">
-                            <X className="h-4 w-4 mr-1"/> Cancel
-                        </Button>
-                      </div>
+                      <AlertDialog>
+                        <div className="flex gap-2 justify-end border-t pt-3">
+                          <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200 flex-1">
+                              <Link href="/doctor/view-appointment">
+                                <Eye className="w-4 h-4 mr-1"/> View
+                              </Link>
+                          </Button>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1">
+                                <Check className="h-4 w-4 mr-1"/> Accept
+                            </Button>
+                          </AlertDialogTrigger>
+                          <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1">
+                              <X className="h-4 w-4 mr-1"/> Cancel
+                          </Button>
+                        </div>
+                        <AlertDialogContent>
+                          <AlertDialogHeader className="items-center">
+                            <div className="p-3 bg-pink-100 rounded-full w-fit">
+                              <AlertCircle className="w-8 h-8 text-pink-500" />
+                            </div>
+                            <AlertDialogTitle className="text-pink-500">Confirm appointment details</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Please note that this Appointment cannot be canceled after being booked with patient
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="sm:justify-center">
+                            <AlertDialogCancel className="border-cyan-400 text-cyan-400">Cancel</AlertDialogCancel>
+                            <AlertDialogAction className="bg-cyan-400 hover:bg-cyan-500">Confirm and Schedule</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </CardContent>
                   </Card>
                 ))}
@@ -317,3 +366,6 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+    
