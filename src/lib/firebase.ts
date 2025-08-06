@@ -14,16 +14,15 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const getClientApp = () => {
-  if (getApps().length) {
-    return getApp();
-  }
-  const app = initializeApp(firebaseConfig);
-  return app;
-};
+let app: FirebaseApp;
+if (typeof window !== "undefined" && !getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps().length > 0 ? getApp() : null!;
+}
 
-const app = getClientApp();
+const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
 
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export const storage = getStorage(app);
+export { db, auth, storage, app };
