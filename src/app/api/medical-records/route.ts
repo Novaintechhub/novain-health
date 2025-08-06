@@ -11,6 +11,7 @@ const medicalRecords = [
     doctorSpecialty: "Dental",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor",
+    visibility: "Public",
   },
   {
     id: "#MR-0009",
@@ -21,6 +22,7 @@ const medicalRecords = [
     doctorSpecialty: "Dental",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "male doctor",
+    visibility: "Public",
   },
   {
     id: "#MR-0008",
@@ -31,6 +33,7 @@ const medicalRecords = [
     doctorSpecialty: "Cardiology",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor portrait",
+    visibility: "Private",
   },
   {
     id: "#MR-0007",
@@ -41,6 +44,7 @@ const medicalRecords = [
     doctorSpecialty: "Urology",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor smiling",
+    visibility: "Public",
   },
   {
     id: "#MR-0006",
@@ -51,6 +55,7 @@ const medicalRecords = [
     doctorSpecialty: "Ophthalmology",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "male doctor portrait",
+    visibility: "Public",
   },
    {
     id: "#MR-0005",
@@ -61,6 +66,7 @@ const medicalRecords = [
     doctorSpecialty: "Dental",
     doctorAvatarUrl: "https://placehold.co/40x40.png",
     doctorAvatarHint: "female doctor glasses",
+    visibility: "Private",
   },
 ];
 

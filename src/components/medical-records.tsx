@@ -4,15 +4,15 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Printer, Eye, UploadCloud, Lock, Users } from "lucide-react";
+import { Printer, Eye, UploadCloud, Lock, Users, Globe, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
 
 
 type MedicalRecord = {
@@ -20,10 +20,7 @@ type MedicalRecord = {
   date: string;
   description: string;
   attachment: string;
-  doctorName: string;
-  doctorSpecialty: string;
-  doctorAvatarUrl: string;
-  doctorAvatarHint: string;
+  visibility: "Public" | "Private";
 };
 
 export default function MedicalRecords() {
@@ -137,7 +134,7 @@ export default function MedicalRecords() {
                                       <TableHead>Date</TableHead>
                                       <TableHead>Description</TableHead>
                                       <TableHead>Attachment</TableHead>
-                                      <TableHead>Created</TableHead>
+                                      <TableHead>Visibility</TableHead>
                                       <TableHead className="text-right">Action</TableHead>
                                   </TableRow>
                               </TableHeader>
@@ -149,16 +146,10 @@ export default function MedicalRecords() {
                                           <TableCell>{record.description}</TableCell>
                                           <TableCell><Link href="#" className="text-blue-600 hover:underline">{record.attachment}</Link></TableCell>
                                           <TableCell>
-                                              <div className="flex items-center gap-3">
-                                                  <Avatar className="h-10 w-10">
-                                                      <AvatarImage src={record.doctorAvatarUrl} alt={record.doctorName} data-ai-hint={record.doctorAvatarHint} />
-                                                      <AvatarFallback>{record.doctorName.charAt(0)}</AvatarFallback>
-                                                  </Avatar>
-                                                  <div>
-                                                      <div className="font-medium">{record.doctorName}</div>
-                                                      <div className="text-sm text-muted-foreground">{record.doctorSpecialty}</div>
-                                                  </div>
-                                              </div>
+                                            <Badge variant={record.visibility === 'Public' ? 'default' : 'secondary'} className={record.visibility === 'Public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                                {record.visibility === 'Public' ? <Globe className="w-3 h-3 mr-1" /> : <Lock className="w-3 h-3 mr-1" />}
+                                                {record.visibility}
+                                            </Badge>
                                           </TableCell>
                                           <TableCell className="text-right">
                                               <div className="flex gap-2 justify-end">
@@ -166,9 +157,8 @@ export default function MedicalRecords() {
                                                       <Printer className="w-4 h-4 mr-1" />
                                                       Print
                                                   </Button>
-                                                  <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                      <Eye className="w-4 h-4 mr-1" />
-                                                      View
+                                                  <Button variant="destructive" size="icon">
+                                                    <Trash2 className="w-4 h-4" />
                                                   </Button>
                                               </div>
                                           </TableCell>
@@ -187,29 +177,23 @@ export default function MedicalRecords() {
                                                 <h3 className="font-bold">{record.description}</h3>
                                                 <p className="text-sm text-muted-foreground">{record.id} - {record.date}</p>
                                             </div>
+                                            <Badge variant={record.visibility === 'Public' ? 'default' : 'secondary'} className={record.visibility === 'Public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                                {record.visibility === 'Public' ? <Globe className="w-3 h-3 mr-1" /> : <Lock className="w-3 h-3 mr-1" />}
+                                                {record.visibility}
+                                            </Badge>
                                         </div>
                                         <div className="border-t pt-3 space-y-2 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-muted-foreground">Attachment:</span>
                                                 <Link href="#" className="font-medium text-blue-600 hover:underline">{record.attachment}</Link>
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-muted-foreground">Created by:</span>
-                                                <div className="flex items-center gap-2">
-                                                    <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={record.doctorAvatarUrl} alt={record.doctorName} data-ai-hint={record.doctorAvatarHint} />
-                                                        <AvatarFallback>{record.doctorName.charAt(0)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <span className="font-medium">{record.doctorName}</span>
-                                                </div>
-                                            </div>
                                         </div>
                                         <div className="flex gap-2 justify-end border-t pt-3">
                                             <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                                 <Printer className="w-4 h-4 mr-1" /> Print
                                             </Button>
-                                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                <Eye className="w-4 h-4 mr-1" /> View
+                                            <Button variant="destructive" size="sm">
+                                                <Trash2 className="w-4 h-4 mr-1" /> Delete
                                             </Button>
                                         </div>
                                     </CardContent>
