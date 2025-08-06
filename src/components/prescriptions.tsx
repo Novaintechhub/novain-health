@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Printer, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -97,13 +97,11 @@ export default function Prescriptions() {
                                           </TableCell>
                                           <TableCell className="text-right">
                                               <div className="flex gap-2 justify-end">
-                                                  <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                      <Printer className="w-4 h-4 mr-1" />
-                                                      Print
-                                                  </Button>
-                                                  <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                  <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                    <Link href="/patients/view-prescription">
                                                       <Eye className="w-4 h-4 mr-1" />
                                                       View
+                                                    </Link>
                                                   </Button>
                                               </div>
                                           </TableCell>
@@ -137,11 +135,10 @@ export default function Prescriptions() {
                                             </div>
                                         </div>
                                         <div className="flex gap-2 justify-end border-t pt-3">
-                                            <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                <Printer className="w-4 h-4 mr-1" /> Print
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                <Eye className="w-4 h-4 mr-1" /> View
+                                            <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                <Link href="/patients/view-prescription">
+                                                    <Eye className="w-4 h-4 mr-1" /> View
+                                                </Link>
                                             </Button>
                                         </div>
                                     </CardContent>
