@@ -1,3 +1,5 @@
+"use client";
+
 import Login from "@/components/doctor/login";
 
 export default function DoctorLoginPage() {
