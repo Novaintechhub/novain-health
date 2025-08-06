@@ -6,8 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const appointmentDetails = {
     doctor: {
@@ -34,9 +35,17 @@ const appointmentDetails = {
 };
 
 export default function ViewAppointment() {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Appointment Details</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Appointment Details</h1>
+        <Button variant="outline" onClick={() => router.back()}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back
+        </Button>
+      </div>
       <Card>
         <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b pb-6">

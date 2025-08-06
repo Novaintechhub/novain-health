@@ -3,7 +3,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Printer } from "lucide-react";
+import { Send, Printer, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const DoccureLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="150" height="40" viewBox="0 0 150 40" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -17,6 +18,7 @@ const DoccureLogo = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export default function InvoiceView() {
+  const router = useRouter();
 
   const handlePrint = () => {
     window.print();
@@ -25,6 +27,10 @@ export default function InvoiceView() {
   return (
     <div className="bg-white p-4 sm:p-8">
         <div className="flex justify-end gap-2 mb-4 print:hidden">
+            <Button variant="outline" onClick={() => router.back()}>
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back
+            </Button>
             <Button variant="outline"><Send className="mr-2 h-4 w-4" /> Send</Button>
             <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" /> Print</Button>
         </div>

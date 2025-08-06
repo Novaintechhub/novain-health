@@ -4,11 +4,20 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Clock, MapPin, Mail, Phone, MessageSquare, Video, X } from "lucide-react";
+import { Clock, MapPin, Mail, Phone, MessageSquare, Video, X, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function DoctorViewAppointment() {
+  const router = useRouter();
+
   return (
-    <div className="bg-gray-50/50 p-4 sm:p-6 flex items-center justify-center min-h-screen">
+    <div className="bg-gray-50/50 p-4 sm:p-6 flex flex-col items-center justify-center min-h-screen">
+       <div className="w-full max-w-2xl flex justify-end mb-4">
+        <Button variant="outline" onClick={() => router.back()}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back
+        </Button>
+       </div>
       <Card className="w-full max-w-2xl shadow-lg rounded-2xl">
         <CardContent className="p-8">
           <div className="flex justify-between items-start mb-6">

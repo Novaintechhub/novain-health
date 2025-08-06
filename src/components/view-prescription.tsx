@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, ChevronLeft } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const prescriptionData = {
   doctor: {
@@ -32,14 +33,16 @@ const prescriptionData = {
 };
 
 export default function ViewPrescription() {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Prescription Details</h1>
-        <div className="flex gap-2">
-          <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
-          <Button className="bg-cyan-500 hover:bg-cyan-600 text-white"><Download className="mr-2 h-4 w-4" /> Download</Button>
-        </div>
+        <Button variant="outline" onClick={() => router.back()}>
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
       </div>
       <Card className="p-4 sm:p-8">
         <CardHeader className="p-0 border-b pb-6 mb-6">
@@ -119,6 +122,10 @@ export default function ViewPrescription() {
             </div>
         </CardFooter>
       </Card>
+      <div className="flex justify-end gap-2">
+          <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
+          <Button className="bg-cyan-500 hover:bg-cyan-600 text-white"><Download className="mr-2 h-4 w-4" /> Download</Button>
+        </div>
     </div>
   );
 }
