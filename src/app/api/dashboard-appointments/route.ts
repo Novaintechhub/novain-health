@@ -4,39 +4,43 @@ import { NextResponse } from 'next/server';
 const patientData = [
     {
         id: "#00016",
-        name: "Tosin Adebayo",
+        name: "Dr. Tosin Adebayo",
         appointmentDate: "11th Dec 2024",
         appointmentTime: "10:00am",
         purpose: "General",
         type: "New Patient",
         paidAmount: "₦150",
+        status: "Confirm",
     },
     {
         id: "#00028",
-        name: "Musa Ahmed",
+        name: "Dr. Musa Ahmed",
         appointmentDate: "14th Dec 2024",
         appointmentTime: "1:00pm",
         purpose: "General",
         type: "Returning Patient",
         paidAmount: "₦350",
+        status: "Confirm",
     },
     {
         id: "#00118",
-        name: "Peter Obi",
+        name: "Dr. Peter Obi",
         appointmentDate: "16th Dec 2024",
         appointmentTime: "9:30am",
         purpose: "General",
         type: "Returning Patient",
         paidAmount: "₦50",
+        status: "Pending",
     },
     {
         id: "#00118",
-        name: "Chima Okenwa",
+        name: "Dr. Chima Okenwa",
         appointmentDate: "24th Nov 2024",
         appointmentTime: "6:00pm",
         purpose: "General",
         type: "New Patient",
         paidAmount: "₦250",
+        status: "Cancelled",
     },
     {
         id: "#00216",
@@ -46,6 +50,7 @@ const patientData = [
         purpose: "General",
         type: "Returning Patient",
         paidAmount: "₦85",
+        status: "Confirm",
     },
     {
         id: "#00216",
@@ -55,6 +60,7 @@ const patientData = [
         purpose: "General",
         type: "New Patient",
         paidAmount: "₦80",
+        status: "Confirm",
     },
 ];
 
