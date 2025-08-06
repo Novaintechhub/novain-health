@@ -1,7 +1,33 @@
-# Settings to manage and configure a Firebase App Hosting backend.
+# Production-ready settings for a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 1
+  # The amount of memory in MiB allocated for each server instance.
+  # 512 is a good starting point for most web applications.
+  memoryMiB: 512
+
+  # The number of CPUs to use for each server instance.
+  # 1 CPU is standard for many workloads.
+  cpu: 1
+
+  # Minimum number of instances to keep running.
+  # Setting this to 1 ensures your app is always responsive and avoids "cold starts"
+  # for your first visitors. This incurs a small, constant cost.
+  # For the tightest budget, you can set this to 0.
+  minInstances: 1
+
+  # Maximum number of instances to scale up to during high traffic.
+  # This provides a safety net to handle unexpected visitor spikes.
+  # 10 is a safe and sensible limit for a new application.
+  maxInstances: 10
+
+  # The maximum number of concurrent requests each instance can handle
+  # before a new instance is started. The default of 80 is fine for most apps.
+  concurrency: 80
+
+# --- Optional: Add your environment variables and secrets below ---
+# env:
+#   - variable: DATABASE_URL
+#     value: "your-database-url-here"
+#   - variable: API_KEY
+#     secret: your-secret-name-in-secret-manager

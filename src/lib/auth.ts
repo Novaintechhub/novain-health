@@ -5,13 +5,19 @@ import {
   OAuthProvider,
   User,
 } from "firebase/auth";
-import { auth } from "./firebase";
+
+// This function will be called on the client, where the firebase app is initialized.
+const getClientAuth = async () => {
+  const { auth } = await import("./firebase");
+  return auth;
+}
 
 const googleProvider = new GoogleAuthProvider();
 const appleProvider = new OAuthProvider("apple.com");
 
 export const signInWithGoogle = async (): Promise<User | null> => {
   try {
+    const auth = await getClientAuth();
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
@@ -22,6 +28,7 @@ export const signInWithGoogle = async (): Promise<User | null> => {
 
 export const signInWithApple = async (): Promise<User | null> => {
   try {
+    const auth = await getClientAuth();
     const result = await signInWithPopup(auth, appleProvider);
     return result.user;
   } catch (error) {
