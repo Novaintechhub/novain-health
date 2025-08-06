@@ -26,8 +26,46 @@ runConfig:
   concurrency: 80
 
 # --- Optional: Add your environment variables and secrets below ---
-# env:
-#   - variable: DATABASE_URL
-#     value: "your-database-url-here"
-#   - variable: API_KEY
-#     secret: your-secret-name-in-secret-manager
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyBTIJEkz1CUo-gA89ueRGb4HvLRkj8SAhc"
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "novain-health.firebaseapp.com"
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "novain-health"
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "novain-health.appspot.com"
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "466888477063"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:466888477063:android:8ca3e953225896f29bab22"
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: "G-H55NLR7ZCT"
+  - variable: FIREBASE_PROJECT_ID
+    value: "novain-health"
+  - variable: FIREBASE_CLIENT_EMAIL
+    value: "firebase-adminsdk-fbsvc@novain-health.iam.gserviceaccount.com"
+  - variable: FIREBASE_PRIVATE_KEY
+    value: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaUBGNQS7Zwpfo\nRNzTSf8NBywXjAOd40qAnl7PoInt1LCJJxIeI0iBJcKTtCqVQyGQxNCNgf2DzDQi\nDSzmkAN7G/ElvsqFmrgNygWimZTFrUlcJbQut9d0BCcLIqpz3GtFHEt+X3qoT144\ngzGPIcPFaAjyLnABH903U/FVf10pFG3dB9UnQqiRRabuaApIghTsNCgXvqQ+84iH\nQSxIw0akTgzQSqW9DoFSV7YA6S5UqkMVqF11wE8xG13M3iZtB9fxWiGQVWQClSJo\nSAWeSe/yCRKhdLa85IyaSmK66CCDsOCB02oiQLqeVIX0quLuMIAu/6d9QjS0eCAW\nU7Pm5KuLAgMBAAECggEAUjSwR0ZyQ+F4nifAF3fXqKo4ui0o930tAr2f6gMDrSDX\n0O17bwnONYNof4HqPwZmT0MtXPvD4Ks2PlRDwhYcmXDuH052qFSYVejqsk2urbkQ\n1LgF30muwasGoLTPBo3LftymuNFvOI2aZyFPuhv2whDovXkrB+FdxYXAbHdnNx4d\n1Jat+8l5hSoW/g6w6bBcmGxI7mLagMkc+NLuGp8Ar+EzuHz2GTF91Ky+Hin++uNR\nrKQkvoV2SZMuTAUQxwqK1VosRpCwS8H3KHETI10OhhNn7hbXf4O9pMETKbi6lC13\nUWlwNzkfEnSDjoK9BVeRLFyz2r78v7VK6CsUK00GkQKBgQD7sZsAONUJLrb3K11w\ndMHnXHlZW09J58UJXKvUExx4zI+dsldK7cTgWIk5OM7kx2nOT7OPtNrta6B1xKdh\nrBTQL/hYcv0b47cyBkV3ulzpNunmyCegm273BhyARQxEEzbKuHB6QfjF62uhuRLB\npaQsXQ7l/niu14T+WNCJOwOgtQKBgQDeDEHrqly4hiSVaVAdYaCzlJNPwY/QJaQo\nIeQspSK8AwDEXtyRdNAvR3++VV6N94llxf/o7Otj5cn/Ae8kELq+j27W52ReUMLl\nV1KfRZ9e38hoBWGG2L+JP/Vz+SCtMEOGb1s+YHGNDNUeiuhn5/a2vls6dRGan7QY\naN0k1mYDPwKBgBMmDf7UVBDgxvbDC9bUazQo6uqLcdrTkUAHFuOJmK7wETUULmP6\n9vGCit4ZnlP1f+08TxLt1YIeoBSVo45gwyybma9RAESw7G0X4Q0c1pi/nsf6Dlm/\nuY99nYl8t1QuigqeQaBriHu2T3f8Vpr4+SaO5eVFmPTkXK/lHehy3vHJAoGAU1n0\nkNtVjOrF5tQuf6j7Iw4dsi2tp2vJ0ErQlTWz8TGLYytczrkzwNutByySnuYRzINj\nyfLNdaV3iuMV+srQ3uGGsOMRWRol3uNFn4YKChok529FqdHJLGM25z7YVkqsvlUk\nwih/13u+sIViMkbv5K9WHX5+ijVy7ErI4KAekQ8CgYEA+YQj6/6KpIwBAOXe1EeC\nziacyAm0tGtVyC4F/PKFx8LxbgUaJOGDLXNIH6CgFwl+zDT3/G5BZqGtXBzIKrG1\noi3LeB4ry2jP754A8i2wbR9uOf/cj7HYyUqhS1KsDmpdtw9wQXLo+j7gkwZpqoqS\nWvPt3DDiM9Q+9IYkZB7lfjg=\n-----END PRIVATE KEY-----"
+  - variable: FIREBASE_STORAGE_BUCKET
+    value: "novain-health.appspot.com"
+  - variable: PAYSTACK_SECRET_KEY
+    value: "sk_test_0c747a578442b1f993b6994df9a972b9b568184a"
+  - variable: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+    value: "pk_test_69e1c65ea933a59ad9baf5cb8d9c1b8eb404cc68"
+  - variable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    value: "pk_test_GPstYtST8nHCUaEhV9BdzsGL"
+  - variable: STRIPE_SECRET_KEY
+    value: "sk_test_51AW5SOLi4UqAYxfx3ynm17BQ9ZUQjCpy04wFcQC7A70ioH4PZ38rxtR2Ci7opnT49NRitfPNqfFdxw7Uuxs6AXM700m8pl9iww"
+  - variable: BREVO_API_KEY
+    value: "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"
+  - variable: NEXT_PUBLIC_ROOT_DOMAIN
+    value: "https://9202-firebase-studio-1753615033768.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/"
+  - variable: NEXT_PUBLIC_APP_URL
+    value: "https://9202-firebase-studio-1753615033768.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/"
+  - variable: ADMIN_SECRET_KEY
+    value: "Novainconnectalwayshub"
+  - variable: NEXT_PUBLIC_BASE_URL
+    value: "https://9202-firebase-studio-1753615033768.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/"
+  - variable: FIREBASE_SERVICE_ACCOUNT_KEY_JSON
+    value: "{\"type\":\"service_account\",\"project_id\":\"novain-health\",\"private_key_id\":\"ee66b51a9c0a22016f682f2dcb8afea5ddfc1894\",\"private_key\":\"-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaUBGNQS7Zwpfo\\nRNzTSf8NBywXjAOd40qAnl7PoInt1LCJJxIeI0iBJcKTtCqVQyGQxNCNgf2DzDQi\\nDSzmkAN7G/ElvsqFmrgNygWimZTFrUlcJbQut9d0BCcLIqpz3GtFHEt+X3qoT144\\ngzGPIcPFaAjyLnABH903U/FVf10pFG3dB9UnQqiRRabuaApIghTsNCgXvqQ+84iH\\nQSxIw0akTgzQSqW9DoFSV7YA6S5UqkMVqF11wE8xG13M3iZtB9fxWiGQVWQClSJo\\nSAWeSe/yCRKhdLa85IyaSmK66CCDsOCB02oiQLqeVIX0quLuMIAu/6d9QjS0eCAW\\nU7Pm5KuLAgMBAAECggEAUjSwR0ZyQ+F4nifAF3fXqKo4ui0o930tAr2f6gMDrSDX\\n0O17bwnONYNof4HqPwZmT0MtXPvD4Ks2PlRDwhYcmXDuH052qFSYVejqsk2urbkQ\\n1LgF30muwasGoLTPBo3LftymuNFvOI2aZyFPuhv2whDovXkrB+FdxYXAbHdnNx4d\\n1Jat+8l5hSoW/g6w6bBcmGxI7mLagMkc+NLuGp8Ar+EzuHz2GTF91Ky+Hin++uNR\\nrKQkvoV2SZMuTAUQxwqK1VosRpCwS8H3KHETI10OhhNn7hbXf4O9pMETKbi6lC13\\nUWlwNzkfEnSDjoK9BVeRLFyz2r78v7VK6CsUK00GkQKBgQD7sZsAONUJLrb3K11w\\ndMHnXHlZW09J58UJXKvUExx4zI+dsldK7cTgWIk5OM7kx2nOT7OPtNrta6B1xKdh\\nrBTQL/hYcv0b47cyBkV3ulzpNunmyCegm273BhyARQxEEzbKuHB6QfjF62uhuRLB\\npaQsXQ7l/niu14T+WNCJOwOgtQKBgQDeDEHrqly4hiSVaVAdYaCzlJNPwY/QJaQo\\nIeQspSK8AwDEXtyRdNAvR3++VV6N94llxf/o7Otj5cn/Ae8kELq+j27W52ReUMLl\\nV1KfRZ9e38hoBWGG2L+JP/Vz+SCtMEOGb1s+YHGNDNUeiuhn5/a2vls6dRGan7QY\\naN0k1mYDPwKBgBMmDf7UVBDgxvbDC9bUazQo6uqLcdrTkUAHFuOJmK7wETUULmP6\\n9vGCit4ZnlP1f+08TxLt1YIeoBSVo45gwyybma9RAESw7G0X4Q0c1pi/nsf6Dlm/\\nuY99nYl8t1QuigqeQaBriHu2T3f8Vpr4+SaO5eVFmPTkXK/lHehy3vHJAoGAU1n0\\nkNtVjOrF5tQuf6j7Iw4dsi2tp2vJ0ErQlTWz8TGLYytczrkzwNutByySnuYRzINj\\nyfLNdaV3iuMV+srQ3uGGsOMRWRol3uNFn4YKChok529FqdHJLGM25z7YVkqsvlUk\\nwih/13u+sIViMkbv5K9WHX5+ijVy7ErI4KAekQ8CgYEA+YQj6/6KpIwBAOXe1EeC\\nziacyAm0tGtVyC4F/PKFx8LxbgUaJOGDLXNIH6CgFwl+zDT3/G5BZqGtXBzIKrG1\\noi3LeB4ry2jP754A8i2wbR9uOf/cj7HYyUqhS1KsDmpdtw9wQXLo+j7gkwZpqoqS\\nWvPt3DDiM9Q+9IYkZB7lfjg=\\n-----END PRIVATE KEY-----\\n\",\"client_email\":\"firebase-adminsdk-fbsvc@novain-health.iam.gserviceaccount.com\",\"client_id\":\"108595061852714019335\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://oauth2.googleapis.com/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_x509_cert_url\":\"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40novain-health.iam.gserviceaccount.com\",\"universe_domain\":\"googleapis.com\"}"
