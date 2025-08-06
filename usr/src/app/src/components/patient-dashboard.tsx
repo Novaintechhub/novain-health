@@ -210,15 +210,14 @@ export default function PatientDashboard() {
                         <TableCell className="text-right">
                           <div className="flex flex-row gap-2 justify-end">
                               <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                  <Link href="/patients/reschedule-appointment">
+                                  <Link href="/patients/view-appointment">
                                     <Eye className="h-4 w-4 mr-1"/> View
                                   </Link>
                               </Button>
-                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                  <CreditCard className="h-4 w-4 mr-1"/> Make Payment
-                              </Button>
-                              <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200">
-                                  <X className="h-4 w-4 mr-1"/> Cancel
+                              <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                  <Link href="/patients/checkout">
+                                    <CreditCard className="h-4 w-4 mr-1"/> Checkout
+                                  </Link>
                               </Button>
                           </div>
                         </TableCell>
@@ -262,15 +261,14 @@ export default function PatientDashboard() {
                       </div>
                       <div className="flex gap-2 justify-end border-t pt-3">
                           <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200 flex-1">
-                              <Link href="/patients/reschedule-appointment">
+                              <Link href="/patients/view-appointment">
                                 <Eye className="h-4 w-4 mr-1"/> View
                               </Link>
                           </Button>
-                           <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1">
-                              <CreditCard className="h-4 w-4 mr-1"/> Payment
-                          </Button>
-                          <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1">
-                              <X className="h-4 w-4 mr-1"/> Cancel
+                           <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1">
+                              <Link href="/patients/checkout">
+                                <CreditCard className="h-4 w-4 mr-1"/> Checkout
+                              </Link>
                           </Button>
                       </div>
                     </CardContent>
