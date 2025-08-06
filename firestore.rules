@@ -1,0 +1,106 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isPatient() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient';
+    }
+
+    function isDoctor() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor';
+    }
+
+    function isAdmin() {
+      // For production, this should be based on custom claims set on the user's token.
+      // This provides a secure way to grant admin privileges without storing roles in the database.
+      // Example: return request.auth.token.admin == true;
+      // For now, we'll allow a user with an 'admin' role in their profile.
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // --- Collections Rules ---
+
+    // Users Collection: users/{userId}
+    match /users/{userId} {
+      // Allow anyone to read a user's profile (for viewing doctor profiles).
+      // Sensitive patient data should be in a private subcollection.
+      allow read: if true;
+
+      // Only the user themselves or an admin can create or update their profile.
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Appointments Collection: appointments/{appointmentId}
+    match /appointments/{appointmentId} {
+      // Allow read if the user is the patient, the doctor associated with the appointment, or an admin.
+      allow read: if isSignedIn() && (isOwner(resource.data.patientId) || isOwner(resource.data.doctorId) || isAdmin());
+      
+      // Allow patient to create their own appointment.
+      allow create: if isPatient() && isOwner(request.resource.data.patientId);
+      
+      // Allow patient/doctor to update (e.g., cancel/confirm), or an admin.
+      allow update: if isSignedIn() && (isOwner(resource.data.patientId) || isOwner(resource.data.doctorId) || isAdmin());
+      
+      // Only patient, doctor, or admin can delete.
+      allow delete: if isSignedIn() && (isOwner(resource.data.patientId) || isOwner(resource.data.doctorId) || isAdmin());
+    }
+
+    // Medical Records Collection: medicalRecords/{recordId}
+    match /medicalRecords/{recordId} {
+        // Patient can access their own records.
+        // A doctor can access a patient's record if an appointment exists between them.
+        // Admins can access all records.
+        allow read: if (isPatient() && isOwner(resource.data.patientId)) ||
+                       (isDoctor() && exists(/databases/$(database)/documents/appointments/{appointmentId} where appointmentId.patientId == resource.data.patientId && appointmentId.doctorId == request.auth.uid)) ||
+                       isAdmin();
+
+        // Patients can create their own records. Doctors can create records for their patients.
+        allow create: if (isPatient() && isOwner(request.resource.data.patientId)) ||
+                         (isDoctor() && exists(/databases/$(database)/documents/appointments/{appointmentId} where appointmentId.patientId == request.resource.data.patientId && appointmentId.doctorId == request.auth.uid));
+
+        // Only the patient, the doctor who created it, or an admin can update/delete.
+        allow update, delete: if (isPatient() && isOwner(resource.data.patientId)) ||
+                                (isDoctor() && isOwner(resource.data.doctorId)) ||
+                                isAdmin();
+    }
+    
+    // Prescriptions Collection: prescriptions/{prescriptionId}
+    // Rules are similar to medical records.
+    match /prescriptions/{prescriptionId} {
+        allow read: if (isPatient() && isOwner(resource.data.patientId)) ||
+                       (isDoctor() && exists(/databases/$(database)/documents/appointments/{appointmentId} where appointmentId.patientId == resource.data.patientId && appointmentId.doctorId == request.auth.uid)) ||
+                       isAdmin();
+
+        // Only doctors can create prescriptions for their patients.
+        allow create: if isDoctor() && isOwner(request.resource.data.doctorId) &&
+                         exists(/databases/$(database)/documents/appointments/{appointmentId} where appointmentId.patientId == request.resource.data.patientId && appointmentId.doctorId == request.auth.uid);
+
+        // Only the doctor who created it or an admin can modify/delete.
+        allow update, delete: if (isDoctor() && isOwner(resource.data.doctorId)) || isAdmin();
+    }
+
+    // Reviews Collection: reviews/{reviewId}
+    match /reviews/{reviewId} {
+        // Anyone can read reviews.
+        allow read: if true;
+
+        // Only a patient can create a review for a doctor they had an appointment with.
+        allow create: if isPatient() && isOwner(request.resource.data.patientId) &&
+                         exists(/databases/$(database)/documents/appointments/{appointmentId} where appointmentId.patientId == request.resource.data.patientId && appointmentId.doctorId == request.resource.data.doctorId);
+        
+        // Only the patient who wrote the review or an admin can update/delete it.
+        allow update, delete: if (isPatient() && isOwner(resource.data.patientId)) || isAdmin();
+    }
+  }
+}
