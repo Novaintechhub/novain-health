@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus } from "lucide-react";
+import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus, Clock, Calendar, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,7 +72,7 @@ const TypeIcon = ({ type }: { type: string }) => {
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusClasses: { [key: string]: string } = {
-    Confirm: 'bg-green-100 text-green-800',
+    Approved: 'bg-green-100 text-green-800',
     Cancelled: 'bg-red-100 text-red-800',
     Pending: 'bg-yellow-100 text-yellow-800',
     Completed: 'bg-blue-100 text-blue-800',
@@ -84,6 +84,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
 
   const cleanDateStr = appointment.date.replace(/(\d+)(st|nd|rd|th)/, '$1');
   const appointmentDate = parse(cleanDateStr, "do MMMM yyyy, h:mm a", new Date());
@@ -142,16 +143,52 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
           </>
         )}
         
-        {appointment.status === 'Confirm' && !isAppointmentPast && (
-             <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                <Link href="/patients/reschedule-appointment">
-                    <Eye className="w-4 h-4 mr-1" />
-                    View
-                </Link>
-            </Button>
+        {appointment.status === 'Approved' && !isAppointmentPast && (
+            <>
+                <AlertDialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Upcoming Appointment</AlertDialogTitle>
+                            <AlertDialogDescription>
+                            Here are the details for your upcoming appointment.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="flex items-center gap-4">
+                            <Avatar className="h-16 w-16">
+                                    <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
+                                    <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h3 className="font-bold">{appointment.name}</h3>
+                                </div>
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span>{appointment.date.split(',')[0]}</span></div>
+                                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-muted-foreground"/><span>{appointment.date.split(',')[1]}</span></div>
+                                <div className="flex items-center gap-2"><Video className="w-4 h-4 text-muted-foreground"/><span>{appointment.type}</span></div>
+                            </div>
+                        </div>
+                        <AlertDialogFooter>
+                            <AlertDialogAction>Close</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                    <Link href="/patients/checkout">
+                        <CreditCard className="w-4 h-4 mr-1"/> Make Payment
+                    </Link>
+                </Button>
+            </>
         )}
 
-        {appointment.status === 'Confirm' && isAppointmentPast && (
+        {appointment.status === 'Approved' && isAppointmentPast && (
           <Button asChild variant="destructive" size="sm">
             <Link href="/patients/report-no-show">
               <AlertCircle className="w-4 h-4 mr-1" />

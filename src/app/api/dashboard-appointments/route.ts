@@ -10,7 +10,7 @@ const patientData = [
         purpose: "General",
         type: "New Patient",
         paidAmount: "₦150",
-        status: "Confirm",
+        status: "Approved",
     },
     {
         id: "#00028",
@@ -20,7 +20,7 @@ const patientData = [
         purpose: "General",
         type: "Returning Patient",
         paidAmount: "₦350",
-        status: "Confirm",
+        status: "Approved",
     },
     {
         id: "#00118",
@@ -50,7 +50,7 @@ const patientData = [
         purpose: "General",
         type: "Returning Patient",
         paidAmount: "₦85",
-        status: "Confirm",
+        status: "Approved",
     },
     {
         id: "#00216",
@@ -60,7 +60,7 @@ const patientData = [
         purpose: "General",
         type: "New Patient",
         paidAmount: "₦80",
-        status: "Confirm",
+        status: "Approved",
     },
 ];
 

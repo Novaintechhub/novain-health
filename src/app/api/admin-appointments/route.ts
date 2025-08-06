@@ -11,7 +11,7 @@ const appointments = [
     patientAvatar: "https://placehold.co/40x40.png",
     patientAvatarHint: "woman smiling",
     appointmentTime: "14 Nov 2023, 10.00 AM",
-    status: "Confirm",
+    status: "Approved",
     amount: "₦200.00"
   },
   {
@@ -24,7 +24,7 @@ const appointments = [
     patientAvatar: "https://placehold.co/40x40.png",
     patientAvatarHint: "male doctor portrait",
     appointmentTime: "12 Nov 2023, 11.00 AM",
-    status: "Confirm",
+    status: "Approved",
     amount: "₦300.00"
   },
   {
@@ -50,7 +50,7 @@ const appointments = [
     patientAvatar: "https://placehold.co/40x40.png",
     patientAvatarHint: "woman portrait",
     appointmentTime: "10 Nov 2023, 1.00 PM",
-    status: "Confirm",
+    status: "Approved",
     amount: "₦150.00"
   }
 ];

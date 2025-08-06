@@ -9,7 +9,7 @@ const appointments = [
     date: "12th October 2025, 4:00 PM",
     bookingDate: "11th October 2025",
     type: "Video Call",
-    status: "Confirm",
+    status: "Approved",
     amount: "₦200",
   },
   {
@@ -30,7 +30,7 @@ const appointments = [
     date: "12th October 2025, 4:00 PM",
     bookingDate: "10th October 2025",
     type: "Chat",
-    status: "Confirm",
+    status: "Approved",
     amount: "₦100",
   },
   {
@@ -60,7 +60,7 @@ const appointments = [
     date: "1st February 2025, 9:00 AM",
     bookingDate: "31st January 2025",
     type: "Chat",
-    status: "Confirm",
+    status: "Approved",
     amount: "₦50",
   },
 ];

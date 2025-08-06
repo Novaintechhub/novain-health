@@ -18,7 +18,7 @@ type Appointment = {
   patientAvatar: string;
   patientAvatarHint: string;
   appointmentTime: string;
-  status: "Confirm" | "Cancelled";
+  status: "Approved" | "Cancelled";
   amount: string;
 };
 
@@ -41,9 +41,9 @@ export default function AdminAppointments() {
     fetchAppointments();
   }, []);
 
-  const StatusBadge = ({ status }: { status: "Confirm" | "Cancelled" }) => {
+  const StatusBadge = ({ status }: { status: "Approved" | "Cancelled" }) => {
     const statusClasses = {
-      Confirm: 'bg-green-100 text-green-800',
+      Approved: 'bg-green-100 text-green-800',
       Cancelled: 'bg-red-100 text-red-800',
     };
     return <Badge className={`capitalize ${statusClasses[status]}`}>{status}</Badge>;
