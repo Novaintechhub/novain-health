@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Printer, Eye } from "lucide-react";
+import { Eye, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -41,7 +41,15 @@ export default function DoctorPrescriptions() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Prescriptions</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Prescriptions</h1>
+        <Button asChild className="bg-cyan-500 hover:bg-cyan-600 text-white">
+          <Link href="/doctor/create-prescription">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create New Prescription
+          </Link>
+        </Button>
+      </div>
         <Tabs defaultValue="prescriptions">
             <TabsList className="grid w-full grid-cols-4 max-w-lg">
                 <Link href="/doctor/appointments"><TabsTrigger value="appointments" className="w-full">Appointments</TabsTrigger></Link>
@@ -97,10 +105,6 @@ export default function DoctorPrescriptions() {
                                           </TableCell>
                                           <TableCell className="text-right">
                                               <div className="flex gap-2 justify-end">
-                                                  <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                      <Printer className="w-4 h-4 mr-1" />
-                                                      Print
-                                                  </Button>
                                                   <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
                                                       <Eye className="w-4 h-4 mr-1" />
                                                       View
@@ -137,9 +141,6 @@ export default function DoctorPrescriptions() {
                                             </div>
                                         </div>
                                         <div className="flex gap-2 justify-end border-t pt-3">
-                                            <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                <Printer className="w-4 h-4 mr-1" /> Print
-                                            </Button>
                                             <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
                                                 <Eye className="w-4 h-4 mr-1" /> View
                                             </Button>
