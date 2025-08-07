@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Search, CheckCircle2, Star, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
 
 type Doctor = {
   name: string;
@@ -74,72 +75,65 @@ export default function FindADoctor() {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Search Location</label>
+                <Label htmlFor="location-search">Search Location</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     type="text"
+                    id="location-search"
                     placeholder="Based on your Location"
                     className="pl-10"
                   />
                 </div>
               </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium">Search Doctors or Specialization</label>
+              <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                <Label htmlFor="doctor-search">Search Doctors or Specialization</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="e.g. Dentist, Sugar checkup, etc"
+                    id="doctor-search"
+                    placeholder="e.g. Dentist"
                     className="pl-10"
                   />
                 </div>
               </div>
-              <Button style={{ backgroundColor: '#D90067' }} className="w-full text-white">
-                <Search className="h-5 w-5 mr-2" />
-                Search
-              </Button>
+              <div className="space-y-2">
+                <Label htmlFor="gender-filter">Gender</Label>
+                <Select>
+                    <SelectTrigger id="gender-filter" className="w-full bg-white">
+                        <SelectValue placeholder="Gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="specialization-filter">Specialization</Label>
+                <Select>
+                    <SelectTrigger id="specialization-filter" className="w-full bg-white">
+                        <SelectValue placeholder="Area of specialization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="dental">Dental</SelectItem>
+                        <SelectItem value="cardiology">Cardiology</SelectItem>
+                        <SelectItem value="neurology">Neurology</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end mt-4">
+               <div className="space-y-2 lg:col-start-4">
+                 <Button style={{ backgroundColor: '#D90067' }} className="w-full text-white">
+                    <Search className="h-5 w-5 mr-2" />
+                    Search
+                  </Button>
+               </div>
             </div>
           </CardContent>
         </Card>
-
-        <div className="mt-8 flex flex-wrap items-center gap-4">
-            <h3 className="text-lg font-semibold text-gray-700">Filter by:</h3>
-            <Select>
-                <SelectTrigger className="w-full sm:w-[180px] bg-white">
-                    <SelectValue placeholder="Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-            </Select>
-            <Select>
-                <SelectTrigger className="w-full sm:w-[220px] bg-white">
-                    <SelectValue placeholder="Area of specialization" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="dental">Dental</SelectItem>
-                    <SelectItem value="cardiology">Cardiology</SelectItem>
-                    <SelectItem value="neurology">Neurology</SelectItem>
-                </SelectContent>
-            </Select>
-            <div className="flex-grow"></div>
-            <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">Sort by:</span>
-                 <Select>
-                    <SelectTrigger className="w-full sm:w-[160px] bg-white">
-                        <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="rating">Rating</SelectItem>
-                        <SelectItem value="popular">Popular</SelectItem>
-                        <SelectItem value="latest">Latest</SelectItem>
-                        <SelectItem value="free">Free</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
         
         {loading ? (
            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -218,3 +212,5 @@ export default function FindADoctor() {
     </div>
   );
 }
+
+    
