@@ -1,103 +1,122 @@
+
 "use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X, Pencil } from "lucide-react";
+import { X, PlusCircle } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 
-const days = [
-  "SUNDAY",
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-];
-const timeSlots = [
-  "8:00am - 9:30am",
-  "11:30am - 1:20pm",
-  "3:00pm - 4:45pm",
-  "5:00pm - 6:30pm",
-];
+type Availability = {
+  [date: string]: string[];
+};
+
+const initialAvailability: Availability = {
+  // Pre-populate with some example data
+  [new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]]: ["09:00 AM - 10:00 AM", "11:00 AM - 12:00 PM"],
+  [new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0]]: ["10:00 AM - 11:00 AM", "02:00 PM - 03:00 PM", "04:00 PM - 05:00 PM"],
+  [new Date(new Date().setDate(new Date().getDate() + 3)).toISOString().split('T')[0]]: ["09:30 AM - 10:30 AM"],
+};
 
 export default function ScheduleTimings() {
-  const [activeDay, setActiveDay] = useState("MONDAY");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [availability, setAvailability] = useState<Availability>(initialAvailability);
+  const [newTimeSlot, setNewTimeSlot] = useState({ from: "", to: "" });
+
+  const selectedDateString = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
+  const timeSlotsForSelectedDate = availability[selectedDateString] || [];
+
+  const handleAddTimeSlot = () => {
+    if (newTimeSlot.from && newTimeSlot.to && selectedDateString) {
+      const formattedSlot = `${newTimeSlot.from} - ${newTimeSlot.to}`;
+      setAvailability(prev => ({
+        ...prev,
+        [selectedDateString]: [...(prev[selectedDateString] || []), formattedSlot]
+      }));
+      setNewTimeSlot({ from: "", to: "" });
+    }
+  };
+
+  const handleRemoveTimeSlot = (slotToRemove: string) => {
+    if (selectedDateString) {
+      setAvailability(prev => ({
+        ...prev,
+        [selectedDateString]: prev[selectedDateString].filter(slot => slot !== slotToRemove)
+      }));
+    }
+  };
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Schedule Timings</h1>
-      <Card className="bg-white rounded-lg shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">Schedule Timings</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card>
+        <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border"
+              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
+            />
+          </div>
           <div className="space-y-6">
-            <div className="space-y-2 max-w-xs">
-              <label
-                htmlFor="timing-slot-duration"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                Timing Slot Duration
-              </label>
-              <Select defaultValue="30">
-                <SelectTrigger id="timing-slot-duration">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="15">15 mins</SelectItem>
-                  <SelectItem value="30">30 mins</SelectItem>
-                  <SelectItem value="45">45 mins</SelectItem>
-                  <SelectItem value="60">60 mins</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-wrap gap-2 border-b pb-4">
-              {days.map((day) => (
-                <Button
-                  key={day}
-                  variant={activeDay === day ? "default" : "outline"}
-                  onClick={() => setActiveDay(day)}
-                  className={`rounded-md ${
-                    activeDay === day
-                      ? "bg-pink-600 text-white"
-                      : "bg-white text-gray-700 border-gray-300"
-                  }`}
-                >
-                  {day}
-                </Button>
-              ))}
-            </div>
+            <CardHeader className="p-0">
+              <CardTitle>
+                Available Slots for <span className="text-cyan-500">{selectedDate?.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) || 'No date selected'}</span>
+              </CardTitle>
+            </CardHeader>
 
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-lg">Time Slots</h3>
-                <Button variant="ghost" className="text-cyan-500 hover:text-cyan-600">
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
+              {timeSlotsForSelectedDate.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {timeSlotsForSelectedDate.map((slot, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-cyan-400 text-white rounded-md px-3 py-1.5 text-sm"
+                    >
+                      <span>{slot}</span>
+                      <button onClick={() => handleRemoveTimeSlot(slot)} className="hover:bg-cyan-500 rounded-full p-0.5">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No time slots scheduled for this day.</p>
+              )}
+            </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <h4 className="font-semibold">Add New Time Slot</h4>
+              <div className="flex items-center gap-4">
+                <div className="flex-1 space-y-2">
+                  <label htmlFor="from-time" className="text-sm font-medium text-muted-foreground">From</label>
+                  <Input 
+                    id="from-time" 
+                    type="time" 
+                    value={newTimeSlot.from} 
+                    onChange={(e) => setNewTimeSlot({...newTimeSlot, from: e.target.value})}
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <label htmlFor="to-time" className="text-sm font-medium text-muted-foreground">To</label>
+                  <Input 
+                    id="to-time" 
+                    type="time" 
+                    value={newTimeSlot.to} 
+                    onChange={(e) => setNewTimeSlot({...newTimeSlot, to: e.target.value})}
+                  />
+                </div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                {timeSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 bg-cyan-400 text-white rounded-md px-3 py-1.5 text-sm"
-                  >
-                    <span>{slot}</span>
-                    <button className="hover:bg-cyan-500 rounded-full p-0.5">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <Button onClick={handleAddTimeSlot} className="bg-cyan-500 hover:bg-cyan-600 text-white">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Slot
+              </Button>
+            </div>
+             <div className="flex justify-end pt-6 border-t">
+                <Button>Save Changes</Button>
             </div>
           </div>
         </CardContent>
