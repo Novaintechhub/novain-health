@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, PlusCircle } from "lucide-react";
@@ -20,9 +20,13 @@ const initialAvailability: Availability = {
 };
 
 export default function ScheduleTimings() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [availability, setAvailability] = useState<Availability>(initialAvailability);
   const [newTimeSlot, setNewTimeSlot] = useState({ from: "", to: "" });
+
+  useEffect(() => {
+    setSelectedDate(new Date());
+  }, []);
 
   const selectedDateString = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
   const timeSlotsForSelectedDate = availability[selectedDateString] || [];
