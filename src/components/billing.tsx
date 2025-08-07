@@ -100,10 +100,6 @@ export default function Billing() {
                                           <TableCell>{invoice.paidOn}</TableCell>
                                           <TableCell className="text-right">
                                               <div className="flex gap-2 justify-end">
-                                                  <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                      <Printer className="w-4 h-4 mr-1" />
-                                                      Print
-                                                  </Button>
                                                   <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
                                                       <Link href="/patients/invoice-view">
                                                           <Eye className="w-4 h-4 mr-1" />
@@ -147,9 +143,6 @@ export default function Billing() {
                                             </div>
                                         </div>
                                         <div className="flex gap-2 justify-end border-t pt-3">
-                                            <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                                <Printer className="w-4 h-4 mr-1" /> Print
-                                            </Button>
                                             <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
                                                 <Link href="/patients/invoice-view">
                                                     <Eye className="w-4 h-4 mr-1" /> View
