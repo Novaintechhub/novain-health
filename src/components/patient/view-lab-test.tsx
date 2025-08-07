@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Printer, Download, ChevronLeft } from "lucide-react";
+import { Printer, Download, ChevronLeft, CalendarPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const labTestData = {
   testName: "Complete Blood Count (CBC)",
@@ -89,9 +90,16 @@ export default function ViewLabTest() {
            </div>
         </CardContent>
         <CardFooter className="p-0 mt-8 pt-6 border-t">
-            <div className="flex justify-end w-full gap-2">
-                <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
-                <Button className="bg-cyan-500 hover:bg-cyan-600 text-white"><Download className="mr-2 h-4 w-4" /> Download</Button>
+            <div className="flex justify-between w-full gap-2">
+                <Button asChild className="bg-cyan-500 hover:bg-cyan-600 text-white">
+                  <Link href="/patients/find-a-doctor">
+                    <CalendarPlus className="mr-2 h-4 w-4" /> Request Follow-up
+                  </Link>
+                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
+                    <Button variant="outline" className="bg-blue-500 text-white hover:bg-blue-600"><Download className="mr-2 h-4 w-4" /> Download</Button>
+                </div>
             </div>
         </CardFooter>
       </Card>

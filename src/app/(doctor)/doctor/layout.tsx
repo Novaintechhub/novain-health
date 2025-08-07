@@ -44,6 +44,7 @@ import {
   Bell,
   FileText,
   Briefcase,
+  FlaskConical,
 } from "lucide-react";
 import Link from "next/link";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -102,6 +103,14 @@ export default function DoctorLayout({
                    <Link href="/doctor/medical-records" className="flex items-center gap-3">
                     <Briefcase />
                     <span className="group-data-[collapsible=icon]:hidden">Medical Records</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Lab Results" isActive={pathname === '/doctor/lab-results'}>
+                  <Link href="/doctor/lab-results" className="flex items-center gap-3">
+                    <FlaskConical />
+                    <span className="group-data-[collapsible=icon]:hidden">Lab Results</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

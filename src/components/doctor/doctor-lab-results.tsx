@@ -2,84 +2,78 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Eye, UploadCloud } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 type LabTest = {
   testName: string;
   date: string;
   status: string;
-  doctorName: string;
-  doctorSpecialty: string;
-  doctorAvatarUrl: string;
-  doctorAvatarHint: string;
+  patientName: string;
+  patientAvatarUrl: string;
+  patientAvatarHint: string;
 };
+
+// Mock data, in a real app this would come from an API
+const labTestsData: LabTest[] = [
+    {
+        testName: "Complete Blood Count (CBC)",
+        date: "14 Nov 2023",
+        status: "Completed",
+        patientName: "Charlene Reed",
+        patientAvatarUrl: "https://placehold.co/40x40.png",
+        patientAvatarHint: "woman smiling",
+    },
+    {
+        testName: "Lipid Panel",
+        date: "18 Nov 2023",
+        status: "Completed",
+        patientName: "Travis Trimble",
+        patientAvatarUrl: "https://placehold.co/40x40.png",
+        patientAvatarHint: "male doctor portrait",
+    },
+    {
+        testName: "Thyroid Stimulating Hormone (TSH)",
+        date: "21 Nov 2023",
+        status: "Pending Review",
+        patientName: "Carl Kelly",
+        patientAvatarUrl: "https://placehold.co/40x40.png",
+        patientAvatarHint: "man portrait",
+    },
+];
+
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const statusClasses = {
+  const statusClasses: { [key: string]: string } = {
     Completed: 'bg-green-100 text-green-800',
-    Pending: 'bg-yellow-100 text-yellow-800',
+    'Pending Review': 'bg-yellow-100 text-yellow-800',
   };
 
-  return <Badge className={`capitalize ${statusClasses[status as keyof typeof statusClasses] || ''}`}>{status}</Badge>;
+  return <Badge className={`capitalize ${statusClasses[status] || ''}`}>{status}</Badge>;
 };
 
-export default function LabTests() {
+export default function DoctorLabResults() {
   const [labTests, setLabTests] = useState<LabTest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchLabTests() {
-      try {
-        const response = await fetch('/api/lab-tests');
-        const data = await response.json();
-        setLabTests(data);
-      } catch (error) {
-        console.error('Failed to fetch lab tests:', error);
-      } finally {
+    // Simulate API call
+    setTimeout(() => {
+        setLabTests(labTestsData);
         setLoading(false);
-      }
-    }
-    fetchLabTests();
+    }, 1000);
   }, []);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Lab Tests</h1>
-       <Card>
-        <CardHeader>
-          <CardTitle>Upload New Lab Result</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="record-description">Test Name</Label>
-              <Input id="record-description" placeholder="e.g., Blood Test Results from City Hospital" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="record-file">Result File</Label>
-              <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary">
-                <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
-                <p className="text-sm text-muted-foreground">Drag & drop your file here, or <span className="text-primary font-semibold">click to select a file</span></p>
-                <Input id="record-file" type="file" className="sr-only" />
-              </div>
-            </div>
-            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
-              Upload Result
-            </Button>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">Lab Results</h1>
         <Card className="bg-white rounded-lg shadow-sm">
-            <CardHeader>
-                <CardTitle>Your Uploaded Lab Results</CardTitle>
-            </CardHeader>
             <CardContent className="p-0">
               {loading ? (
                 <div className="p-4 space-y-4">
@@ -103,7 +97,7 @@ export default function LabTests() {
                                 <TableHead>Test Name</TableHead>
                                 <TableHead>Date Uploaded</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Prescribed by</TableHead>
+                                <TableHead>Patient</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -116,22 +110,17 @@ export default function LabTests() {
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-10 w-10">
-                                                <AvatarImage src={test.doctorAvatarUrl} alt={test.doctorName} data-ai-hint={test.doctorAvatarHint} />
-                                                <AvatarFallback>{test.doctorName.charAt(0)}</AvatarFallback>
+                                                <AvatarImage src={test.patientAvatarUrl} alt={test.patientName} data-ai-hint={test.patientAvatarHint} />
+                                                <AvatarFallback>{test.patientName.charAt(0)}</AvatarFallback>
                                             </Avatar>
-                                            <div>
-                                                <div className="font-medium">{test.doctorName}</div>
-                                                <div className="text-sm text-muted-foreground">{test.doctorSpecialty}</div>
-                                            </div>
+                                            <span className="font-medium">{test.patientName}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-2 justify-end">
-                                            <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                <Link href="/patients/view-lab-test">
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    View
-                                                </Link>
+                                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                <Eye className="w-4 h-4 mr-1" />
+                                                View
                                             </Button>
                                             <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                                 <Download className="w-4 h-4 mr-1" />
@@ -156,25 +145,20 @@ export default function LabTests() {
                           <p className="text-sm text-muted-foreground">{test.date}</p>
                           
                           <div className="border-t pt-3">
-                            <p className="text-xs text-muted-foreground mb-2">Prescribed by:</p>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage src={test.doctorAvatarUrl} alt={test.doctorName} data-ai-hint={test.doctorAvatarHint} />
-                                <AvatarFallback>{test.doctorName.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="font-semibold">{test.doctorName}</p>
-                                <p className="text-sm text-muted-foreground">{test.doctorSpecialty}</p>
-                              </div>
+                            <p className="text-xs text-muted-foreground mb-2">Patient:</p>
+                             <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={test.patientAvatarUrl} alt={test.patientName} data-ai-hint={test.patientAvatarHint} />
+                                    <AvatarFallback>{test.patientName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="font-semibold">{test.patientName}</span>
                             </div>
                           </div>
 
                           <div className="flex gap-2 justify-end border-t pt-3">
-                            <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                <Link href="/patients/view-lab-test">
-                                    <Eye className="w-4 h-4 mr-1" />
-                                    View
-                                </Link>
+                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
                             </Button>
                             <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                 <Download className="w-4 h-4 mr-1" />
