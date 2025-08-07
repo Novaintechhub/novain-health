@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus, Clock, Calendar, CreditCard } from "lucide-react";
+import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus, Clock, Calendar, CreditCard, Star } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -213,6 +213,12 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
                     <Link href="/patients/request-appointment">
                         <CalendarPlus className="w-4 h-4 mr-1" />
                         Follow-up
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="bg-yellow-100 text-yellow-600 border-none hover:bg-yellow-200">
+                    <Link href="/patients/write-review">
+                        <Star className="w-4 h-4 mr-1" />
+                        Write a Review
                     </Link>
                 </Button>
             </>

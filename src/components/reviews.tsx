@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 type Review = {
   name: string;
   reviewedDate: string;
+  reviewDate?: string;
   rating: number;
   comment: string;
   avatarUrl: string;

@@ -354,20 +354,6 @@ export default function DoctorProfile() {
                                 </div>
                             )}
                             <p className="mt-2 text-muted-foreground">{review.text}</p>
-                            <div className="flex items-center justify-between mt-4">
-                                <Button variant="ghost" className="p-0 text-cyan-500 hover:text-cyan-600">
-                                    <Reply className="h-4 w-4 mr-2"/> Reply
-                                </Button>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                    <span>Recommend?</span>
-                                    <Button variant="outline" size="sm" className="gap-1">
-                                        <ThumbsUp className="h-4 w-4 text-green-500"/> Yes
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="gap-1">
-                                        <ThumbsDown className="h-4 w-4 text-red-500"/> No
-                                    </Button>
-                                </div>
-                            </div>
                             {review.reply && (
                                 <div className="flex items-start gap-4 mt-6 ml-8 p-4 bg-gray-50 rounded-lg">
                                     <Avatar className="h-12 w-12 shrink-0">
@@ -392,42 +378,6 @@ export default function DoctorProfile() {
                <div className="text-center">
                  <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">Show all feedback (167)</Button>
                </div>
-
-               <div className="border-t pt-8 mt-8">
-                    <h3 className="text-xl font-bold mb-4">Write a review for Dr. Darren Elder</h3>
-                    <div className="space-y-4">
-                        <div>
-                            <Label>Review</Label>
-                            <div className="mt-1">
-                                <StarRating rating={reviewRating} onRatingChange={setReviewRating} interactive={true} />
-                            </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="review-title">Title of your review</Label>
-                            <Input id="review-title" placeholder="If you could say it in one sentence, what would you say?" />
-                        </div>
-                        <div>
-                            <Label htmlFor="review-text">Your review</Label>
-                            <Textarea 
-                                id="review-text"
-                                value={reviewText}
-                                onChange={(e) => setReviewText(e.target.value)}
-                                maxLength={MAX_REVIEW_LENGTH}
-                            />
-                            <p className="text-sm text-muted-foreground mt-1">{MAX_REVIEW_LENGTH - reviewText.length} characters remaining</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Checkbox id="terms" />
-                            <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground">
-                                I have read and accept <a href="#" className="text-cyan-500 hover:underline">Terms & Conditions</a>
-                            </Label>
-                        </div>
-                        <div>
-                            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">Add Review</Button>
-                        </div>
-                    </div>
-                </div>
-
             </CardContent>
           </Card>
         </TabsContent>
