@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, ArrowDownCircle } from "lucide-react";
+import { PlusCircle, CalendarPlus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 type Transaction = {
   date: string;
@@ -57,8 +58,10 @@ export default function Wallet() {
             <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
               <PlusCircle className="mr-2 h-4 w-4" /> Add Funds
             </Button>
-            <Button variant="outline">
-              <ArrowDownCircle className="mr-2 h-4 w-4" /> Withdraw
+            <Button asChild variant="outline">
+              <Link href="/patients/find-a-doctor">
+                <CalendarPlus className="mr-2 h-4 w-4" /> Request an Appointment
+              </Link>
             </Button>
           </div>
         </CardContent>
