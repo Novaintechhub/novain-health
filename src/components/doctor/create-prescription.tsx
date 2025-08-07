@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { PlusCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Mock patient data
 const patients = [
@@ -41,6 +43,11 @@ export default function CreatePrescription() {
   const [medications, setMedications] = useState<Medication[]>([
     { name: "", dosage: "", frequency: "", duration: "", instructions: "" },
   ]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleAddMedication = () => {
     setMedications([
@@ -92,18 +99,22 @@ export default function CreatePrescription() {
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="patient-select">Select Patient</Label>
-              <Select onValueChange={setSelectedPatient} value={selectedPatient}>
-                <SelectTrigger id="patient-select">
-                  <SelectValue placeholder="Select a patient" />
-                </SelectTrigger>
-                <SelectContent>
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id}>
-                      {patient.name} ({patient.id})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isClient ? (
+                <Select onValueChange={setSelectedPatient} value={selectedPatient}>
+                  <SelectTrigger id="patient-select">
+                    <SelectValue placeholder="Select a patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id}>
+                        {patient.name} ({patient.id})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Skeleton className="h-10 w-full" />
+              )}
             </div>
 
             <div className="space-y-4">
