@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Download, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 type LabTest = {
   testName: string;
@@ -99,9 +100,11 @@ export default function LabTests() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-2 justify-end">
-                                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                <Eye className="w-4 h-4 mr-1" />
-                                                View
+                                            <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                                <Link href="/patients/view-lab-test">
+                                                    <Eye className="w-4 h-4 mr-1" />
+                                                    View
+                                                </Link>
                                             </Button>
                                             <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                                 <Download className="w-4 h-4 mr-1" />
@@ -140,9 +143,11 @@ export default function LabTests() {
                           </div>
 
                           <div className="flex gap-2 justify-end border-t pt-3">
-                            <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
+                             <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                                <Link href="/patients/view-lab-test">
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    View
+                                </Link>
                             </Button>
                             <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
                                 <Download className="w-4 h-4 mr-1" />
