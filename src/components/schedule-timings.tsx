@@ -12,19 +12,20 @@ type Availability = {
   [date: string]: string[];
 };
 
-const initialAvailability: Availability = {
-  // Pre-populate with some example data
-  [new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]]: ["09:00 AM - 10:00 AM", "11:00 AM - 12:00 PM"],
-  [new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0]]: ["10:00 AM - 11:00 AM", "02:00 PM - 03:00 PM", "04:00 PM - 05:00 PM"],
-  [new Date(new Date().setDate(new Date().getDate() + 3)).toISOString().split('T')[0]]: ["09:30 AM - 10:30 AM"],
-};
-
 export default function ScheduleTimings() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [availability, setAvailability] = useState<Availability>(initialAvailability);
+  const [availability, setAvailability] = useState<Availability>({});
   const [newTimeSlot, setNewTimeSlot] = useState({ from: "", to: "" });
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    const initialAvailability: Availability = {
+      [new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]]: ["09:00 AM - 10:00 AM", "11:00 AM - 12:00 PM"],
+      [new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0]]: ["10:00 AM - 11:00 AM", "02:00 PM - 03:00 PM", "04:00 PM - 05:00 PM"],
+      [new Date(new Date().setDate(new Date().getDate() + 3)).toISOString().split('T')[0]]: ["09:30 AM - 10:30 AM"],
+    };
+    setAvailability(initialAvailability);
     setSelectedDate(new Date());
   }, []);
 
@@ -50,6 +51,11 @@ export default function ScheduleTimings() {
       }));
     }
   };
+  
+  if (!isClient) {
+    // Render a skeleton or null on the server to avoid hydration mismatch
+    return null;
+  }
 
   return (
     <div className="space-y-6">
