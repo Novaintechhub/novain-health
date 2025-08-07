@@ -147,7 +147,7 @@ export default function Dashboard() {
     fetchAppointments();
   }, []);
 
-  const handleAcceptClick = (patient: Patient) => {
+  const handleApproveClick = (patient: Patient) => {
     setSelectedPatient(patient);
     setShowConfirmDialog(true);
   };
@@ -291,8 +291,8 @@ export default function Dashboard() {
                                 </Button>
                                 {patient.status === 'Pending' && (
                                   <>
-                                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleAcceptClick(patient)}>
-                                        <Check className="h-4 w-4 mr-1"/> Accept
+                                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleApproveClick(patient)}>
+                                        <Check className="h-4 w-4 mr-1"/> Approve
                                     </Button>
                                     <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200" onClick={() => handleCancelClick(patient)}>
                                         <X className="h-4 w-4 mr-1"/> Cancel
@@ -347,8 +347,8 @@ export default function Dashboard() {
                           </Button>
                           {patient.status === 'Pending' && (
                             <>
-                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleAcceptClick(patient)}>
-                                  <Check className="h-4 w-4 mr-1"/> Accept
+                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleApproveClick(patient)}>
+                                  <Check className="h-4 w-4 mr-1"/> Approve
                               </Button>
                               <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1" onClick={() => handleCancelClick(patient)}>
                                   <X className="h-4 w-4 mr-1"/> Cancel
