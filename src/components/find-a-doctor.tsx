@@ -202,7 +202,9 @@ export default function FindADoctor() {
                     <Button asChild variant="outline" className="w-full text-cyan-500 border-cyan-500 hover:bg-cyan-50 hover:text-cyan-600">
                       <Link href="/patients/doctor-profile">View Profile</Link>
                     </Button>
-                    <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white">Book Now</Button>
+                    <Button asChild className="w-full bg-cyan-400 hover:bg-cyan-500 text-white">
+                      <Link href="/patients/request-appointment">Book Now</Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
