@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
 import { signInWithGoogle, signInWithApple } from "@/lib/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -27,6 +29,8 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function PatientLogin() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleGoogleSignIn = async () => {
     const user = await signInWithGoogle();
     if (user) {
@@ -82,7 +86,18 @@ export default function PatientLogin() {
               
               <form className="space-y-4">
                 <Input type="email" placeholder="Email Address" />
-                <Input type="password" placeholder="Input password" />
+                <div className="relative">
+                  <Input type={showPassword ? "text" : "password"} placeholder="Input password" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
                 <Link href="/patients/dashboard" className="w-full block">
                   <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="button">Sign In</Button>
                 </Link>

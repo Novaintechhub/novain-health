@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import LandingHeader from "./landing-header";
 import LandingFooter from "./landing-footer";
 import { signInWithGoogle, signInWithApple } from "@/services/authService";
@@ -45,6 +45,8 @@ export default function PatientRegistration() {
   const [lgas, setLgas] = useState<string[]>([]);
   const { toast } = useToast();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<RegistrationInput>({
     resolver: zodResolver(RegistrationSchema),
@@ -165,10 +167,42 @@ export default function PatientRegistration() {
                       <FormItem><FormControl><Input type="email" placeholder="Email Address" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField control={form.control} name="password" render={({ field }) => (
-                      <FormItem><FormControl><Input type="password" placeholder="Input password" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative">
+                            <Input type={showPassword ? "text" : "password"} placeholder="Input password" {...field} />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}/>
                     <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                      <FormItem><FormControl><Input type="password" placeholder="Confirm password" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem>
+                        <FormControl>
+                           <div className="relative">
+                              <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm password" {...field} />
+                               <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                              >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                           </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}/>
                     <FormField control={form.control} name="stateOfResidence" render={({ field }) => (
                       <FormItem>
