@@ -8,6 +8,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { DoctorProfile, PatientProfile } from "@/lib/types";
+
 
 type StatCardProps = {
   title: string;
@@ -37,28 +39,11 @@ const chartData = [
   { name: 'Jun', revenue: 2390, appointments: 3800 },
 ];
 
-type Doctor = {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  specialty: string;
-  earned: string;
-};
-
-type Patient = {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    avatarHint: string;
-    lastVisit: string;
-    paid: string;
-}
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ totalPatients: 0, totalDoctors: 0, totalAppointments: 0, totalRevenue: 0 });
-  const [recentDoctors, setRecentDoctors] = useState<Doctor[]>([]);
-  const [recentPatients, setRecentPatients] = useState<Patient[]>([]);
+  const [recentDoctors, setRecentDoctors] = useState<DoctorProfile[]>([]);
+  const [recentPatients, setRecentPatients] = useState<PatientProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -148,17 +133,17 @@ export default function AdminDashboard() {
               </TableHeader>
               <TableBody>
                 {recentDoctors.map(doctor => (
-                  <TableRow key={doctor.id}>
+                  <TableRow key={doctor.uid}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={doctor.avatarUrl} alt={doctor.name} data-ai-hint={doctor.avatarHint} />
-                          <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={doctor.image} alt={`${doctor.firstName} ${doctor.lastName}`} data-ai-hint={doctor.hint} />
+                          <AvatarFallback>{doctor.firstName.charAt(0)}{doctor.lastName.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span>{doctor.name}</span>
+                        <span>{`Dr. ${doctor.firstName} ${doctor.lastName}`}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{doctor.specialty}</TableCell>
+                    <TableCell>{doctor.specialty || 'N/A'}</TableCell>
                     <TableCell>{doctor.earned}</TableCell>
                   </TableRow>
                 ))}
@@ -181,17 +166,17 @@ export default function AdminDashboard() {
               </TableHeader>
               <TableBody>
                 {recentPatients.map(patient => (
-                  <TableRow key={patient.id}>
+                  <TableRow key={patient.uid}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={patient.avatarUrl} alt={patient.name} data-ai-hint={patient.avatarHint} />
-                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} data-ai-hint={patient.avatarHint} />
+                           <AvatarFallback>{patient.firstName.charAt(0)}{patient.lastName.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span>{patient.name}</span>
+                        <span>{`${patient.firstName} ${patient.lastName}`}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{patient.lastVisit}</TableCell>
+                    <TableCell>{new Date(patient.lastVisit).toLocaleDateString()}</TableCell>
                     <TableCell>{patient.paid}</TableCell>
                   </TableRow>
                 ))}

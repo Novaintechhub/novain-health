@@ -17,3 +17,67 @@ export const RegistrationSchema = z.object({
 });
 
 export type RegistrationInput = z.infer<typeof RegistrationSchema>;
+
+// Base user profile
+interface UserProfile {
+    uid: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: 'patient' | 'doctor';
+    mobileNumber: string;
+    stateOfResidence: string;
+    lga: string;
+    language: string;
+    createdAt: string;
+}
+
+// Doctor specific profile fields
+export interface DoctorProfile extends UserProfile {
+    role: 'doctor';
+    specialty: string;
+    isVerified: boolean;
+    rating: number;
+    reviews: number;
+    location: string;
+    availability: string;
+    price: string;
+    image: string;
+    hint: string;
+    memberSince: string;
+    earned: string;
+    accountStatus: "active" | "inactive";
+}
+
+// Patient specific profile fields
+export interface PatientProfile extends UserProfile {
+    role: 'patient';
+    age: number;
+    address: string;
+    phone: string;
+    lastVisit: string;
+    paid: string;
+    avatarUrl: string;
+    avatarHint: string;
+    genotype: string;
+    bloodGroup: string;
+}
+
+export type Appointment = {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  doctorName: string;
+  doctorAvatar: string;
+  doctorAvatarHint: string;
+  specialty: string;
+  patientName: string;
+  patientAvatar: string;
+  patientAvatarHint: string;
+  appointmentDate: string; // Stored as ISO string
+  bookingDate: string;
+  type: string;
+  status: "Approved" | "Cancelled" | "Pending" | "Completed";
+  amount: string;
+  cancellationReason?: string;
+};

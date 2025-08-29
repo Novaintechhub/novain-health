@@ -6,21 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-
-type Patient = {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  age: number;
-  address: string;
-  phone: string;
-  lastVisit: string;
-  paid: string;
-};
+import type { PatientProfile } from "@/lib/types";
 
 export default function AdminPatients() {
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,20 +70,20 @@ export default function AdminPatients() {
                 </TableHeader>
                 <TableBody>
                     {patients.map(patient => (
-                    <TableRow key={patient.id}>
+                    <TableRow key={patient.uid}>
                         <TableCell>
                             <div className="flex items-center gap-3">
                                 <Avatar>
-                                <AvatarImage src={patient.avatarUrl} alt={patient.name} data-ai-hint={patient.avatarHint} />
-                                <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                                <AvatarImage src={patient.avatarUrl} alt={`${patient.firstName} ${patient.lastName}`} data-ai-hint={patient.avatarHint} />
+                                <AvatarFallback>{patient.firstName.charAt(0)}{patient.lastName.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <span>{patient.name}</span>
+                                <span>{`${patient.firstName} ${patient.lastName}`}</span>
                             </div>
                         </TableCell>
-                        <TableCell>{patient.age}</TableCell>
-                        <TableCell>{patient.address}</TableCell>
+                        <TableCell>{patient.age || 'N/A'}</TableCell>
+                        <TableCell>{patient.address || `${patient.lga}, ${patient.stateOfResidence}`}</TableCell>
                         <TableCell>{patient.phone}</TableCell>
-                        <TableCell>{patient.lastVisit}</TableCell>
+                        <TableCell>{new Date(patient.lastVisit).toLocaleDateString()}</TableCell>
                         <TableCell>{patient.paid}</TableCell>
                     </TableRow>
                     ))}

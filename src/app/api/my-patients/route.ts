@@ -1,68 +1,53 @@
-{
-  "name": "nextn",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack -p 5002",
-    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
-    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@genkit-ai/googleai": "^1.14.1",
-    "@genkit-ai/next": "^1.14.1",
-    "@hookform/resolvers": "^4.1.3",
-    "@radix-ui/react-accordion": "^1.2.3",
-    "@radix-ui/react-alert-dialog": "^1.1.6",
-    "@radix-ui/react-avatar": "^1.1.3",
-    "@radix-ui/react-checkbox": "^1.1.4",
-    "@radix-ui/react-collapsible": "^1.1.11",
-    "@radix-ui/react-dialog": "^1.1.6",
-    "@radix-ui/react-dropdown-menu": "^2.1.6",
-    "@radix-ui/react-label": "^2.1.2",
-    "@radix-ui/react-menubar": "^1.1.6",
-    "@radix-ui/react-popover": "^1.1.6",
-    "@radix-ui/react-progress": "^1.1.2",
-    "@radix-ui/react-radio-group": "^1.2.3",
-    "@radix-ui/react-scroll-area": "^1.2.3",
-    "@radix-ui/react-select": "^2.1.6",
-    "@radix-ui/react-separator": "^1.1.2",
-    "@radix-ui/react-slider": "^1.2.3",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-switch": "^1.1.3",
-    "@radix-ui/react-tabs": "^1.1.3",
-    "@radix-ui/react-toast": "^1.2.6",
-    "@radix-ui/react-tooltip": "^1.1.8",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^3.6.0",
-    "dotenv": "^16.5.0",
-    "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.1",
-    "firebase-admin": "^12.2.0",
-    "genkit": "^1.14.1",
-    "lucide-react": "^0.475.0",
-    "next": "15.3.3",
-    "patch-package": "^8.0.0",
-    "react": "^18.3.1",
-    "react-day-picker": "^8.10.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.54.2",
-    "recharts": "^2.15.1",
-    "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "genkit-cli": "^1.14.1",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+import { NextResponse } from 'next/server';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminAuth } from '@/lib/firebase-admin';
+import { PatientProfile } from '@/lib/types';
+import { patientConverter } from '@/lib/firestore-converters';
+import { headers } from 'next/headers';
+
+export async function GET() {
+  try {
+    const headersList = headers();
+    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+
+    if (!idToken) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    const decodedToken = await getAdminAuth().verifyIdToken(idToken);
+    const doctorId = decodedToken.uid;
+    
+    const db = getAdminDb();
+    // This is a simplified query. A real-world scenario might involve a subcollection
+    // of patients for each doctor or querying appointments to find unique patients.
+    const appointmentsSnapshot = await db.collection('appointments')
+        .where('doctorId', '==', doctorId)
+        .get();
+
+    if (appointmentsSnapshot.empty) {
+        return NextResponse.json([]);
+    }
+
+    const patientIds = new Set<string>();
+    appointmentsSnapshot.forEach(doc => {
+        patientIds.add(doc.data().patientId);
+    });
+
+    if (patientIds.size === 0) {
+        return NextResponse.json([]);
+    }
+    
+    const patientsRef = db.collection('patients').withConverter(patientConverter);
+    const patientsSnapshot = await patientsRef.where('uid', 'in', Array.from(patientIds)).get();
+    
+    const patients: PatientProfile[] = [];
+    patientsSnapshot.forEach(doc => {
+        patients.push(doc.data());
+    });
+
+    return NextResponse.json(patients);
+  } catch (error) {
+    console.error('Error fetching my patients:', error);
+    return NextResponse.json({ error: 'Failed to fetch patients' }, { status: 500 });
   }
 }

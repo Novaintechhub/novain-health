@@ -7,20 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
-type Appointment = {
-  id: string;
-  doctorName: string;
-  doctorAvatar: string;
-  doctorAvatarHint: string;
-  specialty: string;
-  patientName: string;
-  patientAvatar: string;
-  patientAvatarHint: string;
-  appointmentTime: string;
-  status: "Approved" | "Cancelled";
-  amount: string;
-};
+import type { Appointment } from "@/lib/types";
 
 export default function AdminAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -41,10 +28,12 @@ export default function AdminAppointments() {
     fetchAppointments();
   }, []);
 
-  const StatusBadge = ({ status }: { status: "Approved" | "Cancelled" }) => {
+  const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
     const statusClasses = {
       Approved: 'bg-green-100 text-green-800',
       Cancelled: 'bg-red-100 text-red-800',
+      Pending: 'bg-yellow-100 text-yellow-800',
+      Completed: 'bg-blue-100 text-blue-800',
     };
     return <Badge className={`capitalize ${statusClasses[status]}`}>{status}</Badge>;
   };
@@ -112,7 +101,7 @@ export default function AdminAppointments() {
                                 <span>{appointment.patientName}</span>
                             </div>
                         </TableCell>
-                        <TableCell>{appointment.appointmentTime}</TableCell>
+                        <TableCell>{new Date(appointment.appointmentDate).toLocaleString()}</TableCell>
                         <TableCell>
                             <StatusBadge status={appointment.status} />
                         </TableCell>

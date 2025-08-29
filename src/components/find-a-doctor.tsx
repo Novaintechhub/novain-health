@@ -16,19 +16,7 @@ import { MapPin, Search, CheckCircle2, Star, Calendar, Clock } from "lucide-reac
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
-
-type Doctor = {
-  name: string;
-  specialty: string;
-  image: string;
-  hint: string;
-  verified: boolean;
-  rating: number;
-  reviews: number;
-  location: string;
-  availability: string;
-  price: string;
-};
+import type { DoctorProfile } from "@/lib/types";
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center">
@@ -44,13 +32,16 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 export default function FindADoctor() {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDoctors() {
       try {
         const response = await fetch('/api/doctors');
+        if (!response.ok) {
+          throw new Error('Failed to fetch doctors');
+        }
         const data = await response.json();
         setDoctors(data);
       } catch (error) {
@@ -161,16 +152,16 @@ export default function FindADoctor() {
               >
                 <img
                   src={doctor.image}
-                  alt={doctor.name}
+                  alt={`${doctor.firstName} ${doctor.lastName}`}
                   className="w-full h-48 object-cover"
                   data-ai-hint={doctor.hint}
                 />
                 <CardContent className="p-4 flex flex-col flex-grow">
                   <div className="flex items-center">
-                    <h4 className="text-lg font-bold text-gray-800">{doctor.name}</h4>
-                    {doctor.verified && <CheckCircle2 className="w-4 h-4 text-green-500 ml-1 shrink-0" />}
+                    <h4 className="text-lg font-bold text-gray-800">{`Dr. ${doctor.firstName} ${doctor.lastName}`}</h4>
+                    {doctor.isVerified && <CheckCircle2 className="w-4 h-4 text-green-500 ml-1 shrink-0" />}
                   </div>
-                  <p className="text-muted-foreground text-xs mt-1 h-8">{doctor.specialty}</p>
+                  <p className="text-muted-foreground text-xs mt-1 h-8">{doctor.specialty || 'General Practioner'}</p>
                   
                   <div className="flex items-center mt-2">
                       <StarRating rating={doctor.rating} />
@@ -180,7 +171,7 @@ export default function FindADoctor() {
                   <div className="mt-4 space-y-2 text-sm text-gray-600 border-t pt-4">
                       <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-400" />
-                          <span>{doctor.location}</span>
+                          <span>{doctor.location || `${doctor.lga}, ${doctor.stateOfResidence}`}</span>
                       </div>
                       <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
@@ -212,5 +203,3 @@ export default function FindADoctor() {
     </div>
   );
 }
-
-    

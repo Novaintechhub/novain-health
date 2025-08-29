@@ -7,20 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
-type Doctor = {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  specialty: string;
-  memberSince: string;
-  earned: string;
-  accountStatus: "active" | "inactive";
-};
+import type { DoctorProfile } from "@/lib/types";
 
 export default function AdminDoctors() {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -88,18 +78,18 @@ export default function AdminDoctors() {
                 </TableHeader>
                 <TableBody>
                     {doctors.map(doctor => (
-                    <TableRow key={doctor.id}>
+                    <TableRow key={doctor.uid}>
                         <TableCell>
                         <div className="flex items-center gap-3">
                             <Avatar>
-                            <AvatarImage src={doctor.avatarUrl} alt={doctor.name} data-ai-hint={doctor.avatarHint} />
-                            <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={doctor.image} alt={`${doctor.firstName} ${doctor.lastName}`} data-ai-hint={doctor.hint} />
+                            <AvatarFallback>{doctor.firstName.charAt(0)}{doctor.lastName.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <span>{doctor.name}</span>
+                            <span>{`Dr. ${doctor.firstName} ${doctor.lastName}`}</span>
                         </div>
                         </TableCell>
-                        <TableCell>{doctor.specialty}</TableCell>
-                        <TableCell>{doctor.memberSince}</TableCell>
+                        <TableCell>{doctor.specialty || 'N/A'}</TableCell>
+                        <TableCell>{new Date(doctor.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell>{doctor.earned}</TableCell>
                         <TableCell>
                             <StatusBadge status={doctor.accountStatus} />
