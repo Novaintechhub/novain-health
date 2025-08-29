@@ -53,7 +53,10 @@ export const sendVerificationEmail = async (email: string, name: string, otp: st
 
     sendSmtpEmail.subject = "Verify Your NovainHealth Account";
     sendSmtpEmail.htmlContent = htmlContent;
-    sendSmtpEmail.sender = { "name": "NovainHealth", "email": "noreply@novainhealth.com" };
+    sendSmtpEmail.sender = { 
+      "name": process.env.BREVO_SENDER_NAME || "NovainHealth", 
+      "email": process.env.BREVO_SENDER_EMAIL || "noreply@novainhealth.com" 
+    };
     sendSmtpEmail.to = [{ "email": email, "name": name }];
     
     const apiResponse = await apiInstance.sendTransacEmail(sendSmtpEmail);
