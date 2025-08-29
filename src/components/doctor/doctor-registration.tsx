@@ -16,8 +16,14 @@ import {
 import { ChevronLeft, Mail } from "lucide-react";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
-import { signInWithGoogle, signInWithApple } from "@/lib/auth";
+import { signInWithGoogle, signInWithApple } from "@/services/authService";
 import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { RegistrationInput, RegistrationSchema } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -36,27 +42,59 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function DoctorRegistration() {
-  const [selectedState, setSelectedState] = useState('');
   const [lgas, setLgas] = useState<string[]>([]);
+  const { toast } = useToast();
+  const router = useRouter();
 
-  const handleGoogleSignIn = async () => {
-    const user = await signInWithGoogle();
-    if (user) {
-      window.location.href = "/doctor";
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    const user = await signInWithApple();
-    if (user) {
-      window.location.href = "/doctor";
-    }
-  };
+  const form = useForm<RegistrationInput>({
+    resolver: zodResolver(RegistrationSchema),
+    defaultValues: {
+      role: 'doctor',
+      firstName: '',
+      lastName: '',
+      mobileNumber: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      stateOfResidence: '',
+      lga: '',
+      language: '',
+    },
+  });
 
   const handleStateChange = (stateName: string) => {
     const state = nigerianStates.find(state => state.name === stateName);
-    setSelectedState(stateName);
+    form.setValue('stateOfResidence', stateName);
+    form.setValue('lga', ''); // Reset LGA when state changes
     setLgas(state ? state.lgas : []);
+  };
+
+  const onSubmit = async (data: RegistrationInput) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Something went wrong');
+      }
+      
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created. Please verify your email.",
+      });
+      router.push(`/verify-email?role=doctor`);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: error.message,
+      });
+    }
   };
 
   return (
@@ -91,11 +129,11 @@ export default function DoctorRegistration() {
               </div>
               
               <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-center" onClick={handleGoogleSignIn}>
+                <Button variant="outline" className="w-full justify-center" onClick={() => signInWithGoogle().then(u => u && router.push('/doctor'))}>
                   <GoogleIcon className="mr-2 h-5 w-5" />
                   Continue with Google
                 </Button>
-                <Button variant="outline" className="w-full justify-center" onClick={handleAppleSignIn}>
+                <Button variant="outline" className="w-full justify-center" onClick={() => signInWithApple().then(u => u && router.push('/doctor'))}>
                   <AppleIcon className="mr-2 h-5 w-5" />
                   Continue with Apple
                 </Button>
@@ -107,65 +145,113 @@ export default function DoctorRegistration() {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
 
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="firstName" render={({ field }) => (
+                      <FormItem>
+                        <FormControl><Input placeholder="First Name" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                     <FormField control={form.control} name="lastName" render={({ field }) => (
+                      <FormItem>
+                        <FormControl><Input placeholder="Last Name" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                  </div>
+                  <FormField control={form.control} name="mobileNumber" render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Input placeholder="Mobile Number" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Input type="email" placeholder="Email Address" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                  <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Input type="password" placeholder="Input password" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                  <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Input type="password" placeholder="Confirm password" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                  
+                  <FormField control={form.control} name="stateOfResidence" render={({ field }) => (
+                    <FormItem>
+                      <Select onValueChange={handleStateChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="State of Residence" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {nigerianStates.map(state => (
+                            <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
 
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input placeholder="First Name" />
-                  <Input placeholder="Last Name" />
-                </div>
-                <Input placeholder="Mobile Number" />
-                <Input type="email" placeholder="Email Address" />
-                <Input type="password" placeholder="Input password" />
-                <Input type="password" placeholder="Confirm password" />
-                
-                <Select onValueChange={handleStateChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="State of Residence" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {nigerianStates.map(state => (
-                      <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <FormField control={form.control} name="lga" render={({ field }) => (
+                    <FormItem>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={lgas.length === 0}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Local Government of Residence" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {lgas.map(lga => (
+                            <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                  
+                  <FormField control={form.control} name="language" render={({ field }) => (
+                    <FormItem>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                           <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {nigerianLanguages.map(lang => (
+                            <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
 
-                <Select disabled={!selectedState}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Local Government of Residence" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lgas.map(lga => (
-                       <SelectItem key={lga} value={lga}>{lga}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                 <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {nigerianLanguages.map(lang => (
-                      <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <div className="flex items-start text-xs text-gray-500">
+                      <span className="mr-2 mt-1">&#9432;</span>
+                      <p>When you select languages, Patients that understand same language can be paired with you.</p>
+                  </div>
 
-                <div className="flex items-start text-xs text-gray-500">
-                    <span className="mr-2 mt-1">&#9432;</span>
-                    <p>When you select languages, Patients that understand same language can be paired with you.</p>
-                </div>
-
-                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white h-12" type="submit">Sign Up</Button>
-              </form>
+                  <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white h-12" type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? "Signing up..." : "Sign Up"}
+                  </Button>
+                </form>
+              </Form>
 
               <p className="text-xs text-muted-foreground text-center mt-4">
                 By signing up, you agree to our{" "}
-                <Link href="#" className="text-cyan-500 hover:underline">
+                <Link href="/terms-of-service" className="text-cyan-500 hover:underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="#" className="text-cyan-500 hover:underline">
+                <Link href="/privacy-policy" className="text-cyan-500 hover:underline">
                   Privacy Policy
                 </Link>
                 , including consent to securely share your information with medical professionals for consultation purposes.
