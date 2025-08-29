@@ -8,7 +8,6 @@ import { sendVerificationEmail } from '@/services/emailService';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { createHash } from 'crypto';
-import { cookies } from 'next/headers';
 
 const generateAlphanumericOTP = (length: number = 6) => {
   return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
@@ -65,7 +64,6 @@ export async function POST(request: Request) {
     
     const otp = generateAlphanumericOTP();
     const otpHash = createHash('sha256').update(otp).digest('hex');
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
 
     let imageUrl = '';
     if (profileImage) {
@@ -90,15 +88,21 @@ export async function POST(request: Request) {
     
     await db.collection(`${role}s`).doc(userRecord.uid).set(userProfile);
 
-    // Store hash in a secure, http-only cookie
-    cookies().set('otp_hash', otpHash, {
+    const response = NextResponse.json({
+      message: 'User created successfully. Verification email sent.',
+      uid: userRecord.uid,
+      email: email
+    });
+
+    // Store hash in a secure, http-only cookie on the response
+    response.cookies.set('otp_hash', otpHash, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 600, // 10 minutes
         path: '/',
         sameSite: 'strict',
     });
-     cookies().set('otp_email', email, {
+     response.cookies.set('otp_email', email, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 600, // 10 minutes
@@ -110,11 +114,8 @@ export async function POST(request: Request) {
     // Send verification email
     await sendVerificationEmail(email, firstName, otp);
 
-    return NextResponse.json({
-      message: 'User created successfully. Verification email sent.',
-      uid: userRecord.uid,
-      email: email
-    });
+    return response;
+
   } catch (error: any) {
     console.error('Registration Error:', error);
     if (error.code === 'auth/email-already-exists') {

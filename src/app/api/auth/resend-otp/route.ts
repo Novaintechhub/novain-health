@@ -7,7 +7,6 @@ import { sendVerificationEmail } from '@/services/emailService';
 import crypto from 'crypto';
 import { z } from 'zod';
 import { createHash } from 'crypto';
-import { cookies } from 'next/headers';
 
 const generateAlphanumericOTP = (length: number = 6) => {
   return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
@@ -52,15 +51,17 @@ export async function POST(request: Request) {
     const otp = generateAlphanumericOTP();
     const otpHash = createHash('sha256').update(otp).digest('hex');
 
-    // Store hash in a secure, http-only cookie
-    cookies().set('otp_hash', otpHash, {
+    const response = NextResponse.json({ message: 'A new OTP has been sent to your email address.' });
+
+    // Store hash in a secure, http-only cookie on the response
+    response.cookies.set('otp_hash', otpHash, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 600, // 10 minutes
         path: '/',
         sameSite: 'strict',
     });
-     cookies().set('otp_email', email, {
+     response.cookies.set('otp_email', email, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 600, // 10 minutes
@@ -68,9 +69,9 @@ export async function POST(request: Request) {
         sameSite: 'strict',
     });
 
-    await sendVerificationEmail(userData.email, userData.firstName, otp);
+    await sendVerificationEmail(userData.firstName, userData.email, otp);
 
-    return NextResponse.json({ message: 'A new OTP has been sent to your email address.' });
+    return response;
   } catch (error) {
     console.error('Resend OTP Error:', error);
     return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
