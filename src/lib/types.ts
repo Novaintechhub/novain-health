@@ -1,10 +1,13 @@
 
 import { z } from 'zod';
 
+// Regex for Nigerian phone numbers. Allows for +234 format or the standard 080/090 format.
+const nigerianPhoneNumberRegex = /^((\+234)|0)[789][01]\d{8}$/;
+
 export const RegistrationSchema = z.object({
   firstName: z.string().min(2, { message: 'First name is required' }),
   lastName: z.string().min(2, { message: 'Last name is required' }),
-  mobileNumber: z.string().min(10, { message: 'Valid mobile number is required' }),
+  mobileNumber: z.string().regex(nigerianPhoneNumberRegex, { message: 'Please enter a valid Nigerian phone number' }),
   email: z.string().email({ message: 'Invalid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   confirmPassword: z.string(),

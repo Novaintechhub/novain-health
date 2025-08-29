@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const { email, password, firstName, lastName, role, profileImage, ...profileData } = validation.data;
+    const { email, password, confirmPassword, firstName, lastName, role, profileImage, ...profileData } = validation.data;
     const auth = getAdminAuth();
     const db = getAdminDb();
 
