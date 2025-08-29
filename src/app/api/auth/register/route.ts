@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { RegistrationSchema } from '@/lib/types';
+import { sendVerificationEmail } from '@/services/emailService';
 
 export async function POST(request: Request) {
   try {
@@ -15,17 +16,18 @@ export async function POST(request: Request) {
     const auth = getAdminAuth();
     const db = getAdminDb();
 
-    // Create user in Firebase Auth
     const userRecord = await auth.createUser({
       email,
       password,
       displayName: `${firstName} ${lastName}`,
     });
 
-    // Set custom claim for role
     await auth.setCustomUserClaims(userRecord.uid, { role });
+    
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
 
-    // Create user profile in Firestore
     const userProfile = {
       uid: userRecord.uid,
       email,
@@ -33,19 +35,23 @@ export async function POST(request: Request) {
       lastName,
       role,
       createdAt: new Date().toISOString(),
+      emailVerified: false,
+      otp,
+      otpExpires: otpExpires.toISOString(),
       ...profileData,
     };
     
-    // The collection will be 'doctors' or 'patients' based on the role
     await db.collection(`${role}s`).doc(userRecord.uid).set(userProfile);
 
+    // Send verification email
+    await sendVerificationEmail(email, firstName, otp);
+
     return NextResponse.json({
-      message: 'User created successfully',
+      message: 'User created successfully. Verification email sent.',
       uid: userRecord.uid,
     });
   } catch (error: any) {
     console.error('Registration Error:', error);
-    // Provide more specific error messages
     if (error.code === 'auth/email-already-exists') {
       return NextResponse.json({ error: 'Email already in use' }, { status: 409 });
     }
