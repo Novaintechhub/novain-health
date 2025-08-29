@@ -16,7 +16,7 @@ import {
 import { ChevronLeft, Mail, Eye, EyeOff } from "lucide-react";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
-import { signInWithGoogle, signInWithApple } from "@/services/authService";
+import { signInWithGoogle, signInWithApple } from "@/lib/auth";
 import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
