@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { RegistrationInput, RegistrationSchema } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -41,7 +42,7 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-export default function DoctorRegistration() {
+const RegistrationForm = () => {
   const [lgas, setLgas] = useState<string[]>([]);
   const { toast } = useToast();
   const router = useRouter();
@@ -100,6 +101,144 @@ export default function DoctorRegistration() {
   };
 
   return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField control={form.control} name="firstName" render={({ field }) => (
+            <FormItem>
+              <FormControl><Input placeholder="First Name" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}/>
+            <FormField control={form.control} name="lastName" render={({ field }) => (
+            <FormItem>
+              <FormControl><Input placeholder="Last Name" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}/>
+        </div>
+        <FormField control={form.control} name="mobileNumber" render={({ field }) => (
+          <FormItem>
+            <FormControl><Input placeholder="Mobile Number" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )}/>
+        <FormField control={form.control} name="email" render={({ field }) => (
+          <FormItem>
+            <FormControl><Input type="email" placeholder="Email Address" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )}/>
+        <FormField control={form.control} name="password" render={({ field }) => (
+          <FormItem>
+            <FormControl>
+              <div className="relative">
+                <Input type={showPassword ? "text" : "password"} placeholder="Input password" {...field} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}/>
+        <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+          <FormItem>
+            <FormControl>
+              <div className="relative">
+                  <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm password" {...field} />
+                  <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}/>
+        
+        <FormField control={form.control} name="stateOfResidence" render={({ field }) => (
+          <FormItem>
+            <Select onValueChange={handleStateChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger><SelectValue placeholder="State of Residence" /></SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {nigerianStates.map(state => (
+                  <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}/>
+
+        <FormField control={form.control} name="lga" render={({ field }) => (
+          <FormItem>
+            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={lgas.length === 0}>
+              <FormControl>
+                <SelectTrigger><SelectValue placeholder="Local Government of Residence" /></SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {lgas.map(lga => (
+                  <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}/>
+        
+        <FormField control={form.control} name="language" render={({ field }) => (
+          <FormItem>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                  <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {nigerianLanguages.map(lang => (
+                  <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}/>
+
+        <div className="flex items-start text-xs text-gray-500">
+            <span className="mr-2 mt-1">&#9432;</span>
+            <p>When you select languages, Patients that understand same language can be paired with you.</p>
+        </div>
+
+        <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white h-12" type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Signing up..." : "Sign Up"}
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+
+export default function DoctorRegistration() {
+  const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <LandingHeader />
       <main className="flex-grow">
@@ -147,131 +286,15 @@ export default function DoctorRegistration() {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="firstName" render={({ field }) => (
-                      <FormItem>
-                        <FormControl><Input placeholder="First Name" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                     <FormField control={form.control} name="lastName" render={({ field }) => (
-                      <FormItem>
-                        <FormControl><Input placeholder="Last Name" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                  </div>
-                  <FormField control={form.control} name="mobileNumber" render={({ field }) => (
-                    <FormItem>
-                      <FormControl><Input placeholder="Mobile Number" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                  <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem>
-                      <FormControl><Input type="email" placeholder="Email Address" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                  <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <Input type={showPassword ? "text" : "password"} placeholder="Input password" {...field} />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword((prev) => !prev)}
-                          >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                  <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                           <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm password" {...field} />
-                           <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowConfirmPassword((prev) => !prev)}
-                          >
-                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                  
-                  <FormField control={form.control} name="stateOfResidence" render={({ field }) => (
-                    <FormItem>
-                      <Select onValueChange={handleStateChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="State of Residence" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {nigerianStates.map(state => (
-                            <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-
-                  <FormField control={form.control} name="lga" render={({ field }) => (
-                    <FormItem>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={lgas.length === 0}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="Local Government of Residence" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {lgas.map(lga => (
-                            <SelectItem key={lga} value={lga}>{lga}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                  
-                  <FormField control={form.control} name="language" render={({ field }) => (
-                    <FormItem>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                           <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {nigerianLanguages.map(lang => (
-                            <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-
-                  <div className="flex items-start text-xs text-gray-500">
-                      <span className="mr-2 mt-1">&#9432;</span>
-                      <p>When you select languages, Patients that understand same language can be paired with you.</p>
-                  </div>
-
-                  <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white h-12" type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? "Signing up..." : "Sign Up"}
-                  </Button>
-                </form>
-              </Form>
+              {isClient ? <RegistrationForm /> : (
+                <div className="space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              )}
 
               <p className="text-xs text-muted-foreground text-center mt-4">
                 By signing up, you agree to our{" "}
