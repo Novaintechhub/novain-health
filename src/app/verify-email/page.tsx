@@ -8,7 +8,7 @@ const OtpVerificationComponent = () => {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense>
       <OtpVerificationComponent />
     </Suspense>
   );

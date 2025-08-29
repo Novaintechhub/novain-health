@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { RegistrationSchema } from '@/lib/types';
 import { sendVerificationEmail } from '@/services/emailService';
+import crypto from 'crypto';
+
+const generateAlphanumericOTP = (length: number = 6) => {
+  return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
+};
 
 export async function POST(request: Request) {
   try {
@@ -24,8 +29,8 @@ export async function POST(request: Request) {
 
     await auth.setCustomUserClaims(userRecord.uid, { role });
     
-    // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate Alphanumeric OTP
+    const otp = generateAlphanumericOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
 
     const userProfile = {
@@ -49,6 +54,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: 'User created successfully. Verification email sent.',
       uid: userRecord.uid,
+      email: email
     });
   } catch (error: any) {
     console.error('Registration Error:', error);

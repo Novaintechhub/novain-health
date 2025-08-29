@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,68 @@ export default function OtpVerification() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const [otp, setOtp] = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleResend = async () => {
+    setIsResendDisabled(true);
+    setCountdown(60);
+    // Restart timer
+     const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    try {
+        const email = searchParams.get('email');
+        if (!email) {
+            toast({ variant: "destructive", title: "Error", description: "Email not found." });
+            return;
+        }
+
+        const response = await fetch('/api/auth/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+
+        toast({
+            title: "Success!",
+            description: "A new OTP has been sent to your email.",
+        });
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Failed to Resend OTP",
+            description: error.message,
+        });
+        setIsResendDisabled(false);
+    }
+  };
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,11 +91,10 @@ export default function OtpVerification() {
     const role = searchParams.get('role');
 
     if (role === 'doctor') {
-      router.push('/doctor');
+      router.push('/doctor-login');
     } else if (role === 'patient') {
-      router.push('/patients/dashboard');
+      router.push('/patient-login');
     } else {
-      // Fallback to general login if role is not specified
       router.push('/general-login');
     }
   };
@@ -58,28 +120,29 @@ export default function OtpVerification() {
               </div>
               <h1 className="text-2xl font-bold mb-2">Verify Your Email</h1>
               <p className="text-muted-foreground mb-6">
-                We've sent a 6-digit code to your email address. Please enter it below to verify your account.
+                We've sent a 6-character code to your email address. Please enter it below to verify your account.
               </p>
 
               <form className="space-y-6" onSubmit={handleVerify}>
-                <div className="flex justify-center gap-2">
-                  <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
-                  <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
-                  <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
-                  <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
-                  <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
-                  <Input maxLength={1} className="w-12 h-12 text-center text-2xl" />
+                <div>
+                  <Input 
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.toUpperCase())}
+                    maxLength={6} 
+                    className="w-full h-14 text-center text-2xl tracking-[8px]" 
+                    placeholder="______"
+                  />
                 </div>
                 
-                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit">
+                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit" disabled={otp.length < 6}>
                   Verify Account
                 </Button>
               </form>
 
               <p className="text-sm text-muted-foreground mt-6">
                 Didn't receive a code?{" "}
-                <Button variant="link" className="p-0 h-auto text-cyan-500">
-                  Resend Code
+                <Button variant="link" className="p-0 h-auto text-cyan-500" onClick={handleResend} disabled={isResendDisabled}>
+                  Resend Code {isResendDisabled && `(${countdown}s)`}
                 </Button>
               </p>
             </div>
