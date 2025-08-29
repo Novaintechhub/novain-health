@@ -1,10 +1,14 @@
 
+'use server';
+
 import { NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb, getAdminStorage } from '@/lib/firebase-admin';
 import { RegistrationSchema } from '@/lib/types';
 import { sendVerificationEmail } from '@/services/emailService';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { createHash } from 'crypto';
+import { cookies } from 'next/headers';
 
 const generateAlphanumericOTP = (length: number = 6) => {
   return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
@@ -60,6 +64,7 @@ export async function POST(request: Request) {
     await auth.setCustomUserClaims(userRecord.uid, { role });
     
     const otp = generateAlphanumericOTP();
+    const otpHash = createHash('sha256').update(otp).digest('hex');
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
 
     let imageUrl = '';
@@ -68,7 +73,6 @@ export async function POST(request: Request) {
             imageUrl = await uploadProfileImage(profileImage, userRecord.uid);
         } catch(uploadError) {
             console.error("Image upload failed:", uploadError);
-            // Decide if you want to fail the whole registration or just proceed without an image
         }
     }
 
@@ -80,13 +84,28 @@ export async function POST(request: Request) {
       role,
       createdAt: new Date().toISOString(),
       emailVerified: false,
-      otp,
-      otpExpires: otpExpires.toISOString(),
       imageUrl: imageUrl, // Save image URL
       ...profileData,
     };
     
     await db.collection(`${role}s`).doc(userRecord.uid).set(userProfile);
+
+    // Store hash in a secure, http-only cookie
+    cookies().set('otp_hash', otpHash, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 600, // 10 minutes
+        path: '/',
+        sameSite: 'strict',
+    });
+     cookies().set('otp_email', email, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 600, // 10 minutes
+        path: '/',
+        sameSite: 'strict',
+    });
+
 
     // Send verification email
     await sendVerificationEmail(email, firstName, otp);

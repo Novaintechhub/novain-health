@@ -1,8 +1,13 @@
+
+'use server';
+
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { sendVerificationEmail } from '@/services/emailService';
 import crypto from 'crypto';
 import { z } from 'zod';
+import { createHash } from 'crypto';
+import { cookies } from 'next/headers';
 
 const generateAlphanumericOTP = (length: number = 6) => {
   return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
@@ -45,11 +50,22 @@ export async function POST(request: Request) {
     }
 
     const otp = generateAlphanumericOTP();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    const otpHash = createHash('sha256').update(otp).digest('hex');
 
-    await userDoc.ref.update({
-      otp,
-      otpExpires: otpExpires.toISOString(),
+    // Store hash in a secure, http-only cookie
+    cookies().set('otp_hash', otpHash, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 600, // 10 minutes
+        path: '/',
+        sameSite: 'strict',
+    });
+     cookies().set('otp_email', email, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 600, // 10 minutes
+        path: '/',
+        sameSite: 'strict',
     });
 
     await sendVerificationEmail(userData.email, userData.firstName, otp);

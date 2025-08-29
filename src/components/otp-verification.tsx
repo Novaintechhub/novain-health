@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -19,41 +19,41 @@ export default function OtpVerification() {
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(60);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
+  const startTimer = () => {
+    setIsResendDisabled(true);
+    setCountdown(60);
+    timerRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
+          clearInterval(timerRef.current!);
           setIsResendDisabled(false);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+  };
 
-    return () => clearInterval(timer);
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, []);
 
   const handleResend = async () => {
-    setIsResendDisabled(true);
-    setCountdown(60);
-    // Restart timer
-     const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setIsResendDisabled(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
+    setIsResending(true);
     try {
         const email = searchParams.get('email');
         if (!email) {
-            toast({ variant: "destructive", title: "Error", description: "Email not found." });
+            toast({ variant: "destructive", title: "Error", description: "Email not found in URL." });
             return;
         }
 
@@ -63,39 +63,62 @@ export default function OtpVerification() {
             body: JSON.stringify({ email }),
         });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error);
+        if (!response.ok) throw new Error(result.error || "Failed to resend OTP.");
 
         toast({
             title: "Success!",
             description: "A new OTP has been sent to your email.",
         });
+        startTimer();
     } catch (error: any) {
         toast({
             variant: "destructive",
             title: "Failed to Resend OTP",
             description: error.message,
         });
-        setIsResendDisabled(false);
+    } finally {
+        setIsResending(false);
     }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, you would add logic here to verify the OTP with your backend.
+    setIsVerifying(true);
     
-    toast({
-      title: "Success!",
-      description: "Your email has been verified successfully.",
-    });
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp }),
+      });
+      
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error?.otp?._errors[0] || result.error || "Failed to verify OTP.");
+      }
+      
+      toast({
+        title: "Success!",
+        description: "Your email has been verified successfully.",
+      });
 
-    const role = searchParams.get('role');
+      const role = searchParams.get('role');
 
-    if (role === 'doctor') {
-      router.push('/doctor-login');
-    } else if (role === 'patient') {
-      router.push('/patient-login');
-    } else {
-      router.push('/general-login');
+      if (role === 'doctor') {
+        router.push('/doctor-login');
+      } else if (role === 'patient') {
+        router.push('/patient-login');
+      } else {
+        router.push('/general-login');
+      }
+    } catch (error: any) {
+       toast({
+        variant: "destructive",
+        title: "Verification Failed",
+        description: error.message,
+      });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -134,15 +157,15 @@ export default function OtpVerification() {
                   />
                 </div>
                 
-                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit" disabled={otp.length < 6}>
-                  Verify Account
+                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit" disabled={otp.length < 6 || isVerifying}>
+                  {isVerifying ? 'Verifying...' : 'Verify Account'}
                 </Button>
               </form>
 
               <p className="text-sm text-muted-foreground mt-6">
                 Didn't receive a code?{" "}
-                <Button variant="link" className="p-0 h-auto text-cyan-500" onClick={handleResend} disabled={isResendDisabled}>
-                  Resend Code {isResendDisabled && `(${countdown}s)`}
+                <Button variant="link" className="p-0 h-auto text-cyan-500" onClick={handleResend} disabled={isResendDisabled || isResending}>
+                  {isResending ? 'Sending...' : `Resend Code ${isResendDisabled ? `(${countdown}s)` : ''}`}
                 </Button>
               </p>
             </div>
