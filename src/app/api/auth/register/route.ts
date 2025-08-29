@@ -1,12 +1,42 @@
+
 import { NextResponse } from 'next/server';
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminDb, getAdminStorage } from '@/lib/firebase-admin';
 import { RegistrationSchema } from '@/lib/types';
 import { sendVerificationEmail } from '@/services/emailService';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 const generateAlphanumericOTP = (length: number = 6) => {
   return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
 };
+
+async function uploadProfileImage(dataUri: string, uid: string): Promise<string> {
+    const storage = getAdminStorage();
+    const bucket = storage.bucket();
+
+    // Extract content type and base64 data from Data URI
+    const match = dataUri.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (!match) {
+        throw new Error('Invalid Data URI for profile image.');
+    }
+    const contentType = match[1];
+    const base64Data = match[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    const filePath = `profile-images/${uid}/${uuidv4()}`;
+    const file = bucket.file(filePath);
+
+    await file.save(buffer, {
+        metadata: {
+            contentType,
+        },
+    });
+
+    // Make the file public and get the URL
+    await file.makePublic();
+    return file.publicUrl();
+}
+
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +47,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const { email, password, firstName, lastName, role, ...profileData } = validation.data;
+    const { email, password, firstName, lastName, role, profileImage, ...profileData } = validation.data;
     const auth = getAdminAuth();
     const db = getAdminDb();
 
@@ -29,9 +59,18 @@ export async function POST(request: Request) {
 
     await auth.setCustomUserClaims(userRecord.uid, { role });
     
-    // Generate Alphanumeric OTP
     const otp = generateAlphanumericOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
+
+    let imageUrl = '';
+    if (profileImage) {
+        try {
+            imageUrl = await uploadProfileImage(profileImage, userRecord.uid);
+        } catch(uploadError) {
+            console.error("Image upload failed:", uploadError);
+            // Decide if you want to fail the whole registration or just proceed without an image
+        }
+    }
 
     const userProfile = {
       uid: userRecord.uid,
@@ -43,6 +82,7 @@ export async function POST(request: Request) {
       emailVerified: false,
       otp,
       otpExpires: otpExpires.toISOString(),
+      imageUrl: imageUrl, // Save image URL
       ...profileData,
     };
     

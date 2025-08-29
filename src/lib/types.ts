@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const RegistrationSchema = z.object({
@@ -11,6 +12,7 @@ export const RegistrationSchema = z.object({
   lga: z.string().min(1, { message: 'LGA is required' }),
   language: z.string().min(1, { message: 'Language is required' }),
   role: z.enum(['patient', 'doctor']),
+  profileImage: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],

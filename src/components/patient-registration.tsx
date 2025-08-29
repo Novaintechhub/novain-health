@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
+import ImageUpload from "@/components/shared/image-upload";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -62,6 +63,7 @@ const RegistrationForm = () => {
       stateOfResidence: '',
       lga: '',
       language: '',
+      profileImage: '',
     },
   });
 
@@ -91,7 +93,7 @@ const RegistrationForm = () => {
         title: "Registration Successful",
         description: "Your account has been created. Please verify your email.",
       });
-      router.push(`/verify-email?role=patient`);
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}&role=patient`);
 
     } catch (error: any) {
       toast({
@@ -105,6 +107,14 @@ const RegistrationForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField control={form.control} name="profileImage" render={({ field }) => (
+            <FormItem className="flex justify-center">
+                <FormControl>
+                    <ImageUpload onImageChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+          )}/>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField control={form.control} name="firstName" render={({ field }) => (
               <FormItem><FormControl><Input placeholder="First Name" {...field} /></FormControl><FormMessage /></FormItem>
@@ -206,6 +216,28 @@ export default function PatientRegistration() {
     setIsClient(true);
   }, []);
 
+  if (!isClient) {
+    return (
+        <div className="flex flex-col min-h-screen bg-gray-100">
+            <LandingHeader />
+            <main className="flex-grow">
+                 <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-4 sm:p-8 overflow-y-auto bg-white mx-auto">
+                    <div className="w-full max-w-lg">
+                        <div className="space-y-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-12 w-full" />
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <LandingFooter />
+        </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <LandingHeader />
@@ -254,15 +286,7 @@ export default function PatientRegistration() {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
 
-              {isClient ? <RegistrationForm /> : (
-                <div className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                </div>
-              )}
+              <RegistrationForm />
 
               <p className="text-xs text-muted-foreground text-center mt-4">
                 By signing up, you agree to our{" "}
