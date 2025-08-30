@@ -7,27 +7,57 @@ import { Button } from "@/components/ui/button";
 import { X, PlusCircle } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "@/lib/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 type Availability = {
   [date: string]: string[];
 };
 
 export default function ScheduleTimings() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [availability, setAvailability] = useState<Availability>({});
   const [newTimeSlot, setNewTimeSlot] = useState({ from: "", to: "" });
-  const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+  const auth = getAuth(app);
 
   useEffect(() => {
-    setIsClient(true);
-    const initialAvailability: Availability = {
-      [new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]]: ["09:00 AM - 10:00 AM", "11:00 AM - 12:00 PM"],
-      [new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0]]: ["10:00 AM - 11:00 AM", "02:00 PM - 03:00 PM", "04:00 PM - 05:00 PM"],
-      [new Date(new Date().setDate(new Date().getDate() + 3)).toISOString().split('T')[0]]: ["09:30 AM - 10:30 AM"],
-    };
-    setAvailability(initialAvailability);
-    setSelectedDate(new Date());
-  }, []);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const idToken = await user.getIdToken();
+          const response = await fetch('/api/doctor/schedule', {
+            headers: {
+              'Authorization': `Bearer ${idToken}`
+            }
+          });
+          if (!response.ok) {
+            throw new Error('Failed to fetch schedule');
+          }
+          const data = await response.json();
+          setAvailability(data);
+        } catch (error) {
+          console.error("Error fetching schedule:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not load your schedule.",
+          });
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, toast]);
 
   const selectedDateString = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
   const timeSlotsForSelectedDate = availability[selectedDateString] || [];
@@ -35,9 +65,10 @@ export default function ScheduleTimings() {
   const handleAddTimeSlot = () => {
     if (newTimeSlot.from && newTimeSlot.to && selectedDateString) {
       const formattedSlot = `${newTimeSlot.from} - ${newTimeSlot.to}`;
+      const updatedSlots = [...timeSlotsForSelectedDate, formattedSlot].sort();
       setAvailability(prev => ({
         ...prev,
-        [selectedDateString]: [...(prev[selectedDateString] || []), formattedSlot]
+        [selectedDateString]: updatedSlots
       }));
       setNewTimeSlot({ from: "", to: "" });
     }
@@ -51,10 +82,63 @@ export default function ScheduleTimings() {
       }));
     }
   };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    const user = auth.currentUser;
+    if (!user) {
+        toast({ variant: "destructive", title: "Error", description: "You must be logged in to save changes." });
+        setIsSaving(false);
+        return;
+    }
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/doctor/schedule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify(availability),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save schedule');
+        }
+        toast({
+            title: "Success",
+            description: "Your schedule has been updated.",
+        });
+    } catch (error) {
+        console.error("Error saving schedule:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not save your schedule.",
+        });
+    } finally {
+        setIsSaving(false);
+    }
+  }
   
-  if (!isClient) {
-    // Render a skeleton or null on the server to avoid hydration mismatch
-    return null;
+  if (loading) {
+    return (
+        <div className="space-y-6">
+            <h1 className="text-2xl font-bold">Schedule Timings</h1>
+            <Card>
+                <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Skeleton className="rounded-md w-full h-[300px]" />
+                    <div className="space-y-6">
+                        <Skeleton className="h-8 w-3/4" />
+                        <div className="space-y-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
   }
 
   return (
@@ -126,7 +210,9 @@ export default function ScheduleTimings() {
               </Button>
             </div>
              <div className="flex justify-end pt-6 border-t">
-                <Button>Save Changes</Button>
+                <Button onClick={handleSaveChanges} disabled={isSaving}>
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
             </div>
           </div>
         </CardContent>
