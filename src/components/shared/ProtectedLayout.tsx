@@ -17,27 +17,26 @@ export default function ProtectedLayout({ children, allowedRole, loginPath }: Pr
   const router = useRouter();
 
   useEffect(() => {
-    // Wait until the initial loading is finished
+    // This effect runs whenever the authentication state changes.
+    // We wait until the initial loading from Firebase is complete.
     if (!loading) {
-      // If there's no user, redirect to the login page.
-      if (!user) {
+      // If there's no authenticated user, or the role check is complete but doesn't match,
+      // we must redirect to the login page.
+      if (!user || (role && role !== allowedRole)) {
         router.push(loginPath);
-      } 
-      // If there is a user but their role doesn't match, redirect them.
-      // This prevents a doctor from accessing patient pages and vice-versa.
-      else if (role && role !== allowedRole) {
-        // Redirect to a safe default page.
-        router.push('/');
       }
     }
   }, [user, loading, role, router, allowedRole, loginPath]);
 
-  // While loading, or if the user is not authenticated or has the wrong role,
-  // show a loading state to prevent flashing the content of the protected page.
+  // While the AuthContext is loading the user's state from Firebase,
+  // or if the user is not authenticated yet (and the redirect is about to happen),
+  // show a loading skeleton. This is crucial to prevent the "flicker" of
+  // protected content and to stop the redirect loop.
   if (loading || !user || (role && role !== allowedRole)) {
     return (
       <div className="flex items-center justify-center h-screen w-screen">
         <div className="space-y-4 w-1/2">
+            <h1 className="text-2xl font-bold text-center">Loading...</h1>
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-32 w-full" />
             <Skeleton className="h-32 w-full" />
