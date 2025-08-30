@@ -206,7 +206,7 @@ export default function DoctorLayout({
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Logout">
-                  <Link href="/doctor-login">
+                  <Link href="/doctor-registration">
                     <LogOut />
                     <span className="group-data-[collapsible=icon]:hidden">Logout</span>
                   </Link>
@@ -262,7 +262,7 @@ export default function DoctorLayout({
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/doctor-login">
+                      <Link href="/doctor-registration">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Log out</span>
                       </Link>

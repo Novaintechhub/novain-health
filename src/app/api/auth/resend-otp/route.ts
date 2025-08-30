@@ -1,80 +1,120 @@
-
 'use server';
 
-import { NextResponse } from 'next/server';
-import { getAdminDb } from '@/lib/firebase-admin';
-import { sendVerificationEmail } from '@/services/emailService';
-import crypto from 'crypto';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createHash } from 'crypto';
+import crypto from 'crypto';
+import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
+import { sendVerificationEmail } from '@/services/emailService';
+import { fixedWindowPerIp, fixedWindowPerEmail, dailyCapPerEmail } from '@/lib/rateLimiter';
 
-const generateAlphanumericOTP = (length: number = 6) => {
-  return crypto.randomBytes(length).toString('hex').slice(0, length).toUpperCase();
-};
+const OTP_PEPPER = process.env.OTP_PEPPER || '';
+if (!OTP_PEPPER) console.error('Missing OTP_PEPPER environment variable');
 
-const ResendOtpSchema = z.object({
-  email: z.string().email(),
-});
+const OTP_LENGTH = 8;
+const OTP_TTL_MS = 10 * 60 * 1000;
+const RESEND_MIN_INTERVAL_MS = 60 * 1000; // 60s minimum gap
+const DAILY_RESEND_CAP = 5;
 
-export async function POST(request: Request) {
+const OTP_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const ResendSchema = z.object({ email: z.string().email() }).strict();
+
+function generateOtp(len = OTP_LENGTH) {
+  let s = '';
+  for (let i = 0; i < len; i++) s += OTP_ALPHABET[crypto.randomInt(0, OTP_ALPHABET.length)];
+  return s;
+}
+function hmacOtp(otp: string) {
+  return crypto.createHmac('sha256', OTP_PEPPER).update(otp).digest('hex');
+}
+
+export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   try {
-    const body = await request.json();
-    const validation = ResendOtpSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json({ error: 'Invalid email provided' }, { status: 400 });
+    // IP rate limit
+    if (!(await fixedWindowPerIp.allow(`resend:ip:${ip}`, 12, 60_000))) {
+      return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
     }
-    
-    const { email } = validation.data;
+
+    const json = await req.json();
+    const parsed = ResendSchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
+    }
+
+    const email = parsed.data.email.trim().toLowerCase();
+
+    // Per-email rate limit and daily cap
+    if (!(await fixedWindowPerEmail.allow(`resend:email:${email}`, 6, 60_000))) {
+      return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
+    }
+    if (!(await dailyCapPerEmail.allow(`resend:daily:${email}`, DAILY_RESEND_CAP))) {
+      return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
+    }
+
     const db = getAdminDb();
+    const auth = getAdminAuth();
 
-    // Find user in patients or doctors collection by email
-    const patientsQuery = db.collection('patients').where('email', '==', email).limit(1);
-    const doctorsQuery = db.collection('doctors').where('email', '==', email).limit(1);
+    // Look up user (unified 'users' collection)
+    const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+    if (snap.empty) {
+      // Anti-enumeration: generic response
+      return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
+    }
+    const userDoc = snap.docs[0];
+    const user = userDoc.data();
+    const uid = userDoc.id;
 
-    const [patientSnapshot, doctorSnapshot] = await Promise.all([patientsQuery.get(), doctorsQuery.get()]);
-
-    let userDoc;
-    if (!patientSnapshot.empty) {
-      userDoc = patientSnapshot.docs[0];
-    } else if (!doctorSnapshot.empty) {
-      userDoc = doctorSnapshot.docs[0];
-    } else {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (user.emailVerified === true) {
+      return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
     }
 
-    const userData = userDoc.data();
-    if (userData.emailVerified) {
-        return NextResponse.json({ message: 'Email already verified' });
+    const verRef = db.collection('email_verifications').doc(uid);
+    const verSnap = await verRef.get();
+    const now = Date.now();
+    const dayStartMs = new Date(new Date().toISOString().slice(0, 10)).getTime();
+
+    let lastSentAt = 0;
+    let resendCount = 0;
+    let existingDayStart = dayStartMs;
+
+    if (verSnap.exists) {
+      const v = verSnap.data() as any;
+      lastSentAt = v?.lastSentAt ?? 0;
+      const sameDay = v?.dayStartMs === dayStartMs;
+      resendCount = sameDay ? v?.resendCount ?? 0 : 0;
+      existingDayStart = sameDay ? v?.dayStartMs : dayStartMs;
+
+      // Enforce min interval
+      if (now - lastSentAt < RESEND_MIN_INTERVAL_MS) {
+        return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
+      }
     }
 
-    const otp = generateAlphanumericOTP();
-    const otpHash = createHash('sha256').update(otp).digest('hex');
+    // New OTP
+    const otp = generateOtp();
+    const otpHash = hmacOtp(otp);
 
-    await sendVerificationEmail(userData.email, userData.firstName, otp);
+    await verRef.set(
+      {
+        otpHash,
+        expiresAt: now + OTP_TTL_MS,
+        attempts: 0,
+        maxAttempts: 5,
+        resendCount: resendCount + 1,
+        lastSentAt: now,
+        dayStartMs: existingDayStart === dayStartMs ? dayStartMs : dayStartMs,
+        createdAt: verSnap.exists ? (verSnap.data() as any).createdAt : now,
+      },
+      { merge: true }
+    );
 
-    const response = NextResponse.json({ message: 'A new OTP has been sent to your email address.' });
+    await sendVerificationEmail(email, user.firstName ?? 'there', otp);
+    try { await auth.updateUser(uid, { emailVerified: false }); } catch {}
 
-    // Store hash in a secure, http-only cookie on the response
-    response.cookies.set('otp_hash', otpHash, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        maxAge: 600, // 10 minutes
-        path: '/',
-        sameSite: 'strict',
-    });
-     response.cookies.set('otp_email', email, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        maxAge: 600, // 10 minutes
-        path: '/',
-        sameSite: 'strict',
-    });
-
-
-    return response;
-  } catch (error) {
-    console.error('Resend OTP Error:', error);
-    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
+    // Always generic
+    return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
+  } catch (err) {
+    console.error('Resend OTP Error:', err);
+    return NextResponse.json({ message: 'If an account exists, a code will be sent.' }, { status: 200 });
   }
 }
