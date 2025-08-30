@@ -1,99 +1,67 @@
+
 'use server';
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { z } from 'zod';
-import crypto from 'crypto';
-import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
-import { fixedWindowPerIp } from '@/lib/rateLimiter';
+import { createHash } from 'crypto';
 
-const OTP_PEPPER = process.env.OTP_PEPPER || '';
-if (!OTP_PEPPER) console.error('Missing OTP_PEPPER environment variable');
+const VerifyOtpSchema = z.object({
+  otp: z.string().length(6, { message: 'OTP must be 6 characters long' }),
+});
 
-const OTP_LENGTH = 8;
-const VerifySchema = z.object({
-  email: z.string().email(),
-  otp: z.string().min(OTP_LENGTH).max(OTP_LENGTH),
-}).strict();
-
-function hmacOtp(otp: string) {
-  return crypto.createHmac('sha256', OTP_PEPPER).update(otp).digest('hex');
-}
-
-export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+export async function POST(request: NextRequest) {
   try {
-    // IP rate limit: 10/min
-    if (!(await fixedWindowPerIp.allow(`verify:ip:${ip}`, 10, 60_000))) {
-      return NextResponse.json({ error: 'Invalid code or expired. Request a new one.' }, { status: 400 });
+    const body = await request.json();
+    const validation = VerifyOtpSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const json = await req.json();
-    const parsed = VerifySchema.safeParse(json);
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid code or expired. Request a new one.' }, { status: 400 });
+    const { otp } = validation.data;
+    
+    const otpHashFromCookie = request.cookies.get('otp_hash')?.value;
+    const emailFromCookie = request.cookies.get('otp_email')?.value;
+
+    if (!otpHashFromCookie || !emailFromCookie) {
+      return NextResponse.json({ error: 'OTP has expired or is invalid. Please request a new one.' }, { status: 400 });
     }
 
-    const email = parsed.data.email.trim().toLowerCase();
-    const otp = parsed.data.otp;
+    const otpHash = createHash('sha256').update(otp).digest('hex');
 
+    if (otpHash !== otpHashFromCookie) {
+      return NextResponse.json({ error: 'Invalid OTP provided.' }, { status: 400 });
+    }
+
+    // OTP is correct, now update the user's status in Firestore
     const db = getAdminDb();
-    const auth = getAdminAuth();
+    const patientsQuery = db.collection('patients').where('email', '==', emailFromCookie).limit(1);
+    const doctorsQuery = db.collection('doctors').where('email', '==', emailFromCookie).limit(1);
 
-    const snap = await db.collection('users').where('email', '==', email).limit(1).get();
-    if (snap.empty) {
-      return NextResponse.json({ error: 'Invalid code or expired. Request a new one.' }, { status: 400 });
-    }
-    const userDoc = snap.docs[0];
-    const uid = userDoc.id;
-
-    const verRef = db.collection('email_verifications').doc(uid);
-    const result = await db.runTransaction(async (tx) => {
-      const v = await tx.get(verRef);
-      if (!v.exists) return { ok: false as const };
-
-      const doc = v.data() as {
-        otpHash: string;
-        expiresAt: number;
-        attempts: number;
-        maxAttempts: number;
-      };
-
-      const now = Date.now();
-      if (now > doc.expiresAt) {
-        tx.delete(verRef);
-        return { ok: false as const };
-      }
-      if (doc.attempts >= doc.maxAttempts) {
-        tx.delete(verRef);
-        return { ok: false as const };
-      }
-
-      const computed = hmacOtp(otp);
-      const match = crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(doc.otpHash));
-      if (!match) {
-        tx.update(verRef, { attempts: doc.attempts + 1 });
-        return { ok: false as const };
-      }
-
-      // Success: consume the token
-      tx.delete(verRef);
-      return { ok: true as const };
-    });
-
-    if (!result.ok) {
-      return NextResponse.json({ error: 'Invalid code or expired. Request a new one.' }, { status: 400 });
+    const [patientSnapshot, doctorSnapshot] = await Promise.all([patientsQuery.get(), doctorsQuery.get()]);
+    
+    let userDocRef;
+    if (!patientSnapshot.empty) {
+      userDocRef = patientSnapshot.docs[0].ref;
+    } else if (!doctorSnapshot.empty) {
+      userDocRef = doctorSnapshot.docs[0].ref;
+    } else {
+      // This should ideally not happen if the registration flow is correct
+      return NextResponse.json({ error: 'User not found for the provided email.' }, { status: 404 });
     }
 
-    // Mark verified in profile and Auth
-    await userDoc.ref.update({ emailVerified: true, verifiedAt: new Date().toISOString() });
-    try { await auth.updateUser(uid, { emailVerified: true }); } catch (e) { console.warn('Auth update failed:', e); }
+    await userDocRef.update({ emailVerified: true });
 
-    // Post-verify: set minimal custom claims (no client-controlled elevation)
-    try { await auth.setCustomUserClaims(uid, { role: 'user' }); } catch (e) { console.warn('Claim set failed:', e); }
+    // Clear the cookies after successful verification
+    const response = NextResponse.json({ message: 'Email verified successfully.' });
+    response.cookies.delete('otp_hash');
+    response.cookies.delete('otp_email');
 
-    return NextResponse.json({ message: 'Email verified successfully.' }, { status: 200 });
-  } catch (err) {
-    console.error('Verify OTP Error:', err);
-    return NextResponse.json({ error: 'Invalid code or expired. Request a new one.' }, { status: 400 });
+    return response;
+
+  } catch (error) {
+    console.error('Verify OTP Error:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
   }
 }
