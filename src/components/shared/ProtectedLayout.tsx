@@ -17,22 +17,24 @@ export default function ProtectedLayout({ children, allowedRole, loginPath }: Pr
   const router = useRouter();
 
   useEffect(() => {
+    // Wait until the initial loading is finished
     if (!loading) {
+      // If there's no user, redirect to the login page.
       if (!user) {
-        // If not logged in, redirect to the specified login page
         router.push(loginPath);
-      } else if (role && role !== allowedRole) {
-        // If logged in but with the wrong role, redirect to a default page or show an error
-        // For simplicity, we'll redirect to the home page.
-        // A more robust solution might redirect doctors to their login and patients to theirs.
-        console.warn(`Role mismatch: expected ${allowedRole}, got ${role}. Redirecting.`);
-        router.push('/'); 
+      } 
+      // If there is a user but their role doesn't match, redirect them.
+      // This prevents a doctor from accessing patient pages and vice-versa.
+      else if (role && role !== allowedRole) {
+        // Redirect to a safe default page.
+        router.push('/');
       }
     }
   }, [user, loading, role, router, allowedRole, loginPath]);
 
+  // While loading, or if the user is not authenticated or has the wrong role,
+  // show a loading state to prevent flashing the content of the protected page.
   if (loading || !user || (role && role !== allowedRole)) {
-    // Show a loading skeleton or a blank screen while checking auth state or redirecting
     return (
       <div className="flex items-center justify-center h-screen w-screen">
         <div className="space-y-4 w-1/2">
@@ -44,5 +46,6 @@ export default function ProtectedLayout({ children, allowedRole, loginPath }: Pr
     );
   }
 
+  // If loading is complete, a user exists, and their role is correct, render the children.
   return <>{children}</>;
 }
