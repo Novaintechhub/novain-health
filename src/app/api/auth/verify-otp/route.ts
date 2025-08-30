@@ -1,17 +1,16 @@
 
 'use server';
 
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { z } from 'zod';
 import { createHash } from 'crypto';
-import { cookies } from 'next/headers';
 
 const VerifyOtpSchema = z.object({
   otp: z.string().length(6, { message: 'OTP must be 6 characters long' }),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validation = VerifyOtpSchema.safeParse(body);
@@ -22,9 +21,8 @@ export async function POST(request: Request) {
 
     const { otp } = validation.data;
     
-    const cookieStore = cookies();
-    const otpHashFromCookie = cookieStore.get('otp_hash')?.value;
-    const emailFromCookie = cookieStore.get('otp_email')?.value;
+    const otpHashFromCookie = request.cookies.get('otp_hash')?.value;
+    const emailFromCookie = request.cookies.get('otp_email')?.value;
 
     if (!otpHashFromCookie || !emailFromCookie) {
       return NextResponse.json({ error: 'OTP has expired or is invalid. Please request a new one.' }, { status: 400 });

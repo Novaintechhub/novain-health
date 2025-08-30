@@ -51,6 +51,8 @@ export async function POST(request: Request) {
     const otp = generateAlphanumericOTP();
     const otpHash = createHash('sha256').update(otp).digest('hex');
 
+    await sendVerificationEmail(userData.email, userData.firstName, otp);
+
     const response = NextResponse.json({ message: 'A new OTP has been sent to your email address.' });
 
     // Store hash in a secure, http-only cookie on the response
@@ -69,7 +71,6 @@ export async function POST(request: Request) {
         sameSite: 'strict',
     });
 
-    await sendVerificationEmail(email, userData.firstName, otp);
 
     return response;
   } catch (error) {

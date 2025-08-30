@@ -87,6 +87,9 @@ export async function POST(request: Request) {
     };
     
     await db.collection(`${role}s`).doc(userRecord.uid).set(userProfile);
+    
+    // Send verification email
+    await sendVerificationEmail(email, firstName, otp);
 
     const response = NextResponse.json({
       message: 'User created successfully. Verification email sent.',
@@ -109,10 +112,6 @@ export async function POST(request: Request) {
         path: '/',
         sameSite: 'strict',
     });
-
-
-    // Send verification email
-    await sendVerificationEmail(email, firstName, otp);
 
     return response;
 
