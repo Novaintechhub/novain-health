@@ -1,3 +1,4 @@
+
 # Production-ready settings for a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
@@ -57,8 +58,6 @@ env:
     value: "pk_test_GPstYtST8nHCUaEhV9BdzsGL"
   - variable: STRIPE_SECRET_KEY
     value: "[YOUR_STRIPE_SECRET_KEY]"
-  - variable: BREVO_API_KEY
-    value: "[YOUR_BREVO_API_KEY]"
   - variable: NEXT_PUBLIC_ROOT_DOMAIN
     value: "https://9202-firebase-studio-1753615033768.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/"
   - variable: NEXT_PUBLIC_APP_URL
@@ -69,7 +68,15 @@ env:
     value: "https://9202-firebase-studio-1753615033768.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/"
   - variable: FIREBASE_SERVICE_ACCOUNT_KEY_JSON
     value: "[YOUR_FIREBASE_SERVICE_ACCOUNT_KEY_JSON]"
-  - variable: BREVO_SENDER_NAME
+  - variable: SMTP_HOST
+    value: "[YOUR_HOSTINGER_SMTP_HOST]"
+  - variable: SMTP_PORT
+    value: "465"
+  - variable: SMTP_USER
+    value: "[YOUR_HOSTINGER_EMAIL_ADDRESS]"
+  - variable: SMTP_PASS
+    value: "[YOUR_HOSTINGER_EMAIL_PASSWORD]"
+  - variable: SMTP_SENDER_NAME
     value: "NovainHealth"
-  - variable: BREVO_SENDER_EMAIL
+  - variable: SMTP_SENDER_EMAIL
     value: "noreply@novainhealth.com"
