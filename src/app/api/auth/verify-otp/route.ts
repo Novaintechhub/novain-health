@@ -56,10 +56,11 @@ export async function POST(request: Request) {
     await userDocRef.update({ emailVerified: true });
 
     // Clear the cookies after successful verification
-    cookieStore.delete('otp_hash');
-    cookieStore.delete('otp_email');
+    const response = NextResponse.json({ message: 'Email verified successfully.' });
+    response.cookies.delete('otp_hash');
+    response.cookies.delete('otp_email');
 
-    return NextResponse.json({ message: 'Email verified successfully.' });
+    return response;
 
   } catch (error) {
     console.error('Verify OTP Error:', error);

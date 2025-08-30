@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         sameSite: 'strict',
     });
 
-    await sendVerificationEmail(userData.firstName, userData.email, otp);
+    await sendVerificationEmail(email, userData.firstName, otp);
 
     return response;
   } catch (error) {
