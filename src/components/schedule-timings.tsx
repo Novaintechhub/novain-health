@@ -103,18 +103,19 @@ export default function ScheduleTimings() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to save schedule');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save schedule');
         }
         toast({
             title: "Success",
             description: "Your schedule has been updated.",
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error saving schedule:", error);
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Could not save your schedule.",
+            description: error.message || "Could not save your schedule.",
         });
     } finally {
         setIsSaving(false);
