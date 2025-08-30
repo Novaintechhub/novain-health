@@ -8,7 +8,7 @@ import { X, PlusCircle } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,12 +23,14 @@ export default function ScheduleTimings() {
   const [newTimeSlot, setNewTimeSlot] = useState({ from: "", to: "" });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const { toast } = useToast();
-  const auth = getAuth(app);
 
   useEffect(() => {
+    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setCurrentUser(user);
         try {
           const idToken = await user.getIdToken();
           const response = await fetch('/api/doctor/schedule', {
@@ -52,12 +54,18 @@ export default function ScheduleTimings() {
           setLoading(false);
         }
       } else {
+        setCurrentUser(null);
         setLoading(false);
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "You must be logged in to view your schedule.",
+        });
       }
     });
 
     return () => unsubscribe();
-  }, [auth, toast]);
+  }, [toast]);
 
   const selectedDateString = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
   const timeSlotsForSelectedDate = availability[selectedDateString] || [];
@@ -85,14 +93,13 @@ export default function ScheduleTimings() {
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
-    const user = auth.currentUser;
-    if (!user) {
+    if (!currentUser) {
         toast({ variant: "destructive", title: "Error", description: "You must be logged in to save changes." });
         setIsSaving(false);
         return;
     }
     try {
-        const idToken = await user.getIdToken();
+        const idToken = await currentUser.getIdToken();
         const response = await fetch('/api/doctor/schedule', {
             method: 'POST',
             headers: {
