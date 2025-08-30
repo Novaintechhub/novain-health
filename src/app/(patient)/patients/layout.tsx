@@ -1,7 +1,8 @@
 
 "use client";
 
-import type { Metadata } from "next";
+import { AuthProvider } from '@/context/AuthContext';
+import ProtectedLayout from '@/components/shared/ProtectedLayout';
 import { usePathname } from 'next/navigation'
 import {
   SidebarProvider,
@@ -44,14 +45,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from '@/context/AuthContext';
 
-
-export default function PatientLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function PatientDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, handleSignOut } = useAuth();
 
   return (
     <SidebarProvider>
@@ -61,10 +59,10 @@ export default function PatientLayout({
             <SidebarGroup>
                <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
                 <Avatar className="h-24 w-24 border-2 border-primary rounded-full shadow-lg">
-                  <AvatarImage src="https://placehold.co/96x96.png" alt="Tosin Chukwuka" data-ai-hint="woman portrait" />
-                  <AvatarFallback>TC</AvatarFallback>
+                  <AvatarImage src={user?.photoURL || "https://placehold.co/96x96.png"} alt={user?.displayName || "Patient"} data-ai-hint="woman portrait" />
+                  <AvatarFallback>{user?.displayName?.charAt(0) || 'P'}</AvatarFallback>
                 </Avatar>
-                <h3 className="mt-4 text-xl font-semibold">Tosin Chukwuka</h3>
+                <h3 className="mt-4 text-xl font-semibold">{user?.displayName || "Tosin Chukwuka"}</h3>
                 <p className="text-sm text-muted-foreground">Patient</p>
                 <div className="text-center text-sm text-muted-foreground mt-2 space-y-1">
                   <p>24 Jul 1983, 38 years</p>
@@ -169,7 +167,7 @@ export default function PatientLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Logout">
+                <SidebarMenuButton asChild tooltip="Logout" onClick={handleSignOut}>
                   <Link href="/patient-login">
                     <LogOut />
                     <span className="group-data-[collapsible=icon]:hidden">Logout</span>
@@ -200,17 +198,17 @@ export default function PatientLayout({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src="https://placehold.co/40x40.png" alt="Tosin Chukwuka" data-ai-hint="woman portrait" />
-                        <AvatarFallback>TC</AvatarFallback>
+                        <AvatarImage src={user?.photoURL || "https://placehold.co/40x40.png"} alt={user?.displayName || "Patient"} data-ai-hint="woman portrait" />
+                        <AvatarFallback>{user?.displayName?.charAt(0) || 'P'}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">Tosin Chukwuka</p>
+                        <p className="text-sm font-medium leading-none">{user?.displayName || "Tosin Chukwuka"}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          tosin.c@novain.com
+                          {user?.email}
                         </p>
                       </div>
                     </DropdownMenuLabel>
@@ -227,11 +225,9 @@ export default function PatientLayout({
                         <span>Change Password</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                       <Link href="/patient-login">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Log out</span>
-                      </Link>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -241,5 +237,16 @@ export default function PatientLayout({
         </SidebarInset>
       </div>
     </SidebarProvider>
+  );
+}
+
+
+export default function PatientLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <ProtectedLayout allowedRole="patient" loginPath="/patient-login">
+        <PatientDashboardLayout>{children}</PatientDashboardLayout>
+      </ProtectedLayout>
+    </AuthProvider>
   );
 }
