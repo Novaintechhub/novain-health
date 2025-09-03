@@ -30,18 +30,18 @@ const DoctorProfileUpdateSchema = z.object({
   postalCode: z.string().optional(),
 
   // Pricing
-  pricing: z.any().optional(),
+  pricing: z.string().optional(),
 
   // Services and Specialization
   services: z.array(z.string()).optional(),
   specializations: z.array(z.string()).optional(),
 
   // Professional Details
-  education: z.array(z.any()).optional(),
-  experience: z.array(z.any()).optional(),
-  awards: z.array(z.any()).optional(),
-  memberships: z.array(z.any()).optional(),
-  registrations: z.array(z.any()).optional(),
+  education: z.array(z.object({ college: z.string(), degree: z.string(), yearStarted: z.string(), yearCompleted: z.string() })).optional(),
+  experience: z.array(z.object({ hospital: z.string(), designation: z.string(), from: z.string(), to: z.string() })).optional(),
+  awards: z.array(z.object({ name: z.string(), year: z.string() })).optional(),
+  memberships: z.array(z.object({ organization: z.string() })).optional(),
+  registrations: z.array(z.object({ registration: z.string(), year: z.string() })).optional(),
 });
 
 async function uploadProfileImage(dataUri: string, uid: string): Promise<string> {
@@ -130,16 +130,25 @@ export async function POST(request: Request) {
     const db = getAdminDb();
     const doctorRef = db.collection('doctors').doc(doctorId);
     
-    const dataToUpdate = { ...profileData };
+    const dataToUpdate: any = { ...profileData };
     if (imageUrl) {
-        (dataToUpdate as any).imageUrl = imageUrl;
+        dataToUpdate.imageUrl = imageUrl;
     }
     
+    // Ensure arrays are not undefined when merging
+    const fieldsToInitialize = ['services', 'specializations', 'education', 'experience', 'awards', 'memberships', 'registrations'];
+    fieldsToInitialize.forEach(field => {
+        if (dataToUpdate[field] === undefined) {
+            dataToUpdate[field] = [];
+        }
+    });
+
     await doctorRef.set(dataToUpdate, { merge: true });
     
     // Also update the display name in Firebase Auth
     await getAdminAuth().updateUser(doctorId, {
-        displayName: `${profileData.firstName} ${profileData.lastName}`
+        displayName: `${profileData.firstName} ${profileData.lastName}`,
+        photoURL: imageUrl || undefined,
     });
 
     return NextResponse.json({ message: 'Profile updated successfully' });
@@ -148,5 +157,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
   }
 }
-
-    

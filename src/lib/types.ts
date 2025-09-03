@@ -37,6 +37,11 @@ interface UserProfile {
     createdAt: string;
     imageUrl?: string;
     dateOfBirth?: string;
+    aboutMe?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
 }
 
 // Doctor specific profile fields
@@ -54,6 +59,19 @@ export interface DoctorProfile extends UserProfile {
     memberSince?: string;
     earned?: string;
     accountStatus?: "active" | "inactive";
+    gender?: string;
+    clinicName?: string;
+    clinicAddress?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    pricing?: string;
+    services?: string[];
+    specializations?: string[];
+    education?: { college: string; degree: string; yearStarted: string; yearCompleted: string; }[];
+    experience?: { hospital: string; designation: string; from: string; to: string; }[];
+    awards?: { name: string; year: string; }[];
+    memberships?: { organization: string; }[];
+    registrations?: { registration: string; year: string; }[];
 }
 
 // Patient specific profile fields
@@ -88,5 +106,3 @@ export type Appointment = {
   amount: string;
   cancellationReason?: string;
 };
-
-    

@@ -4,7 +4,14 @@ import type { DoctorProfile, PatientProfile, Appointment } from '@/lib/types';
 
 export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
   toFirestore(doctor: DoctorProfile): DocumentData {
-    return { ...doctor };
+    // Clean up undefined values before sending to Firestore
+    const data: any = { ...doctor };
+    Object.keys(data).forEach(key => {
+        if (data[key] === undefined) {
+            delete data[key];
+        }
+    });
+    return data;
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): DoctorProfile {
     const data = snapshot.data();
@@ -14,14 +21,31 @@ export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
       firstName: data.firstName,
       lastName: data.lastName,
       role: 'doctor',
-      mobileNumber: data.mobileNumber,
+      mobileNumber: data.mobileNumber || '',
       stateOfResidence: data.stateOfResidence,
       lga: data.lga,
       language: data.language,
       createdAt: data.createdAt,
       imageUrl: data.imageUrl || '',
       dateOfBirth: data.dateOfBirth || '',
-      // Add other doctor-specific fields with defaults if they don't exist
+      aboutMe: data.aboutMe || '',
+      gender: data.gender || '',
+      clinicName: data.clinicName || '',
+      clinicAddress: data.clinicAddress || '',
+      addressLine1: data.addressLine1 || '',
+      addressLine2: data.addressLine2 || '',
+      city: data.city || '',
+      state: data.state || '',
+      country: data.country || '',
+      postalCode: data.postalCode || '',
+      pricing: data.pricing || 'Free',
+      services: data.services || [],
+      specializations: data.specializations || [],
+      education: data.education || [],
+      experience: data.experience || [],
+      awards: data.awards || [],
+      memberships: data.memberships || [],
+      registrations: data.registrations || [],
       specialty: data.specialty || '',
       isVerified: data.isVerified || false,
       rating: data.rating || 0,
@@ -99,5 +123,3 @@ export const appointmentConverter: FirestoreDataConverter<Appointment> = {
         };
     },
 };
-
-    

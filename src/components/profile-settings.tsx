@@ -29,33 +29,28 @@ import type { DoctorProfile } from "@/lib/types";
 const DoctorProfileUpdateSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().min(2, "Last name is required"),
-    mobileNumber: z.string().optional(),
-    gender: z.string().optional(),
-    dateOfBirth: z.string().optional(),
-    aboutMe: z.string().optional(),
-    profileImage: z.string().optional(),
-    imageUrl: z.string().optional(),
+    mobileNumber: z.string().optional().nullable(),
+    gender: z.string().optional().nullable(),
+    dateOfBirth: z.string().optional().nullable(),
+    aboutMe: z.string().optional().nullable(),
+    profileImage: z.string().optional().nullable(),
+    imageUrl: z.string().optional().nullable(),
     
-    // Clinic Info
-    clinicName: z.string().optional(),
-    clinicAddress: z.string().optional(),
+    clinicName: z.string().optional().nullable(),
+    clinicAddress: z.string().optional().nullable(),
     
-    // Contact Details
-    addressLine1: z.string().optional(),
-    addressLine2: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    country: z.string().optional(),
-    postalCode: z.string().optional(),
+    addressLine1: z.string().optional().nullable(),
+    addressLine2: z.string().optional().nullable(),
+    city: z.string().optional().nullable(),
+    state: z.string().optional().nullable(),
+    country: z.string().optional().nullable(),
+    postalCode: z.string().optional().nullable(),
   
-    // Pricing
-    pricing: z.string().optional(),
+    pricing: z.string().optional().nullable(),
   
-    // Services and Specialization
     services: z.array(z.string()).optional(),
     specializations: z.array(z.string()).optional(),
   
-    // Professional Details
     education: z.array(z.object({
         college: z.string(),
         degree: z.string(),
@@ -158,11 +153,11 @@ export default function ProfileSettings() {
         imageUrl: "",
         services: [],
         specializations: [],
-        education: [{ college: "", degree: "", yearStarted: "", yearCompleted: "" }],
-        experience: [{ hospital: "", designation: "", from: "", to: "" }],
-        awards: [{ name: "", year: "" }],
-        memberships: [{ organization: "" }],
-        registrations: [{ registration: "", year: "" }],
+        education: [],
+        experience: [],
+        awards: [],
+        memberships: [],
+        registrations: [],
     },
   });
 
@@ -199,7 +194,7 @@ export default function ProfileSettings() {
       const data: DoctorProfile = await response.json();
       form.reset({
         ...data,
-        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : "", // Format date for input
+        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : "",
       });
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "Could not load profile data." });
@@ -232,7 +227,9 @@ export default function ProfileSettings() {
       }
       
       toast({ title: "Success", description: "Profile updated successfully." });
-      await fetchProfile(); // Refetch to get the latest data including new image URL
+      await user.reload();
+      const freshTokenResult = await user.getIdTokenResult(true);
+      await fetchProfile();
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message });
     }
@@ -266,7 +263,7 @@ export default function ProfileSettings() {
                   control={form.control}
                   name="profileImage"
                   render={({ field }) => (
-                      <ImageUpload onImageChange={field.onChange} currentImageUrl={form.getValues('imageUrl')}/>
+                      <ImageUpload onImageChange={field.onChange} currentImageUrl={form.watch('imageUrl')}/>
                   )}
                 />
               <h3 className="text-xl font-semibold mt-4">{form.watch('firstName')} {form.watch('lastName')}</h3>
@@ -313,7 +310,7 @@ export default function ProfileSettings() {
                         control={form.control}
                         name="pricing"
                         render={({ field }) => (
-                            <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-2">
+                            <RadioGroup onValueChange={field.onChange} value={field.value ?? undefined} className="space-y-2">
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="Free" id="free" />
                                     <Label htmlFor="free">Free</Label>
@@ -362,7 +359,7 @@ export default function ProfileSettings() {
                     control={form.control}
                     name="gender"
                     render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value ?? undefined}>
                         <SelectTrigger id="gender"><SelectValue placeholder="Select" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="male">Male</SelectItem>
