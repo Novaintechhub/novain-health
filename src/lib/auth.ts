@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -7,6 +8,7 @@ import {
   User,
   setPersistence,
   browserLocalPersistence,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import type { Auth } from "firebase/auth";
 
@@ -46,6 +48,21 @@ export const signInWithApple = async (): Promise<User | null> => {
     return null;
   }
 };
+
+export const signInWithEmail = async (email: string, password: string): Promise<User | null> => {
+  try {
+    const auth = await getClientAuth();
+    if (!auth) return null;
+    await setPersistence(auth, browserLocalPersistence);
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    await auth.currentUser?.getIdToken(true);
+    return result.user;
+  } catch (error) {
+    console.error("Error signing in with email:", error);
+    return null;
+  }
+};
+
 
 export const signOut = async (): Promise<void> => {
   try {

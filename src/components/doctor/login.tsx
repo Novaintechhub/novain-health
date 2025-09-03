@@ -6,11 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
-import { signInWithGoogle, signInWithApple } from "@/lib/auth";
+import { signInWithGoogle, signInWithApple, signInWithEmail } from "@/lib/auth";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -30,18 +31,41 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const user = await signInWithEmail(email, password);
+    setIsLoading(false);
+    if (user) {
+      router.push("/doctor");
+    } else {
+       toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Please check your email and password.",
+      });
+    }
+  };
+
 
   const handleGoogleSignIn = async () => {
     const user = await signInWithGoogle();
     if (user) {
-      window.location.href = "/doctor";
+      router.push("/doctor");
     }
   };
 
   const handleAppleSignIn = async () => {
     const user = await signInWithApple();
     if (user) {
-      window.location.href = "/doctor";
+      router.push("/doctor");
     }
   };
 
@@ -84,10 +108,22 @@ export default function Login() {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
               
-              <form className="space-y-4">
-                <Input type="email" placeholder="Email Address" />
+              <form className="space-y-4" onSubmit={handleSignIn}>
+                <Input 
+                  type="email" 
+                  placeholder="Email Address" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
                 <div className="relative">
-                  <Input type={showPassword ? "text" : "password"} placeholder="Input password" />
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Input password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                    <Button
                     type="button"
                     variant="ghost"
@@ -98,15 +134,15 @@ export default function Login() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
-                <Link href="/doctor" className="w-full block">
-                  <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="button">Sign In</Button>
-                </Link>
+                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit" disabled={isLoading}>
+                  {isLoading ? "Signing In..." : "Sign In"}
+                </Button>
               </form>
 
               <div className="border-t border-gray-300 my-8"></div>
 
               <p className="text-center text-sm">
-                Don't have an account? <Link href="/doctor/register" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
+                Don't have an account? <Link href="/doctor-registration" className="text-cyan-500 font-semibold hover:underline">Sign up</Link>
               </p>
 
                <div className="flex justify-between text-xs text-muted-foreground mt-12">
