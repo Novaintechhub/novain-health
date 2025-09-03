@@ -30,20 +30,11 @@ interface UserProfile {
     firstName: string;
     lastName: string;
     role: 'patient' | 'doctor';
-    mobileNumber: string;
-    stateOfResidence: string;
-    lga: string;
-    language: string;
     createdAt: string;
     imageUrl?: string;
-    dateOfBirth?: string;
-    aboutMe?: string;
-    city?: string;
-    state?: string;
 }
 
-// Doctor specific profile fields
-export interface DoctorProfile extends UserProfile {
+export interface DoctorCoreProfile extends UserProfile {
     role: 'doctor';
     specialty?: string;
     isVerified?: boolean;
@@ -57,24 +48,78 @@ export interface DoctorProfile extends UserProfile {
     memberSince?: string;
     earned?: string;
     accountStatus?: "active" | "inactive";
+}
+
+export interface DoctorDetails {
+    aboutMe?: string;
+    mobileNumber?: string;
     gender?: string;
+    dateOfBirth?: string;
     clinicName?: string;
     clinicAddress?: string;
     addressLine1?: string;
     addressLine2?: string;
+    city?: string;
+    state?: string;
+    stateOfResidence?: string;
+    lga?: string;
+    language?: string;
     pricing?: string;
     services?: string[];
     specializations?: string[];
-    education?: { college: string; degree: string; yearStarted: string; yearCompleted: string; }[];
-    experience?: { hospital: string; designation: string; from: string; to: string; }[];
-    awards?: { name: string; year: string; }[];
-    memberships?: { organization: string; }[];
-    registrations?: { registration: string; year: string; }[];
 }
+
+export interface DoctorEducation {
+    id?: string;
+    college: string;
+    degree: string;
+    yearStarted: string;
+    yearCompleted: string;
+}
+
+export interface DoctorExperience {
+    id?: string;
+    hospital: string;
+    designation: string;
+    from: string;
+    to: string;
+}
+
+export interface DoctorAward {
+    id?: string;
+    name: string;
+    year: string;
+}
+
+export interface DoctorMembership {
+    id?: string;
+    organization: string;
+}
+
+export interface DoctorRegistration {
+    id?: string;
+    registration: string;
+    year: string;
+}
+
+
+// This is the composite type used by the application frontend
+export interface DoctorProfile extends DoctorCoreProfile, DoctorDetails {
+    education?: DoctorEducation[];
+    experience?: DoctorExperience[];
+    awards?: DoctorAward[];
+    memberships?: DoctorMembership[];
+    registrations?: DoctorRegistration[];
+}
+
 
 // Patient specific profile fields
 export interface PatientProfile extends UserProfile {
     role: 'patient';
+    mobileNumber: string;
+    stateOfResidence: string;
+    lga: string;
+    language: string;
     age?: number;
     address?: string;
     phone?: string;

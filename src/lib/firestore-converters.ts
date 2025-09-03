@@ -1,9 +1,9 @@
 
 import type { FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions } from 'firebase-admin/firestore';
-import type { DoctorProfile, PatientProfile, Appointment } from '@/lib/types';
+import type { DoctorCoreProfile, PatientProfile, Appointment } from '@/lib/types';
 
-export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
-  toFirestore(doctor: DoctorProfile): DocumentData {
+export const doctorConverter: FirestoreDataConverter<DoctorCoreProfile> = {
+  toFirestore(doctor: DoctorCoreProfile): DocumentData {
     // Clean up undefined values before sending to Firestore
     const data: any = { ...doctor };
     Object.keys(data).forEach(key => {
@@ -13,7 +13,7 @@ export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
     });
     return data;
   },
-  fromFirestore(snapshot: QueryDocumentSnapshot): DoctorProfile {
+  fromFirestore(snapshot: QueryDocumentSnapshot): DoctorCoreProfile {
     const data = snapshot.data();
     return {
       uid: snapshot.id,
@@ -21,29 +21,8 @@ export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
       firstName: data.firstName,
       lastName: data.lastName,
       role: 'doctor',
-      mobileNumber: data.mobileNumber || '',
-      stateOfResidence: data.stateOfResidence,
-      lga: data.lga,
-      language: data.language,
       createdAt: data.createdAt,
       imageUrl: data.imageUrl || '',
-      dateOfBirth: data.dateOfBirth || '',
-      aboutMe: data.aboutMe || '',
-      gender: data.gender || '',
-      clinicName: data.clinicName || '',
-      clinicAddress: data.clinicAddress || '',
-      addressLine1: data.addressLine1 || '',
-      addressLine2: data.addressLine2 || '',
-      city: data.city || '',
-      state: data.state || '',
-      pricing: data.pricing || 'Free',
-      services: data.services || [],
-      specializations: data.specializations || [],
-      education: data.education || [],
-      experience: data.experience || [],
-      awards: data.awards || [],
-      memberships: data.memberships || [],
-      registrations: data.registrations || [],
       specialty: data.specialty || '',
       isVerified: data.isVerified || false,
       rating: data.rating || 0,

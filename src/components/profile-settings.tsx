@@ -297,14 +297,7 @@ export default function ProfileSettings() {
                     <Label htmlFor="address-line-2">Address Line 2</Label>
                     <Input id="address-line-2" {...form.register('addressLine2')} />
                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" {...form.register('city')} />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="state">State / Province</Label>
-                    <Input id="state" {...form.register('state')} />
-                </div>
+                
             </CardContent>
            </Card>
             <Card>
