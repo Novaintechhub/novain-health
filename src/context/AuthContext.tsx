@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, {
@@ -22,14 +23,14 @@ import { useToast } from "@/hooks/use-toast";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  role: "doctor" | "patient" | null;
+  role: "doctor" | "patient" | null | undefined; // Allow undefined for initial state
   handleSignOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  role: null,
+  role: undefined,
   handleSignOut: () => {},
 });
 
@@ -39,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<"doctor" | "patient" | null>(null);
+  const [role, setRole] = useState<"doctor" | "patient" | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -48,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleSignOut = useCallback(async () => {
     const auth = getAuth(app);
+    // Determine redirect path *before* signing out and clearing state
     const redirectPath = role === "doctor" ? "/doctor-login" : "/patient-login";
 
     try {
@@ -64,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
     }
   }, [role, router, toast]);
+
 
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) {
@@ -116,12 +119,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       try {
-        // Try custom claims first
         const tokenResult = await newUser.getIdTokenResult();
         let userRole =
           (tokenResult.claims.role as "doctor" | "patient" | null) ?? null;
 
-        // Fallback to Firestore profile if claim is missing
         if (!userRole) {
           const [docDoctor, docPatient] = await Promise.all([
             getDoc(doc(db, "doctors", newUser.uid)),
@@ -130,13 +131,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           if (docDoctor.exists()) userRole = "doctor";
           else if (docPatient.exists()) userRole = "patient";
         }
-
         setRole(userRole);
       } catch (error) {
         console.error("Error resolving user role:", error);
         setRole(null);
-        // Avoid auto sign-out on transient errors to prevent loops
-        // await fbSignOut(auth);
       } finally {
         setLoading(false);
       }
