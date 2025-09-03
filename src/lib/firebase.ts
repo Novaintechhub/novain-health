@@ -1,6 +1,5 @@
-
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -13,11 +12,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const app: FirebaseApp =
+  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+// Persistence helps avoid losing session on navigation/refresh
+setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 const db = getFirestore(app);
-const auth = getAuth(app);
 const storage = getStorage(app);
 
 export { db, auth, storage, app };

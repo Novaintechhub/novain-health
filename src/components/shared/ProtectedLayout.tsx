@@ -1,67 +1,80 @@
-
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
-  allowedRole: 'doctor' | 'patient';
+  allowedRole: "doctor" | "patient";
   loginPath: string;
 }
 
-export default function ProtectedLayout({ children, allowedRole, loginPath }: ProtectedLayoutProps) {
+export default function ProtectedLayout({
+  children,
+  allowedRole,
+  loginPath,
+}: ProtectedLayoutProps) {
   const { user, loading, role } = useAuth();
   const router = useRouter();
 
+  // If the user exists but we haven't resolved their role yet, keep "loading"
+  const roleLoading = !!user && (role === undefined || role === null);
+
+  const normalizedRole = useMemo(
+    () => role?.toString().trim().toLowerCase(),
+    [role]
+  );
+  const normalizedAllowed = allowedRole.toLowerCase();
+
   useEffect(() => {
-    // Do not run this effect until the auth state is fully loaded
-    if (loading) {
+    if (loading || roleLoading) return;
+
+    if (!user) {
+      router.replace(loginPath);
       return;
     }
 
-    // If loading is complete, and there's no user, or the role doesn't match,
-    // then it's safe to redirect.
-    if (!user || (role && role !== allowedRole)) {
-      router.push(loginPath);
+    if (normalizedRole && normalizedRole !== normalizedAllowed) {
+      router.replace(loginPath);
+      return;
     }
-  }, [user, loading, role, router, allowedRole, loginPath]);
+  }, [
+    loading,
+    roleLoading,
+    user,
+    normalizedRole,
+    normalizedAllowed,
+    router,
+    loginPath,
+  ]);
 
-  // While the initial authentication check is running, display a loading screen.
-  // This is the key to preventing the redirect loop. We render nothing but the
-  // skeleton until Firebase has confirmed the user's auth state.
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="flex items-center justify-center h-screen w-screen">
         <div className="space-y-4 w-1/2">
-            <h1 className="text-2xl font-bold text-center">Loading...</h1>
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
+          <h1 className="text-2xl font-bold text-center">Loading...</h1>
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
         </div>
       </div>
     );
   }
 
-  // If loading is complete, and the user exists with the correct role,
-  // the useEffect hook above will not redirect. We can safely render the children.
-  if (user && role === allowedRole) {
+  if (user && normalizedRole === normalizedAllowed) {
     return <>{children}</>;
   }
 
-  // If loading is complete but the user/role is invalid, the useEffect will
-  // trigger a redirect. We return a loading skeleton here as well to prevent
-  // any flicker of protected content before the redirect happens.
   return (
-      <div className="flex items-center justify-center h-screen w-screen">
-        <div className="space-y-4 w-1/2">
-            <h1 className="text-2xl font-bold text-center">Redirecting...</h1>
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-        </div>
+    <div className="flex items-center justify-center h-screen w-screen">
+      <div className="space-y-4 w-1/2">
+        <h1 className="text-2xl font-bold text-center">Redirecting...</h1>
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
       </div>
+    </div>
   );
 }
