@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,16 @@ import { Camera } from "lucide-react";
 
 interface ImageUploadProps {
   onImageChange: (dataUri: string) => void;
+  currentImageUrl?: string | null;
 }
 
-export default function ImageUpload({ onImageChange }: ImageUploadProps) {
-  const [preview, setPreview] = useState<string | null>(null);
+export default function ImageUpload({ onImageChange, currentImageUrl }: ImageUploadProps) {
+  const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+      setPreview(currentImageUrl || null);
+  }, [currentImageUrl]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -55,3 +60,5 @@ export default function ImageUpload({ onImageChange }: ImageUploadProps) {
     </div>
   );
 }
+
+    

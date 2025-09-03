@@ -35,37 +35,39 @@ interface UserProfile {
     lga: string;
     language: string;
     createdAt: string;
+    imageUrl?: string;
+    dateOfBirth?: string;
 }
 
 // Doctor specific profile fields
 export interface DoctorProfile extends UserProfile {
     role: 'doctor';
-    specialty: string;
-    isVerified: boolean;
-    rating: number;
-    reviews: number;
-    location: string;
-    availability: string;
-    price: string;
-    image: string;
-    hint: string;
-    memberSince: string;
-    earned: string;
-    accountStatus: "active" | "inactive";
+    specialty?: string;
+    isVerified?: boolean;
+    rating?: number;
+    reviews?: number;
+    location?: string;
+    availability?: string;
+    price?: string;
+    image?: string;
+    hint?: string;
+    memberSince?: string;
+    earned?: string;
+    accountStatus?: "active" | "inactive";
 }
 
 // Patient specific profile fields
 export interface PatientProfile extends UserProfile {
     role: 'patient';
-    age: number;
-    address: string;
-    phone: string;
-    lastVisit: string;
-    paid: string;
-    avatarUrl: string;
-    avatarHint: string;
-    genotype: string;
-    bloodGroup: string;
+    age?: number;
+    address?: string;
+    phone?: string;
+    lastVisit?: string;
+    paid?: string;
+    avatarUrl?: string;
+    avatarHint?: string;
+    genotype?: string;
+    bloodGroup?: string;
 }
 
 export type Appointment = {
@@ -86,3 +88,5 @@ export type Appointment = {
   amount: string;
   cancellationReason?: string;
 };
+
+    

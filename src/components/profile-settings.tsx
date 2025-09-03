@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -18,16 +18,82 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UploadCloud, Trash2, X, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Skeleton } from "@/components/ui/skeleton";
+import ImageUpload from "@/components/shared/image-upload";
+import type { DoctorProfile } from "@/lib/types";
+
+
+const DoctorProfileUpdateSchema = z.object({
+    firstName: z.string().min(2, "First name is required"),
+    lastName: z.string().min(2, "Last name is required"),
+    mobileNumber: z.string().optional(),
+    gender: z.string().optional(),
+    dateOfBirth: z.string().optional(),
+    aboutMe: z.string().optional(),
+    profileImage: z.string().optional(),
+    imageUrl: z.string().optional(),
+    
+    // Clinic Info
+    clinicName: z.string().optional(),
+    clinicAddress: z.string().optional(),
+    
+    // Contact Details
+    addressLine1: z.string().optional(),
+    addressLine2: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    country: z.string().optional(),
+    postalCode: z.string().optional(),
+  
+    // Pricing
+    pricing: z.any().optional(),
+  
+    // Services and Specialization
+    services: z.array(z.string()).optional(),
+    specializations: z.array(z.string()).optional(),
+  
+    // Professional Details
+    education: z.array(z.object({
+        college: z.string(),
+        degree: z.string(),
+        yearStarted: z.string(),
+        yearCompleted: z.string(),
+    })).optional(),
+    experience: z.array(z.object({
+        hospital: z.string(),
+        designation: z.string(),
+        from: z.string(),
+        to: z.string(),
+    })).optional(),
+    awards: z.array(z.object({
+        name: z.string(),
+        year: z.string(),
+    })).optional(),
+    memberships: z.array(z.object({
+        organization: z.string(),
+    })).optional(),
+    registrations: z.array(z.object({
+        registration: z.string(),
+        year: z.string(),
+    })).optional(),
+});
+  
+type DoctorProfileUpdateInput = z.infer<typeof DoctorProfileUpdateSchema>;
 
 
 const TagInput = ({
   tags,
-  setTags,
+  onTagsChange,
   placeholder,
   note,
 }: {
   tags: string[];
-  setTags: React.Dispatch<React.SetStateAction<string[]>>;
+  onTagsChange: (tags: string[]) => void;
   placeholder: string;
   note: string;
 }) => {
@@ -36,13 +102,15 @@ const TagInput = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim()) {
       e.preventDefault();
-      setTags([...tags, inputValue.trim()]);
+      if (!tags.includes(inputValue.trim())) {
+        onTagsChange([...tags, inputValue.trim()]);
+      }
       setInputValue("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    onTagsChange(tags.filter((tag) => tag !== tagToRemove));
   };
 
   return (
@@ -75,74 +143,136 @@ const TagInput = ({
 
 
 export default function ProfileSettings() {
-  const [services, setServices] = useState(["Tooth Cleaning", "Teeth Whitening"]);
-  const [specializations, setSpecializations] = useState(["Children Care", "Dental Care"]);
-  const [educationFields, setEducationFields] = useState([
-    {
-      college: "",
-      degree: "",
-      yearStarted: "",
-      yearCompleted: "",
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  
+  const form = useForm<DoctorProfileUpdateInput>({
+    resolver: zodResolver(DoctorProfileUpdateSchema),
+    defaultValues: {
+        firstName: "",
+        lastName: "",
+        mobileNumber: "",
+        gender: "",
+        dateOfBirth: "",
+        aboutMe: "",
+        profileImage: "",
+        imageUrl: "",
+        services: [],
+        specializations: [],
+        education: [{ college: "", degree: "", yearStarted: "", yearCompleted: "" }],
+        experience: [{ hospital: "", designation: "", from: "", to: "" }],
+        awards: [{ name: "", year: "" }],
+        memberships: [{ organization: "" }],
+        registrations: [{ registration: "", year: "" }],
     },
-  ]);
-  const [workExperience, setWorkExperience] = useState([
-    {
-      hospital: "",
-      designation: "",
-      from: "",
-      to: "",
-    },
-  ]);
-  const [awards, setAwards] = useState([{ name: "", year: "" }]);
-  const [memberships, setMemberships] = useState([{ organization: "" }]);
-  const [registrations, setRegistrations] = useState([{ registration: "", year: "" }]);
-  const [pricingOption, setPricingOption] = useState("free");
+  });
+
+  const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
+    control: form.control,
+    name: "education",
+  });
+  const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
+    control: form.control,
+    name: "experience",
+  });
+  const { fields: awardsFields, append: appendAward, remove: removeAward } = useFieldArray({
+    control: form.control,
+    name: "awards",
+  });
+  const { fields: membershipsFields, append: appendMembership, remove: removeMembership } = useFieldArray({
+    control: form.control,
+    name: "memberships",
+  });
+  const { fields: registrationsFields, append: appendRegistration, remove: removeRegistration } = useFieldArray({
+    control: form.control,
+    name: "registrations",
+  });
+
+  const fetchProfile = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/doctor/profile', {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch profile");
+      const data: DoctorProfile = await response.json();
+      form.reset({
+        ...data,
+        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : "", // Format date for input
+      });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Could not load profile data." });
+    } finally {
+      setLoading(false);
+    }
+  }, [user, form, toast]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
 
-  const addEducationField = () => {
-    setEducationFields([
-      ...educationFields,
-      { college: "", degree: "", yearStarted: "", yearCompleted: "" },
-    ]);
+  const onSubmit = async (data: DoctorProfileUpdateInput) => {
+    if (!user) return;
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/doctor/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update profile");
+      }
+      
+      toast({ title: "Success", description: "Profile updated successfully." });
+      await fetchProfile(); // Refetch to get the latest data including new image URL
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    }
   };
-
-  const addWorkExperienceField = () => {
-    setWorkExperience([
-      ...workExperience,
-      { hospital: "", designation: "", from: "", to: "" },
-    ]);
-  };
-
-  const addAwardField = () => {
-    setAwards([...awards, { name: "", year: "" }]);
-  };
-
-  const addMembershipField = () => {
-    setMemberships([...memberships, { organization: "" }]);
-  };
-
-  const addRegistrationField = () => {
-    setRegistrations([...registrations, { registration: "", year: "" }]);
-  };
-
+  
+  if (loading) {
+      return (
+          <div className="space-y-6">
+              <Skeleton className="h-8 w-1/4" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-1">
+                      <Skeleton className="h-64 w-full" />
+                  </div>
+                  <div className="lg:col-span-2 space-y-8">
+                      <Skeleton className="h-80 w-full" />
+                      <Skeleton className="h-40 w-full" />
+                  </div>
+              </div>
+          </div>
+      )
+  }
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       <h1 className="text-2xl font-bold">Profile Settings</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
           <Card>
             <CardContent className="p-6 flex flex-col items-center text-center">
-              <Avatar className="h-32 w-32 mb-4">
-                <AvatarImage src="https://placehold.co/128x128.png" alt="Dr. Susan Mandible" data-ai-hint="female doctor" />
-                <AvatarFallback>SM</AvatarFallback>
-              </Avatar>
-              <h3 className="text-xl font-semibold">Dr. Susan Mandible</h3>
+                <Controller
+                  control={form.control}
+                  name="profileImage"
+                  render={({ field }) => (
+                      <ImageUpload onImageChange={field.onChange} currentImageUrl={form.getValues('imageUrl')}/>
+                  )}
+                />
+              <h3 className="text-xl font-semibold mt-4">{form.watch('firstName')} {form.watch('lastName')}</h3>
               <p className="text-sm text-muted-foreground">BDS, MDS - Oral & Maxillofacial Surgery</p>
-              <div className="flex gap-4 mt-4">
-                <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Upload Photo</Button>
-                <Button variant="outline">Delete</Button>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -155,49 +285,35 @@ export default function ProfileSettings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" placeholder="Susan" />
+                  <Input id="first-name" {...form.register("firstName")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="last-name">Last Name</Label>
-                  <Input id="last-name" placeholder="Mandible" />
+                  <Input id="last-name" {...form.register("lastName")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone-number">Phone Number</Label>
-                  <Input id="phone-number" placeholder="+1 234 567 890" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="susan.m@novain.com" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
-                  <Select>
-                    <SelectTrigger id="gender">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input id="phone-number" {...form.register("mobileNumber")} />
                 </div>
                  <div className="space-y-2">
-                  <Label htmlFor="marital-status">Marital Status</Label>
-                  <Select>
-                    <SelectTrigger id="marital-status">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="married">Married</SelectItem>
-                      <SelectItem value="divorced">Divorced</SelectItem>
-                      <SelectItem value="widowed">Widowed</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="gender">Gender</Label>
+                  <Controller
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger id="gender"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dob">Date of Birth</Label>
-                  <Input id="dob" type="date" />
+                  <Input id="dob" type="date" {...form.register("dateOfBirth")} />
                 </div>
               </div>
             </CardContent>
@@ -207,7 +323,7 @@ export default function ProfileSettings() {
               <CardTitle>About Me</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea placeholder="Say something about yourself" rows={5} />
+              <Textarea {...form.register("aboutMe")} placeholder="Say something about yourself" rows={5} />
             </CardContent>
           </Card>
            <Card>
@@ -218,293 +334,63 @@ export default function ProfileSettings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="clinic-name">Clinic Name</Label>
-                  <Input id="clinic-name" placeholder="NovainHealth Clinic" />
+                  <Input id="clinic-name" {...form.register("clinicName")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="clinic-address">Clinic Address</Label>
-                  <Input id="clinic-address" placeholder="123 Health St, MedCity" />
+                  <Input id="clinic-address" {...form.register("clinicAddress")} />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Clinic Images</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-muted-foreground">Drag files here to upload</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                  <div className="relative">
-                    <Image src="https://placehold.co/100x100.png" alt="Clinic Image 1" width={100} height={100} className="rounded-md" data-ai-hint="mri machine" />
-                    <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
-                      <Trash2 className="h-4 w-4"/>
-                    </Button>
-                  </div>
-                  <div className="relative">
-                    <Image src="https://placehold.co/100x100.png" alt="Clinic Image 2" width={100} height={100} className="rounded-md" data-ai-hint="pharmacy shelves" />
-                    <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
-                      <Trash2 className="h-4 w-4"/>
-                    </Button>
-                  </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Details</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="address1">Address Line 1</Label>
-                <Input id="address1" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address2">Address Line 2</Label>
-                <Input id="address2" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input id="city" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State/Province</Label>
-                <Input id="state" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Input id="country" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="postal-code">Postal Code</Label>
-                <Input id="postal-code" />
-              </div>
-            </CardContent>
-          </Card>
-
-           <Card>
-            <CardHeader>
-              <CardTitle>Pricing</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <RadioGroup value={pricingOption} onValueChange={setPricingOption} className="flex items-center gap-8 mb-6">
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="free" id="free" />
-                        <Label htmlFor="free">Free</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="custom" id="custom" />
-                        <Label htmlFor="custom">Custom price</Label>
-                    </div>
-                </RadioGroup>
-
-                {pricingOption === "custom" && (
-                    <div className="space-y-4 pt-6 border-t">
-                        <h4 className="font-semibold text-cyan-500">Consultation Fees</h4>
-                        <div className="space-y-2">
-                            <Label htmlFor="text-fee">Text Consultation Fee (₦)</Label>
-                            <Input id="text-fee" type="number" placeholder="e.g. 50" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="audio-fee">Audio Consultation Fee (₦)</Label>
-                            <Input id="audio-fee" type="number" placeholder="e.g. 100" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="video-fee">Video Consultation Fee (₦)</Label>
-                            <Input id="video-fee" type="number" placeholder="e.g. 150" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="followup-fee">Follow-up Consultation Fee (₦)</Label>
-                            <Input id="followup-fee" type="number" placeholder="e.g. 75" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="emergency-fee">Emergency Consultation Fee (₦)</Label>
-                            <Input id="emergency-fee" type="number" placeholder="e.g. 250" />
-                        </div>
-                    </div>
-                )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Services and Specialization</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label>Services</Label>
-                <TagInput
-                  tags={services}
-                  setTags={setServices}
-                  placeholder="Add Services"
-                  note="NB: Type and Press Enter to add new service"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Specialization</Label>
-                <TagInput
-                  tags={specializations}
-                  setTags={setSpecializations}
-                  placeholder="Add Specialization"
-                  note="NB: Type and Press Enter to add new specialization"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Education</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {educationFields.map((field, index) => (
-                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label>College/Institute</Label>
-                      <Input placeholder="e.g. University of Medical Sciences" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Degree Obtained</Label>
-                      <Input placeholder="e.g. Bachelor of Dental Surgery" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Year Started</Label>
-                      <Input type="number" placeholder="e.g. 2010" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Year of Completion</Label>
-                      <Input type="number" placeholder="e.g. 2015" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <Button variant="ghost" onClick={addEducationField} className="text-cyan-500 hover:text-cyan-600">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add more
-              </Button>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle>Work Experience</CardTitle>
+                <CardTitle>Services and Specialization</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {workExperience.map((field, index) => (
-                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label>Hospital</Label>
-                      <Input />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Designation</Label>
-                      <Input />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>From</Label>
-                      <Input type="date" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>To</Label>
-                      <Input type="date" />
-                    </div>
-                  </div>
+                <div className="space-y-2">
+                <Label>Services</Label>
+                 <Controller
+                    control={form.control}
+                    name="services"
+                    render={({ field }) => (
+                        <TagInput
+                            tags={field.value || []}
+                            onTagsChange={field.onChange}
+                            placeholder="Add Services"
+                            note="NB: Type and Press Enter to add new service"
+                        />
+                    )}
+                    />
                 </div>
-              ))}
-              <Button variant="ghost" onClick={addWorkExperienceField} className="text-cyan-500 hover:text-cyan-600">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add more
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Awards</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {awards.map((award, index) => (
-                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label>Name of Award</Label>
-                      <Input />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Year</Label>
-                      <Input type="number" />
-                    </div>
-                  </div>
+                <div className="space-y-2">
+                <Label>Specialization</Label>
+                 <Controller
+                    control={form.control}
+                    name="specializations"
+                    render={({ field }) => (
+                        <TagInput
+                        tags={field.value || []}
+                        onTagsChange={field.onChange}
+                        placeholder="Add Specialization"
+                        note="NB: Type and Press Enter to add new specialization"
+                        />
+                    )}
+                    />
                 </div>
-              ))}
-              <Button variant="ghost" onClick={addAwardField} className="text-cyan-500 hover:text-cyan-600">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add more
-              </Button>
             </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Memberships</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {memberships.map((field, index) => (
-                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
-                   <div className="space-y-2">
-                    <Label>Name of Organization</Label>
-                    <Input />
-                  </div>
-                </div>
-              ))}
-              <Button variant="ghost" onClick={addMembershipField} className="text-cyan-500 hover:text-cyan-600">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add more
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Registrations and Licenses</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {registrations.map((field, index) => (
-                <div key={index} className="space-y-4 border-b pb-4 last:border-b-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label>Registration</Label>
-                      <Input />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Year</Label>
-                      <Input type="number" />
-                    </div>
-                  </div>
-                  <div className="space-y-2 mt-4">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <p className="text-sm text-muted-foreground">Drag to upload licensing document</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <div className="flex justify-between items-center">
-                <Button variant="ghost" onClick={addRegistrationField} className="text-cyan-500 hover:text-cyan-600">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add more
-                </Button>
-                <Button variant="link" className="text-cyan-500">See all (4)</Button>
-              </div>
-            </CardContent>
-          </Card>
-
+           </Card>
 
           <div>
-             <Button style={{ backgroundColor: '#46C8F5', color: 'white' }}>Save Changes</Button>
+             <Button type="submit" style={{ backgroundColor: '#46C8F5', color: 'white' }} disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+             </Button>
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
+
+    

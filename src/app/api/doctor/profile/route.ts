@@ -2,18 +2,20 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
+import { getAdminDb, getAdminAuth, getAdminStorage } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import { doctorConverter } from '@/lib/firestore-converters';
+import { v4 as uuidv4 } from 'uuid';
 
 const DoctorProfileUpdateSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
-  mobileNumber: z.string().min(10, "Valid phone number is required"),
+  mobileNumber: z.string().optional(),
   gender: z.string().optional(),
   dateOfBirth: z.string().optional(),
   aboutMe: z.string().optional(),
+  profileImage: z.string().optional(), // Base64 data URI for new image
   
   // Clinic Info
   clinicName: z.string().optional(),
@@ -42,6 +44,28 @@ const DoctorProfileUpdateSchema = z.object({
   registrations: z.array(z.any()).optional(),
 });
 
+async function uploadProfileImage(dataUri: string, uid: string): Promise<string> {
+    const storage = getAdminStorage();
+    const bucket = storage.bucket();
+
+    const match = dataUri.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (!match) {
+        throw new Error('Invalid Data URI for profile image.');
+    }
+    const contentType = match[1];
+    const base64Data = match[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    const filePath = `profile-images/${uid}/${uuidv4()}`;
+    const file = bucket.file(filePath);
+
+    await file.save(buffer, {
+        metadata: { contentType },
+    });
+
+    await file.makePublic();
+    return file.publicUrl();
+}
 
 // GET handler to fetch doctor profile
 export async function GET() {
@@ -90,13 +114,33 @@ export async function POST(request: Request) {
     if (!validation.success) {
         return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
+    
+    const { profileImage, ...profileData } = validation.data;
+    let imageUrl;
 
+    if (profileImage) {
+        try {
+            imageUrl = await uploadProfileImage(profileImage, doctorId);
+        } catch(uploadError) {
+            console.error("Image upload failed:", uploadError);
+            return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
+        }
+    }
+    
     const db = getAdminDb();
     const doctorRef = db.collection('doctors').doc(doctorId);
     
-    // We use set with merge: true to update the document, which is equivalent to update.
-    // This also creates the document if it doesn't exist, though it should for a logged-in doctor.
-    await doctorRef.set(validation.data, { merge: true });
+    const dataToUpdate = { ...profileData };
+    if (imageUrl) {
+        (dataToUpdate as any).imageUrl = imageUrl;
+    }
+    
+    await doctorRef.set(dataToUpdate, { merge: true });
+    
+    // Also update the display name in Firebase Auth
+    await getAdminAuth().updateUser(doctorId, {
+        displayName: `${profileData.firstName} ${profileData.lastName}`
+    });
 
     return NextResponse.json({ message: 'Profile updated successfully' });
   } catch (error) {
@@ -104,3 +148,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
   }
 }
+
+    

@@ -1,3 +1,4 @@
+
 import type { FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions } from 'firebase-admin/firestore';
 import type { DoctorProfile, PatientProfile, Appointment } from '@/lib/types';
 
@@ -18,6 +19,8 @@ export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
       lga: data.lga,
       language: data.language,
       createdAt: data.createdAt,
+      imageUrl: data.imageUrl || '',
+      dateOfBirth: data.dateOfBirth || '',
       // Add other doctor-specific fields with defaults if they don't exist
       specialty: data.specialty || '',
       isVerified: data.isVerified || false,
@@ -96,3 +99,5 @@ export const appointmentConverter: FirestoreDataConverter<Appointment> = {
         };
     },
 };
+
+    
