@@ -63,7 +63,7 @@ export default function Login() {
       if (user) {
         toast({
             title: "Login Successful",
-            description: "Welcome back, Doc!",
+            description: `Welcome back, ${user.displayName || 'Doc'}!`,
         });
         router.push("/doctor");
       } else {
