@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
-import { signInWithGoogle, signInWithApple, signInWithEmail } from "@/lib/auth";
+import { signInWithGoogle, signInWithApple, signInWithCustomToken } from "@/lib/auth";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -41,16 +41,39 @@ export default function Login() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const user = await signInWithEmail(email, password);
-    setIsLoading(false);
-    if (user) {
-      router.push("/doctor");
-    } else {
-       toast({
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      if (data.role !== 'doctor') {
+        throw new Error('Access denied. Only doctors can log in here.');
+      }
+      
+      const user = await signInWithCustomToken(data.token);
+
+      if (user) {
+        router.push("/doctor");
+      } else {
+        throw new Error('Failed to sign in with custom token.');
+      }
+
+    } catch (error: any) {
+      toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Please check your email and password.",
+        description: error.message,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

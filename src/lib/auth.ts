@@ -9,6 +9,7 @@ import {
   setPersistence,
   browserLocalPersistence,
   signInWithEmailAndPassword,
+  signInWithCustomToken as fbSignInWithCustomToken,
 } from "firebase/auth";
 import type { Auth } from "firebase/auth";
 
@@ -59,6 +60,19 @@ export const signInWithEmail = async (email: string, password: string): Promise<
     return result.user;
   } catch (error) {
     console.error("Error signing in with email:", error);
+    return null;
+  }
+};
+
+export const signInWithCustomToken = async (token: string): Promise<User | null> => {
+  try {
+    const auth = await getClientAuth();
+    if (!auth) return null;
+    await setPersistence(auth, browserLocalPersistence);
+    const result = await fbSignInWithCustomToken(auth, token);
+    return result.user;
+  } catch (error) {
+    console.error("Error signing in with custom token:", error);
     return null;
   }
 };
