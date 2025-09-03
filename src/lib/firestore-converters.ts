@@ -36,8 +36,6 @@ export const doctorConverter: FirestoreDataConverter<DoctorProfile> = {
       addressLine2: data.addressLine2 || '',
       city: data.city || '',
       state: data.state || '',
-      country: data.country || '',
-      postalCode: data.postalCode || '',
       pricing: data.pricing || 'Free',
       services: data.services || [],
       specializations: data.specializations || [],

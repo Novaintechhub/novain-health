@@ -11,26 +11,27 @@ import { v4 as uuidv4 } from 'uuid';
 const DoctorProfileUpdateSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
-  mobileNumber: z.string().optional(),
-  gender: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  aboutMe: z.string().optional(),
+  mobileNumber: z.string().optional().nullable(),
+  gender: z.string().optional().nullable(),
+  dateOfBirth: z.string().optional().nullable(),
+  aboutMe: z.string().optional().nullable(),
   profileImage: z.string().optional(), // Base64 data URI for new image
   
   // Clinic Info
-  clinicName: z.string().optional(),
-  clinicAddress: z.string().optional(),
+  clinicName: z.string().optional().nullable(),
+  clinicAddress: z.string().optional().nullable(),
   
   // Contact Details
-  addressLine1: z.string().optional(),
-  addressLine2: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  country: z.string().optional(),
-  postalCode: z.string().optional(),
+  addressLine1: z.string().optional().nullable(),
+  addressLine2: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  stateOfResidence: z.string().optional().nullable(),
+  lga: z.string().optional().nullable(),
+  language: z.string().optional().nullable(),
 
   // Pricing
-  pricing: z.string().optional(),
+  pricing: z.string().optional().nullable(),
 
   // Services and Specialization
   services: z.array(z.string()).optional(),
@@ -118,7 +119,7 @@ export async function POST(request: Request) {
     const { profileImage, ...profileData } = validation.data;
     let imageUrl;
 
-    if (profileImage) {
+    if (profileImage && profileImage.startsWith('data:image')) {
         try {
             imageUrl = await uploadProfileImage(profileImage, doctorId);
         } catch(uploadError) {
@@ -145,11 +146,12 @@ export async function POST(request: Request) {
 
     await doctorRef.set(dataToUpdate, { merge: true });
     
-    // Also update the display name in Firebase Auth
-    await getAdminAuth().updateUser(doctorId, {
-        displayName: `${profileData.firstName} ${profileData.lastName}`,
-        photoURL: imageUrl || undefined,
-    });
+    // Note: We don't update Firebase Auth display name here because it's disabled in the form
+    if (imageUrl) {
+        await getAdminAuth().updateUser(doctorId, {
+            photoURL: imageUrl,
+        });
+    }
 
     return NextResponse.json({ message: 'Profile updated successfully' });
   } catch (error) {

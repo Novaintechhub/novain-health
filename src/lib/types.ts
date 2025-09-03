@@ -40,8 +40,6 @@ interface UserProfile {
     aboutMe?: string;
     city?: string;
     state?: string;
-    country?: string;
-    postalCode?: string;
 }
 
 // Doctor specific profile fields

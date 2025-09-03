@@ -24,6 +24,7 @@ import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageUpload from "@/components/shared/image-upload";
 import type { DoctorProfile } from "@/lib/types";
+import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
 
 
 const DoctorProfileUpdateSchema = z.object({
@@ -43,9 +44,7 @@ const DoctorProfileUpdateSchema = z.object({
     addressLine2: z.string().optional().nullable(),
     city: z.string().optional().nullable(),
     state: z.string().optional().nullable(),
-    country: z.string().optional().nullable(),
-    postalCode: z.string().optional().nullable(),
-  
+    
     pricing: z.string().optional().nullable(),
   
     services: z.array(z.string()).optional(),
@@ -74,6 +73,9 @@ const DoctorProfileUpdateSchema = z.object({
         registration: z.string(),
         year: z.string(),
     })).optional(),
+    stateOfResidence: z.string().optional().nullable(),
+    lga: z.string().optional().nullable(),
+    language: z.string().optional().nullable(),
 });
   
 type DoctorProfileUpdateInput = z.infer<typeof DoctorProfileUpdateSchema>;
@@ -139,6 +141,7 @@ export default function ProfileSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [lgas, setLgas] = useState<string[]>([]);
   
   const form = useForm<DoctorProfileUpdateInput>({
     resolver: zodResolver(DoctorProfileUpdateSchema),
@@ -181,6 +184,17 @@ export default function ProfileSettings() {
     control: form.control,
     name: "registrations",
   });
+
+  const selectedState = form.watch("stateOfResidence");
+
+  useEffect(() => {
+    if (selectedState) {
+        const state = nigerianStates.find(s => s.name === selectedState);
+        setLgas(state ? state.lgas : []);
+    } else {
+        setLgas([]);
+    }
+  }, [selectedState]);
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
@@ -291,14 +305,6 @@ export default function ProfileSettings() {
                     <Label htmlFor="state">State / Province</Label>
                     <Input id="state" {...form.register('state')} />
                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Input id="country" {...form.register('country')} />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="postal-code">Postal Code</Label>
-                    <Input id="postal-code" {...form.register('postalCode')} />
-                </div>
             </CardContent>
            </Card>
             <Card>
@@ -343,11 +349,11 @@ export default function ProfileSettings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" {...form.register("firstName")} />
+                  <Input id="first-name" {...form.register("firstName")} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="last-name">Last Name</Label>
-                  <Input id="last-name" {...form.register("lastName")} />
+                  <Input id="last-name" {...form.register("lastName")} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone-number">Phone Number</Label>
@@ -372,6 +378,48 @@ export default function ProfileSettings() {
                 <div className="space-y-2">
                   <Label htmlFor="dob">Date of Birth</Label>
                   <Input id="dob" type="date" {...form.register("dateOfBirth")} />
+                </div>
+                <div className="space-y-2">
+                    <Label>State of Residence</Label>
+                    <Controller
+                        control={form.control} name="stateOfResidence"
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                                <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
+                                <SelectContent>
+                                    {nigerianStates.map(state => (<SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>LGA of Residence</Label>
+                    <Controller
+                        control={form.control} name="lga"
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value ?? ''} disabled={lgas.length === 0}>
+                                <SelectTrigger><SelectValue placeholder="Select LGA" /></SelectTrigger>
+                                <SelectContent>
+                                    {lgas.map(lga => (<SelectItem key={lga} value={lga}>{lga}</SelectItem>))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </div>
+                 <div className="space-y-2">
+                    <Label>Language</Label>
+                     <Controller
+                        control={form.control} name="language"
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                                <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
+                                <SelectContent>
+                                    {nigerianLanguages.map(lang => (<SelectItem key={lang} value={lang}>{lang}</SelectItem>))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
                 </div>
               </div>
             </CardContent>
