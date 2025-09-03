@@ -14,9 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UploadCloud, Trash2, X, PlusCircle } from "lucide-react";
-import Image from "next/image";
+import { X, PlusCircle, Trash2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -51,7 +49,7 @@ const DoctorProfileUpdateSchema = z.object({
     postalCode: z.string().optional(),
   
     // Pricing
-    pricing: z.any().optional(),
+    pricing: z.string().optional(),
   
     // Services and Specialization
     services: z.array(z.string()).optional(),
@@ -260,8 +258,8 @@ export default function ProfileSettings() {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       <h1 className="text-2xl font-bold">Profile Settings</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardContent className="p-6 flex flex-col items-center text-center">
                 <Controller
@@ -275,6 +273,69 @@ export default function ProfileSettings() {
               <p className="text-sm text-muted-foreground">BDS, MDS - Oral & Maxillofacial Surgery</p>
             </CardContent>
           </Card>
+           <Card>
+            <CardHeader>
+                <CardTitle>Contact Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="address-line-1">Address Line 1</Label>
+                    <Input id="address-line-1" {...form.register('addressLine1')} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="address-line-2">Address Line 2</Label>
+                    <Input id="address-line-2" {...form.register('addressLine2')} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input id="city" {...form.register('city')} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="state">State / Province</Label>
+                    <Input id="state" {...form.register('state')} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Input id="country" {...form.register('country')} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="postal-code">Postal Code</Label>
+                    <Input id="postal-code" {...form.register('postalCode')} />
+                </div>
+            </CardContent>
+           </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Pricing</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Controller
+                        control={form.control}
+                        name="pricing"
+                        render={({ field }) => (
+                            <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Free" id="free" />
+                                    <Label htmlFor="free">Free</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Custom" id="custom" />
+                                    <Label htmlFor="custom">Custom Price (per hour)</Label>
+                                </div>
+                                {field.value?.startsWith('Custom') && (
+                                     <Input 
+                                        type="number" 
+                                        placeholder="30" 
+                                        className="mt-2"
+                                        onChange={(e) => field.onChange(`Custom ${e.target.value}`)}
+                                        value={field.value.replace('Custom ', '')}
+                                     />
+                                )}
+                            </RadioGroup>
+                        )}
+                    />
+                </CardContent>
+            </Card>
         </div>
         <div className="lg:col-span-2 space-y-8">
           <Card>
@@ -382,6 +443,79 @@ export default function ProfileSettings() {
             </CardContent>
            </Card>
 
+            <Card>
+                <CardHeader><CardTitle>Professional Details</CardTitle></CardHeader>
+                <CardContent className="space-y-6">
+                    {/* Education */}
+                    <div className="space-y-4">
+                        <Label>Education</Label>
+                        {educationFields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md relative">
+                             <div className="space-y-2"><Label>College/Institute</Label><Input {...form.register(`education.${index}.college`)} /></div>
+                             <div className="space-y-2"><Label>Degree</Label><Input {...form.register(`education.${index}.degree`)} /></div>
+                             <div className="space-y-2"><Label>Year Started</Label><Input type="number" {...form.register(`education.${index}.yearStarted`)} /></div>
+                             <div className="space-y-2"><Label>Year Completed</Label><Input type="number" {...form.register(`education.${index}.yearCompleted`)} /></div>
+                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeEducation(index)}><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={() => appendEducation({ college: '', degree: '', yearStarted: '', yearCompleted: '' })}><PlusCircle className="mr-2 w-4 h-4" /> Add Education</Button>
+                    </div>
+
+                     {/* Experience */}
+                     <div className="space-y-4">
+                        <Label>Experience</Label>
+                        {experienceFields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md relative">
+                             <div className="space-y-2"><Label>Hospital Name</Label><Input {...form.register(`experience.${index}.hospital`)} /></div>
+                             <div className="space-y-2"><Label>Designation</Label><Input {...form.register(`experience.${index}.designation`)} /></div>
+                             <div className="space-y-2"><Label>From</Label><Input type="date" {...form.register(`experience.${index}.from`)} /></div>
+                             <div className="space-y-2"><Label>To</Label><Input type="date" {...form.register(`experience.${index}.to`)} /></div>
+                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeExperience(index)}><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={() => appendExperience({ hospital: '', designation: '', from: '', to: '' })}><PlusCircle className="mr-2 w-4 h-4" /> Add Experience</Button>
+                    </div>
+
+                    {/* Awards */}
+                    <div className="space-y-4">
+                        <Label>Awards</Label>
+                        {awardsFields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md relative">
+                             <div className="space-y-2"><Label>Award</Label><Input {...form.register(`awards.${index}.name`)} /></div>
+                             <div className="space-y-2"><Label>Year</Label><Input type="number" {...form.register(`awards.${index}.year`)} /></div>
+                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeAward(index)}><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={() => appendAward({ name: '', year: '' })}><PlusCircle className="mr-2 w-4 h-4" /> Add Award</Button>
+                    </div>
+
+                    {/* Memberships */}
+                    <div className="space-y-4">
+                        <Label>Memberships</Label>
+                        {membershipsFields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-1 gap-4 border p-4 rounded-md relative">
+                             <div className="space-y-2"><Label>Membership</Label><Input {...form.register(`memberships.${index}.organization`)} /></div>
+                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeMembership(index)}><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={() => appendMembership({ organization: '' })}><PlusCircle className="mr-2 w-4 h-4" /> Add Membership</Button>
+                    </div>
+
+                    {/* Registrations */}
+                    <div className="space-y-4">
+                        <Label>Registrations</Label>
+                        {registrationsFields.map((field, index) => (
+                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md relative">
+                             <div className="space-y-2"><Label>Registration</Label><Input {...form.register(`registrations.${index}.registration`)} /></div>
+                             <div className="space-y-2"><Label>Year</Label><Input type="number" {...form.register(`registrations.${index}.year`)} /></div>
+                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeRegistration(index)}><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={() => appendRegistration({ registration: '', year: '' })}><PlusCircle className="mr-2 w-4 h-4" /> Add Registration</Button>
+                    </div>
+                </CardContent>
+            </Card>
+
           <div>
              <Button type="submit" style={{ backgroundColor: '#46C8F5', color: 'white' }} disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
@@ -392,5 +526,3 @@ export default function ProfileSettings() {
     </form>
   );
 }
-
-    
