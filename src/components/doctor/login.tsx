@@ -61,6 +61,10 @@ export default function Login() {
       const user = await signInWithCustomToken(data.token);
 
       if (user) {
+        toast({
+            title: "Login Successful",
+            description: "Welcome back, Doc!",
+        });
         router.push("/doctor");
       } else {
         throw new Error('Failed to sign in with custom token.');
