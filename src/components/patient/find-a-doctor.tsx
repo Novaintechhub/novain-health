@@ -66,7 +66,7 @@ const DoctorCard = ({ doctor }: { doctor: DoctorProfile }) => (
             <p className="font-semibold text-sm">{doctor.availability}</p>
         </div>
         <Button asChild className="bg-cyan-500 hover:bg-cyan-600 text-white">
-            <Link href="/patients/doctor-profile">Book Now</Link>
+            <Link href={`/patients/doctor-profile?id=${doctor.uid}`}>Book Now</Link>
         </Button>
     </CardFooter>
   </Card>
