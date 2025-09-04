@@ -143,6 +143,10 @@ function DoctorProfileContent() {
     }
     return days;
   };
+
+  const toYYYYMMDD = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  }
   
   if (loading) {
     return (
@@ -437,9 +441,9 @@ function DoctorProfileContent() {
                 <CardContent className="p-6">
                     <ul className="space-y-4">
                         {getUpcomingWeek().map((date, index) => {
-                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                            const dateString = toYYYYMMDD(date);
                             // @ts-ignore
-                            const slots = doctor.schedule?.[dayName] || [];
+                            const slots = doctor.schedule?.[dateString] || [];
                             const isToday = index === 0;
 
                             return (
@@ -451,10 +455,14 @@ function DoctorProfileContent() {
                                     <div className="text-right">
                                         {slots.length > 0 ? (
                                             <>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {slots.map((slot: { start: string; end: string; }) => `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`).join(' / ')}
-                                                </p>
-                                                {isToday && <Badge className="bg-green-100 text-green-800 mt-1">Open Now</Badge>}
+                                                <div className="flex flex-wrap gap-2 justify-end">
+                                                    {slots.map((slot: { start: string; end: string; }, i: number) => (
+                                                        <Badge key={i} variant="outline" className="text-cyan-600 border-cyan-200 bg-cyan-50">
+                                                            {formatTo12Hour(slot.start)} - {formatTo12Hour(slot.end)}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                                {isToday && <Badge className="bg-green-100 text-green-800 mt-2">Open Now</Badge>}
                                             </>
                                         ) : (
                                             <Badge variant="destructive" className="bg-red-100 text-red-800">Closed</Badge>
@@ -463,7 +471,7 @@ function DoctorProfileContent() {
                                 </li>
                             );
                         })}
-                         {(!doctor.schedule || Object.keys(doctor.schedule).length === 0) && (
+                        {(!doctor.schedule || Object.keys(doctor.schedule).length === 0) && (
                             <p className="text-muted-foreground text-center py-4">No schedule set by the doctor.</p>
                         )}
                     </ul>
