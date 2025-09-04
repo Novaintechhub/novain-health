@@ -8,10 +8,9 @@ import { z } from 'zod';
 
 const scheduleSchema = z.record(z.array(z.string()));
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const headersList = headers();
-    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
 
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -40,8 +39,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const headersList = headers();
-    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
 
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -60,9 +58,9 @@ export async function POST(request: Request) {
     const db = getAdminDb();
     const doctorRef = db.collection('doctors').doc(doctorId);
     
-    await doctorRef.update({
+    await doctorRef.set({
         schedule: validation.data
-    });
+    }, { merge: true });
 
     return NextResponse.json({ message: 'Schedule updated successfully' });
   } catch (error) {
@@ -70,3 +68,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to update schedule' }, { status: 500 });
   }
 }
+
