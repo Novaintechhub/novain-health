@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PatientProfile } from "@/lib/types";
 import ImageUpload from "@/components/shared/image-upload";
+import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
+
 
 export default function PatientProfileSettings() {
   const { user, loading: authLoading } = useAuth() || {};
@@ -20,6 +22,7 @@ export default function PatientProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageToUpload, setImageToUpload] = useState<string | null>(null);
+  const [lgas, setLgas] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,6 +35,10 @@ export default function PatientProfileSettings() {
         if (!response.ok) throw new Error("Failed to fetch profile");
         const data = await response.json();
         setProfile(data);
+        if (data.stateOfResidence) {
+          const state = nigerianStates.find(s => s.name === data.stateOfResidence);
+          if (state) setLgas(state.lgas);
+        }
       } catch (error) {
         console.error("Error fetching patient profile:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not load your profile." });
@@ -52,6 +59,12 @@ export default function PatientProfileSettings() {
   
   const handleSelectChange = (field: keyof PatientProfile) => (value: string) => {
     setProfile({ ...profile, [field]: value });
+  };
+
+  const handleStateChange = (stateName: string) => {
+    const state = nigerianStates.find(s => s.name === stateName);
+    setLgas(state ? state.lgas : []);
+    setProfile(prev => ({ ...prev, stateOfResidence: stateName, lga: '' })); // Reset LGA on state change
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -166,6 +179,19 @@ export default function PatientProfileSettings() {
                         <Label htmlFor="mobileNumber">Phone Number</Label>
                         <Input id="mobileNumber" value={profile.mobileNumber || ''} onChange={handleChange} />
                     </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="language">Preferred Language</Label>
+                         <Select value={profile.language} onValueChange={handleSelectChange('language')}>
+                            <SelectTrigger id="language">
+                                <SelectValue placeholder="Select Language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {nigerianLanguages.map(lang => (
+                                    <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             </CardContent>
         </Card>
@@ -176,21 +202,39 @@ export default function PatientProfileSettings() {
             </CardHeader>
             <CardContent className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="address">Address</Label>
                         <Input id="address" value={profile.address || ''} onChange={handleChange}/>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="lga">City</Label>
-                        <Input id="lga" value={profile.lga || ''} onChange={handleChange} />
+                        <Label htmlFor="stateOfResidence">State</Label>
+                        <Select value={profile.stateOfResidence} onValueChange={handleStateChange}>
+                            <SelectTrigger id="stateOfResidence">
+                                <SelectValue placeholder="Select State" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {nigerianStates.map(state => (
+                                    <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="stateOfResidence">State</Label>
-                        <Input id="stateOfResidence" value={profile.stateOfResidence || ''} onChange={handleChange} />
+                        <Label htmlFor="lga">LGA</Label>
+                         <Select value={profile.lga} onValueChange={handleSelectChange('lga')} disabled={lgas.length === 0}>
+                            <SelectTrigger id="lga">
+                                <SelectValue placeholder="Select LGA" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {lgas.map(lga => (
+                                    <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="country">Country</Label>
-                        <Input id="country" defaultValue="Nigeria" />
+                        <Input id="country" defaultValue="Nigeria" disabled />
                     </div>
                 </div>
             </CardContent>
