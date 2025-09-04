@@ -41,7 +41,14 @@ export const doctorConverter: FirestoreDataConverter<DoctorCoreProfile> = {
 
 export const patientConverter: FirestoreDataConverter<PatientProfile> = {
   toFirestore(patient: PatientProfile): DocumentData {
-    return { ...patient };
+    // Clean up undefined values before sending to Firestore
+    const data: any = { ...patient };
+    Object.keys(data).forEach(key => {
+        if (data[key] === undefined) {
+            delete data[key];
+        }
+    });
+    return data;
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): PatientProfile {
     const data = snapshot.data();
@@ -62,7 +69,8 @@ export const patientConverter: FirestoreDataConverter<PatientProfile> = {
       phone: data.phone || data.mobileNumber,
       lastVisit: data.lastVisit || new Date().toISOString().split('T')[0],
       paid: data.paid || '₦0.00',
-      avatarUrl: data.avatarUrl || `https://placehold.co/40x40.png?text=${data.firstName.charAt(0)}${data.lastName.charAt(0)}`,
+      imageUrl: data.imageUrl || `https://placehold.co/40x40.png?text=${data.firstName.charAt(0)}${data.lastName.charAt(0)}`,
+      avatarUrl: data.avatarUrl || data.imageUrl || `https://placehold.co/40x40.png?text=${data.firstName.charAt(0)}${data.lastName.charAt(0)}`,
       avatarHint: data.avatarHint || 'person portrait',
       genotype: data.genotype || 'N/A',
       bloodGroup: data.bloodGroup || 'N/A',

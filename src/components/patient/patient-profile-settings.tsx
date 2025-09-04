@@ -16,8 +16,10 @@ import ImageUpload from "@/components/shared/image-upload";
 export default function PatientProfileSettings() {
   const { user, loading: authLoading } = useAuth() || {};
   const { toast } = useToast();
-  const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [profile, setProfile] = useState<Partial<PatientProfile>>({});
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageToUpload, setImageToUpload] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -40,17 +42,57 @@ export default function PatientProfileSettings() {
     if (user) {
         fetchProfile();
     } else if (!authLoading) {
-        setLoading(false); // If there's no user and we are not loading auth, stop loading profile.
+        setLoading(false);
     }
   }, [user, authLoading, toast]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfile({ ...profile, [e.target.id]: e.target.value });
+  };
+  
+  const handleSelectChange = (field: keyof PatientProfile) => (value: string) => {
+    setProfile({ ...profile, [field]: value });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically have a POST request to update the profile
-    toast({
-        title: "Profile Updated",
-        description: "Your changes have been saved successfully.",
-    });
+    if (!user) return;
+    setIsSubmitting(true);
+
+    try {
+        const idToken = await user.getIdToken();
+        const payload = {
+            ...profile,
+            profileImage: imageToUpload,
+        };
+        
+        const response = await fetch('/api/patient/profile', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update profile");
+        }
+
+        toast({
+            title: "Profile Updated",
+            description: "Your changes have been saved successfully.",
+        });
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: error.message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
   const isLoading = authLoading || loading;
@@ -84,24 +126,24 @@ export default function PatientProfileSettings() {
             <CardTitle>Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <ImageUpload onImageChange={() => {}} currentImageUrl={profile?.imageUrl || user?.photoURL} />
+                <ImageUpload onImageChange={setImageToUpload} currentImageUrl={profile?.imageUrl || user?.photoURL} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label htmlFor="first-name">First Name</Label>
-                        <Input id="first-name" defaultValue={profile?.firstName} />
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" value={profile.firstName || ''} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="last-name">Last Name</Label>
-                        <Input id="last-name" defaultValue={profile?.lastName} />
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" value={profile.lastName || ''} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="dob">Date of Birth</Label>
-                        <Input id="dob" type="date" defaultValue="1983-07-24" />
+                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                        <Input id="dateOfBirth" type="date" value={profile.dateOfBirth || '1983-07-24'} onChange={handleChange}/>
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="blood-group">Blood Group</Label>
-                        <Select defaultValue={profile?.bloodGroup}>
-                            <SelectTrigger id="blood-group">
+                        <Label htmlFor="bloodGroup">Blood Group</Label>
+                        <Select value={profile.bloodGroup} onValueChange={handleSelectChange('bloodGroup')}>
+                            <SelectTrigger id="bloodGroup">
                                 <SelectValue placeholder="Select Blood Group" />
                             </SelectTrigger>
                             <SelectContent>
@@ -118,11 +160,11 @@ export default function PatientProfileSettings() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={profile?.email} disabled />
+                        <Input id="email" type="email" value={profile.email || ''} disabled />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input id="phone" defaultValue={profile?.mobileNumber} />
+                        <Label htmlFor="mobileNumber">Phone Number</Label>
+                        <Input id="mobileNumber" value={profile.mobileNumber || ''} onChange={handleChange} />
                     </div>
                 </div>
             </CardContent>
@@ -136,15 +178,15 @@ export default function PatientProfileSettings() {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="address">Address</Label>
-                        <Input id="address" defaultValue={profile?.address} />
+                        <Input id="address" value={profile.address || ''} onChange={handleChange}/>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="city">City</Label>
-                        <Input id="city" defaultValue={profile?.lga} />
+                        <Label htmlFor="lga">City</Label>
+                        <Input id="lga" value={profile.lga || ''} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="state">State</Label>
-                        <Input id="state" defaultValue={profile?.stateOfResidence} />
+                        <Label htmlFor="stateOfResidence">State</Label>
+                        <Input id="stateOfResidence" value={profile.stateOfResidence || ''} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="country">Country</Label>
@@ -154,7 +196,9 @@ export default function PatientProfileSettings() {
             </CardContent>
         </Card>
         <div className="flex justify-end">
-            <Button type="submit" className="bg-cyan-500 hover:bg-cyan-600 text-white">Save Changes</Button>
+            <Button type="submit" className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
         </div>
         </div>
     </form>
