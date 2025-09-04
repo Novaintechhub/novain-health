@@ -19,6 +19,16 @@ type Availability = {
   [date: string]: TimeSlot[];
 };
 
+const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    const formattedMinutes = minutes.padStart(2, '0');
+    return `${h12}:${formattedMinutes} ${ampm}`;
+};
+
 export default function ScheduleTimings() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [availability, setAvailability] = useState<Availability>({});
@@ -199,7 +209,7 @@ export default function ScheduleTimings() {
                       key={index}
                       className="flex items-center gap-2 bg-cyan-400 text-white rounded-md px-3 py-1.5 text-sm"
                     >
-                      <span>{slot.start} - {slot.end}</span>
+                      <span>{formatTo12Hour(slot.start)} - {formatTo12Hour(slot.end)}</span>
                       <button onClick={() => handleRemoveTimeSlot(slot)} className="hover:bg-cyan-500 rounded-full p-0.5">
                         <X className="w-4 h-4" />
                       </button>
