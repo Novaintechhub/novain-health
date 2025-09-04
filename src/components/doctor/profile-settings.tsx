@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -65,6 +68,13 @@ export default function ProfileSettings() {
           awards: [],
           memberships: [],
           registrations: [],
+          pricingModel: 'custom',
+          freeMethods: { video: false, voice: false, chat: false },
+          customPricing: {
+              video: { '15': 0, '30': 0, '45': 0, '60': 0 },
+              voice: { '15': 0, '30': 0, '45': 0, '60': 0 },
+              chat: { '15': 0, '30': 0, '45': 0, '60': 0 },
+          }
       }
   });
 
@@ -77,6 +87,7 @@ export default function ProfileSettings() {
   const { fields: registrationsFields, append: appendRegistration, remove: removeRegistration } = useFieldArray({ control, name: "registrations" });
   
   const selectedState = watch('stateOfResidence');
+  const pricingModel = watch('pricingModel');
   const initialImageUrl = useMemo(() => user?.photoURL, [user]);
 
   useEffect(() => {
@@ -170,6 +181,79 @@ export default function ProfileSettings() {
     return <Skeleton className="w-full h-96" />;
   }
 
+  const renderCustomPricingTable = () => (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Duration</TableHead>
+            <TableHead>Video Call</TableHead>
+            <TableHead>Voice Call</TableHead>
+            <TableHead>Chat</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {['15', '30', '45', '60'].map(duration => (
+            <TableRow key={duration}>
+              <TableCell className="font-medium">{duration} mins</TableCell>
+              {(['video', 'voice', 'chat'] as const).map(method => (
+                <TableCell key={method}>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
+                    <Input
+                      type="number"
+                      className="pl-7"
+                      {...register(`customPricing.${method}.${duration}`, { valueAsNumber: true })}
+                    />
+                  </div>
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
+  const renderFreePricingOptions = () => (
+    <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">Select the consultation methods you offer for free.</p>
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+            <Controller
+                name="freeMethods.video"
+                control={control}
+                render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="free-video" checked={field.value} onCheckedChange={field.onChange} />
+                        <Label htmlFor="free-video">Video Call</Label>
+                    </div>
+                )}
+            />
+             <Controller
+                name="freeMethods.voice"
+                control={control}
+                render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="free-voice" checked={field.value} onCheckedChange={field.onChange} />
+                        <Label htmlFor="free-voice">Voice Call</Label>
+                    </div>
+                )}
+            />
+            <Controller
+                name="freeMethods.chat"
+                control={control}
+                render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="free-chat" checked={field.value} onCheckedChange={field.onChange} />
+                        <Label htmlFor="free-chat">Chat</Label>
+                    </div>
+                )}
+            />
+        </div>
+    </div>
+  );
+
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <h1 className="text-2xl font-bold">Profile Settings</h1>
@@ -257,49 +341,25 @@ export default function ProfileSettings() {
        {/* Pricing */}
       <Card>
         <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-                Set your consultation fees based on the appointment type. The fee should be based on your selected slot duration.
-            </p>
-            <div className="space-y-2">
-                <Label htmlFor="slotDuration">Appointment Slot Duration</Label>
-                <Controller name="slotDuration" control={control} render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger id="slot-duration" className="w-full md:w-1/2">
-                            <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="15">15 mins</SelectItem>
-                            <SelectItem value="30">30 mins</SelectItem>
-                            <SelectItem value="45">45 mins</SelectItem>
-                            <SelectItem value="60">1 hour</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )}/>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <Label htmlFor="pricingVideo">Video Call</Label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
-                        <Input id="pricingVideo" type="number" placeholder="e.g., 10000" className="pl-7" {...register("pricingVideo")} />
-                    </div>
-                </div>
-                 <div>
-                    <Label htmlFor="pricingVoice">Voice Call</Label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
-                        <Input id="pricingVoice" type="number" placeholder="e.g., 8000" className="pl-7" {...register("pricingVoice")} />
-                    </div>
-                </div>
-                 <div>
-                    <Label htmlFor="pricingChat">Chat</Label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
-                        <Input id="pricingChat" type="number" placeholder="e.g., 5000" className="pl-7" {...register("pricingChat")} />
-                    </div>
-                </div>
-            </div>
+        <CardContent className="space-y-6">
+            <Controller
+                name="pricingModel"
+                control={control}
+                render={({ field }) => (
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex gap-8">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="free" id="free-pricing" />
+                            <Label htmlFor="free-pricing">Free Consultation</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="custom" id="custom-pricing" />
+                            <Label htmlFor="custom-pricing">Set Custom Prices</Label>
+                        </div>
+                    </RadioGroup>
+                )}
+            />
+            {pricingModel === 'free' && renderFreePricingOptions()}
+            {pricingModel === 'custom' && renderCustomPricingTable()}
         </CardContent>
       </Card>
       

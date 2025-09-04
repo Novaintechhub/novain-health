@@ -30,10 +30,17 @@ const DoctorProfileUpdateSchema = z.object({
   lga: z.string().optional().nullable(),
   language: z.string().optional().nullable(),
 
-  slotDuration: z.enum(['15', '30', '45', '60']).optional().nullable(),
-  pricingVideo: z.string().optional().nullable(),
-  pricingVoice: z.string().optional().nullable(),
-  pricingChat: z.string().optional().nullable(),
+  pricingModel: z.enum(['free', 'custom']).optional(),
+  freeMethods: z.object({
+    video: z.boolean().optional(),
+    voice: z.boolean().optional(),
+    chat: z.boolean().optional(),
+  }).optional(),
+  customPricing: z.object({
+    video: z.record(z.string(), z.number()).optional(),
+    voice: z.record(z.string(), z.number()).optional(),
+    chat: z.record(z.string(), z.number()).optional(),
+  }).optional(),
 
   services: z.array(z.string()).optional(),
   specializations: z.array(z.string()).optional(),
@@ -163,7 +170,6 @@ export async function POST(request: Request) {
         profileImage,
         firstName, lastName, 
         education, experience, awards, memberships, registrations,
-        slotDuration,
         ...detailsData 
     } = validation.data;
     
@@ -186,13 +192,10 @@ export async function POST(request: Request) {
     if (imageUrl) {
         coreData.imageUrl = imageUrl;
     }
-    if (slotDuration) {
-        coreData.slotDuration = slotDuration;
-    }
     
     const batch = db.batch();
 
-    // Update core profile if there's an image or slot duration
+    // Update core profile if there's an image
     if (Object.keys(coreData).length > 0) {
         batch.set(doctorRef, coreData, { merge: true });
     }

@@ -48,7 +48,6 @@ export interface DoctorCoreProfile extends UserProfile {
     memberSince?: string;
     earned?: string;
     accountStatus?: "active" | "inactive";
-    slotDuration?: '15' | '30' | '45' | '60';
 }
 
 export interface DoctorDetails {
@@ -73,9 +72,17 @@ export interface DoctorDetails {
     pinterestUrl?: string;
     linkedinUrl?: string;
     youtubeUrl?: string;
-    pricingVideo?: string;
-    pricingVoice?: string;
-    pricingChat?: string;
+    pricingModel?: 'free' | 'custom';
+    freeMethods?: {
+        video: boolean;
+        voice: boolean;
+        chat: boolean;
+    };
+    customPricing?: {
+        video: { '15': number, '30': number, '45': number, '60': number };
+        voice: { '15': number, '30': number, '45': number, '60': number };
+        chat: { '15': number, '30': number, '45': number, '60': number };
+    };
 }
 
 export interface DoctorEducation {
