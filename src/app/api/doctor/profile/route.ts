@@ -9,6 +9,12 @@ import { doctorConverter } from '@/lib/firestore-converters';
 import { v4 as uuidv4 } from 'uuid';
 import type { DoctorProfile, DoctorDetails, DoctorEducation, DoctorExperience, DoctorAward, DoctorMembership, DoctorRegistration, DoctorCoreProfile } from '@/lib/types';
 
+const pricingDurationSchema = z.object({
+    '15': z.preprocess(val => val === '' ? 0 : Number(val), z.number().optional()),
+    '30': z.preprocess(val => val === '' ? 0 : Number(val), z.number().optional()),
+    '45': z.preprocess(val => val === '' ? 0 : Number(val), z.number().optional()),
+    '60': z.preprocess(val => val === '' ? 0 : Number(val), z.number().optional()),
+}).optional();
 
 const DoctorProfileUpdateSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -37,9 +43,9 @@ const DoctorProfileUpdateSchema = z.object({
     chat: z.boolean().optional(),
   }).optional(),
   customPricing: z.object({
-    video: z.record(z.string(), z.number()).optional(),
-    voice: z.record(z.string(), z.number()).optional(),
-    chat: z.record(z.string(), z.number()).optional(),
+    video: pricingDurationSchema,
+    voice: pricingDurationSchema,
+    chat: pricingDurationSchema,
   }).optional(),
 
   services: z.array(z.string()).optional(),
