@@ -108,7 +108,7 @@ export default function MedicalRecords() {
                                                       Print
                                                   </Button>
                                                   <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                      <Link href="/patients/view-medical-record">
+                                                      <Link href={`/patients/view-medical-record?id=${record.id}`}>
                                                           <Eye className="w-4 h-4 mr-1" />
                                                           View
                                                       </Link>
@@ -152,7 +152,7 @@ export default function MedicalRecords() {
                                                 <Printer className="w-4 h-4 mr-1" /> Print
                                             </Button>
                                             <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                <Link href="/patients/view-medical-record">
+                                                <Link href={`/patients/view-medical-record?id=${record.id}`}>
                                                     <Eye className="w-4 h-4 mr-1" /> View
                                                 </Link>
                                             </Button>
