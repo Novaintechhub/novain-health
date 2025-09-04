@@ -19,11 +19,20 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DoctorProfile } from "@/lib/types";
-import { nigerianStates } from "@/lib/nigeria-data";
+import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
 import ImageUpload from "@/components/shared/image-upload";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
 
 type ProfileFormData = Omit<DoctorProfile, 'uid' | 'email' | 'role' | 'createdAt' | 'isVerified' | 'rating' | 'reviews' | 'location' | 'availability' | 'price' | 'image' | 'hint' | 'memberSince' | 'earned' | 'accountStatus'>;
+
+const generateYears = () => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear; year >= 1960; year--) {
+    years.push(year.toString());
+  }
+  return years;
+};
 
 export default function ProfileSettings() {
   const { user, loading: authLoading } = useAuth();
@@ -32,6 +41,7 @@ export default function ProfileSettings() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageToUpload, setImageToUpload] = useState<string | null>(null);
   const [lgas, setLgas] = useState<string[]>([]);
+  const years = useMemo(() => generateYears(), []);
   
   const form = useForm<ProfileFormData>({
       defaultValues: {
@@ -45,7 +55,7 @@ export default function ProfileSettings() {
           clinicAddress: '',
           addressLine1: '',
           addressLine2: '',
-          city: '',
+          language: '',
           stateOfResidence: '',
           lga: '',
           pricing: 'Free',
@@ -59,7 +69,7 @@ export default function ProfileSettings() {
       }
   });
 
-  const { control, register, handleSubmit, reset, watch } = form;
+  const { control, register, handleSubmit, reset, watch, setValue } = form;
 
   const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({ control, name: "education" });
   const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({ control, name: "experience" });
@@ -69,6 +79,7 @@ export default function ProfileSettings() {
   
   const selectedState = watch('stateOfResidence');
   const initialImageUrl = useMemo(() => user?.photoURL, [user]);
+  const pricingValue = watch('pricing');
 
   useEffect(() => {
     if (selectedState) {
@@ -204,11 +215,21 @@ export default function ProfileSettings() {
         <CardHeader><CardTitle>Contact Details</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2"><Label htmlFor="addressLine1">Address</Label><Input id="addressLine1" {...register("addressLine1")} /></div>
-            <div><Label htmlFor="city">City</Label><Input id="city" {...register("city")} /></div>
+            <div>
+              <Label htmlFor="language">Language</Label>
+              <Controller name="language" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger><SelectValue placeholder="Select Language" /></SelectTrigger>
+                  <SelectContent>
+                    {nigerianLanguages.map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
+            </div>
             <div>
               <Label htmlFor="stateOfResidence">State of Residence</Label>
               <Controller name="stateOfResidence" control={control} render={({ field }) => (
-                <Select onValueChange={(value) => { field.onChange(value); form.setValue('lga', ''); }} value={field.value}>
+                <Select onValueChange={(value) => { field.onChange(value); setValue('lga', ''); }} value={field.value}>
                   <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
                   <SelectContent>
                     {nigerianStates.map(state => <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>)}
@@ -231,19 +252,29 @@ export default function ProfileSettings() {
       {/* Pricing */}
       <Card>
         <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
             <Label htmlFor="pricing">Set your pricing tier</Label>
-            <Controller name="pricing" control={control} render={({ field }) => (
-                 <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Free">Free</SelectItem>
-                        <SelectItem value="1000">₦1000</SelectItem>
-                        <SelectItem value="2500">₦2500</SelectItem>
-                        <SelectItem value="5000">₦5000</SelectItem>
-                    </SelectContent>
-                </Select>
-            )}/>
+            <div className="flex gap-4 items-center">
+                <Controller name="pricing" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Free">Free</SelectItem>
+                            <SelectItem value="1000">₦1000</SelectItem>
+                            <SelectItem value="2500">₦2500</SelectItem>
+                            <SelectItem value="5000">₦5000</SelectItem>
+                            <SelectItem value="Custom">Custom</SelectItem>
+                        </SelectContent>
+                    </Select>
+                )}/>
+                 {pricingValue === 'Custom' && (
+                    <Input 
+                      type="number" 
+                      placeholder="Enter custom amount" 
+                      onChange={(e) => setValue('pricing', e.target.value)} 
+                    />
+                )}
+            </div>
         </CardContent>
       </Card>
       
@@ -259,8 +290,24 @@ export default function ProfileSettings() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div><Label>Degree</Label><Input {...register(`education.${index}.degree`)} /></div>
                           <div><Label>College/Institute</Label><Input {...register(`education.${index}.college`)} /></div>
-                          <div><Label>Year Started</Label><Input type="number" {...register(`education.${index}.yearStarted`)} /></div>
-                          <div><Label>Year Completed</Label><Input type="number" {...register(`education.${index}.yearCompleted`)} /></div>
+                          <div>
+                            <Label>Year Started</Label>
+                            <Controller name={`education.${index}.yearStarted`} control={control} render={({ field }) => (
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                                <SelectContent>{years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
+                              </Select>
+                            )} />
+                          </div>
+                          <div>
+                            <Label>Year Completed</Label>
+                            <Controller name={`education.${index}.yearCompleted`} control={control} render={({ field }) => (
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                                <SelectContent>{years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
+                              </Select>
+                            )} />
+                          </div>
                       </div>
                   </div>
               ))}
@@ -295,7 +342,15 @@ export default function ProfileSettings() {
               <div key={field.id} className="flex items-end gap-2">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><Label>Award</Label><Input {...register(`awards.${index}.name`)} /></div>
-                  <div><Label>Year</Label><Input type="number" {...register(`awards.${index}.year`)} /></div>
+                  <div>
+                    <Label>Year</Label>
+                    <Controller name={`awards.${index}.year`} control={control} render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                        <SelectContent>{years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
+                      </Select>
+                    )} />
+                  </div>
                 </div>
                 <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => removeAward(index)}><Trash2 className="h-4 w-4" /></Button>
               </div>
@@ -324,7 +379,15 @@ export default function ProfileSettings() {
               <div key={field.id} className="flex items-end gap-2">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><Label>Registration</Label><Input {...register(`registrations.${index}.registration`)} /></div>
-                  <div><Label>Year</Label><Input type="number" {...register(`registrations.${index}.year`)} /></div>
+                  <div>
+                    <Label>Year</Label>
+                    <Controller name={`registrations.${index}.year`} control={control} render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                        <SelectContent>{years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
+                      </Select>
+                    )} />
+                  </div>
                 </div>
                 <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => removeRegistration(index)}><Trash2 className="h-4 w-4" /></Button>
               </div>
