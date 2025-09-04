@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const db = getAdminDb();
     const doctorsRef = db.collection('doctors').withConverter(doctorConverter);
-    const snapshot = await doctorsRef.where('isVerified', '==', true).get();
+    const snapshot = await doctorsRef.get();
     
     if (snapshot.empty) {
       return NextResponse.json([]);
