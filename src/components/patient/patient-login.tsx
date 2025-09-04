@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LandingHeader from "@/components/shared/landing-header";
 import LandingFooter from "@/components/shared/landing-footer";
-import { signInWithGoogle, signInWithApple } from "@/lib/auth";
+import { signInWithGoogle, signInWithApple, signInWithCustomToken } from "@/lib/auth";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -30,18 +32,68 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function PatientLogin() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      if (data.role !== 'patient') {
+        throw new Error('Access denied. Only patients can log in here.');
+      }
+      
+      const user = await signInWithCustomToken(data.token);
+
+      if (user) {
+        toast({
+            title: "Login Successful",
+            description: `Welcome back, ${user.displayName || 'Patient'}!`,
+        });
+        router.push("/patients/dashboard");
+      } else {
+        throw new Error('Failed to sign in with custom token.');
+      }
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     const user = await signInWithGoogle();
     if (user) {
-      window.location.href = "/patients/dashboard";
+      // You might want to verify the role here as well before redirecting
+      router.push("/patients/dashboard");
     }
   };
 
   const handleAppleSignIn = async () => {
     const user = await signInWithApple();
     if (user) {
-      window.location.href = "/patients/dashboard";
+      // You might want to verify the role here as well before redirecting
+      router.push("/patients/dashboard");
     }
   };
   
@@ -84,10 +136,22 @@ export default function PatientLogin() {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
               
-              <form className="space-y-4">
-                <Input type="email" placeholder="Email Address" />
+              <form className="space-y-4" onSubmit={handleSignIn}>
+                <Input 
+                    type="email" 
+                    placeholder="Email Address" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
                 <div className="relative">
-                  <Input type={showPassword ? "text" : "password"} placeholder="Input password" />
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Input password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                   <Button
                     type="button"
                     variant="ghost"
@@ -98,9 +162,9 @@ export default function PatientLogin() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
-                <Link href="/patients/dashboard" className="w-full block">
-                  <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="button">Sign In</Button>
-                </Link>
+                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white" type="submit" disabled={isLoading}>
+                    {isLoading ? "Signing In..." : "Sign In"}
+                </Button>
               </form>
 
               <div className="border-t border-gray-300 my-8"></div>

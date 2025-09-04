@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail } from "lucide-react";
 import { signInWithGoogle, signInWithApple } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -26,19 +27,19 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function Signup() {
+  const router = useRouter();
+
   const handleGoogleSignIn = async () => {
     const user = await signInWithGoogle();
     if (user) {
-      // Redirect to patient dashboard or handle successful login
-      window.location.href = "/patients/dashboard";
+      router.push("/patients/dashboard");
     }
   };
 
   const handleAppleSignIn = async () => {
     const user = await signInWithApple();
     if (user) {
-      // Redirect to patient dashboard or handle successful login
-      window.location.href = "/patients/dashboard";
+      router.push("/patients/dashboard");
     }
   };
 
