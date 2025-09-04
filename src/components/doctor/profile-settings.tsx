@@ -88,7 +88,7 @@ export default function ProfileSettings() {
   
   const selectedState = watch('stateOfResidence');
   const pricingModel = watch('pricingModel');
-  const initialImageUrl = useMemo(() => user?.photoURL, [user]);
+  const initialImageUrl = watch('imageUrl');
 
   useEffect(() => {
     if (selectedState) {
@@ -264,8 +264,8 @@ export default function ProfileSettings() {
         <CardContent className="space-y-6">
            <ImageUpload onImageChange={setImageToUpload} currentImageUrl={initialImageUrl} />
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><Label htmlFor="firstName">First Name</Label><Input id="firstName" {...register("firstName")} disabled /></div>
-              <div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" {...register("lastName")} disabled /></div>
+              <div><Label htmlFor="firstName">First Name</Label><Input id="firstName" {...register("firstName")} /></div>
+              <div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" {...register("lastName")} /></div>
               <div><Label htmlFor="mobileNumber">Phone Number</Label><Input id="mobileNumber" {...register("mobileNumber")} /></div>
               <div>
                 <Label htmlFor="gender">Gender</Label>

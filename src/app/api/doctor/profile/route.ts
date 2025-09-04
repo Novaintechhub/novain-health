@@ -118,6 +118,12 @@ export async function GET(request: NextRequest) {
         getSubcollectionData<DoctorMembership>(db, doctorId, 'memberships'),
         getSubcollectionData<DoctorRegistration>(db, doctorId, 'registrations'),
     ]);
+    
+    const emptyCustomPricing = {
+        video: { '15': 0, '30': 0, '45': 0, '60': 0 },
+        voice: { '15': 0, '30': 0, '45': 0, '60': 0 },
+        chat: { '15': 0, '30': 0, '45': 0, '60': 0 },
+    };
 
     const fullProfile: DoctorProfile = {
         ...coreProfile,
@@ -127,6 +133,8 @@ export async function GET(request: NextRequest) {
         awards,
         memberships,
         registrations,
+        freeMethods: details.freeMethods || { video: false, voice: false, chat: false },
+        customPricing: details.customPricing || emptyCustomPricing,
     };
     
     return NextResponse.json(fullProfile);
