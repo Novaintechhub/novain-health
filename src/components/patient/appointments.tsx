@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,7 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@/context/AuthContext";
 
 type Appointment = {
   name: string;
@@ -31,7 +33,7 @@ type Appointment = {
   date: string;
   bookingDate: string;
   type: string;
-  status: string;
+  status: "Approved" | "Cancelled" | "Pending" | "Completed";
   amount: string;
   cancellationReason?: string;
 };
@@ -85,8 +87,8 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
 
-  const cleanDateStr = appointment.date.replace(/(\d+)(st|nd|rd|th)/, '$1');
-  const appointmentDate = parse(cleanDateStr, "do MMMM yyyy, h:mm a", new Date());
+  // The date is already formatted as a string from the API, we can parse it for comparison
+  const appointmentDate = new Date(appointment.date);
   const isAppointmentPast = isPast(appointmentDate);
 
   const handleCancel = () => {
@@ -231,11 +233,23 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
 export default function Appointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchAppointments() {
+      if (!user) {
+        setLoading(false);
+        return;
+      };
+      
       try {
-        const response = await fetch('/api/appointments');
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/appointments', {
+            headers: {
+                'Authorization': `Bearer ${idToken}`
+            }
+        });
+        if (!response.ok) throw new Error("Failed to fetch appointments");
         const data = await response.json();
         setAppointments(data);
       } catch (error) {
@@ -245,7 +259,7 @@ export default function Appointments() {
       }
     }
     fetchAppointments();
-  }, []);
+  }, [user]);
 
   return (
     <div className="space-y-4">
@@ -275,6 +289,12 @@ export default function Appointments() {
                       </Card>
                     ))}
                   </div>
+                ) : appointments.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-6 text-center text-muted-foreground">
+                            You have no appointments.
+                        </CardContent>
+                    </Card>
                 ) : (
                   <>
                     {/* Desktop View */}
