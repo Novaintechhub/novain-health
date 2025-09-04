@@ -11,6 +11,7 @@ import LandingFooter from "@/components/shared/landing-footer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const RESEND_INTERVAL = 60; // 60 seconds
 
@@ -26,6 +27,11 @@ export default function OtpVerification() {
   const [countdown, setCountdown] = useState(RESEND_INTERVAL);
   const { toast } = useToast();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const startCountdown = () => {
     setCountdown(RESEND_INTERVAL);
@@ -42,6 +48,8 @@ export default function OtpVerification() {
   };
 
   useEffect(() => {
+    if (!isClient) return;
+
     if (!email) {
       toast({
         variant: "destructive",
@@ -50,16 +58,14 @@ export default function OtpVerification() {
       });
       const registrationPath = role === "doctor" ? "/doctor-registration" : "/patient-registration";
       router.push(registrationPath);
+    } else {
+        startCountdown();
     }
-  }, [email, router, toast, role]);
-
-  useEffect(() => {
-    startCountdown();
+    
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, []);
-  
+  }, [isClient, email, role, router, toast]);
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +102,7 @@ export default function OtpVerification() {
   };
 
   const handleResendOtp = async () => {
-    if (countdown > 0) return;
+    if (countdown > 0 || isResending) return;
     setIsResending(true);
     try {
       const response = await fetch('/api/auth/resend-otp', {
@@ -154,45 +160,61 @@ export default function OtpVerification() {
                 <Image src="/logo.png" alt="NovainHealth Logo" width={148} height={64} />
               </div>
 
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold">Email Verification</h1>
-                <p className="text-muted-foreground mt-2">
-                  Please enter the 6-digit code sent to <span className="font-semibold text-primary">{email}</span>.
-                </p>
-              </div>
+            {!isClient ? (
+                <div className="space-y-8">
+                    <div className="text-center space-y-2">
+                        <Skeleton className="h-8 w-48 mx-auto" />
+                        <Skeleton className="h-4 w-full max-w-xs mx-auto" />
+                        <Skeleton className="h-4 w-full max-w-sm mx-auto" />
+                    </div>
+                    <div className="space-y-6">
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="text-center mb-8">
+                        <h1 className="text-2xl font-bold">Email Verification</h1>
+                        <p className="text-muted-foreground mt-2">
+                        Please enter the 6-digit code sent to <span className="font-semibold text-primary">{email}</span>.
+                        </p>
+                    </div>
 
-              <form onSubmit={handleVerification} className="space-y-6">
-                 <Input
-                    type="text"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.trim())}
-                    maxLength={6}
-                    className="h-12 text-center text-lg tracking-[8px]"
-                    required
-                />
-                <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white h-12" type="submit" disabled={isLoading}>
-                  {isLoading ? "Verifying..." : "Verify Account"}
-                </Button>
-              </form>
-              
-              <div className="text-center mt-6">
-                <p className="text-sm text-muted-foreground">
-                    Didn't receive the code?{' '}
-                    <Button 
-                      variant="link" 
-                      onClick={handleResendOtp} 
-                      disabled={isResending || countdown > 0} 
-                      className="p-0 h-auto text-cyan-500"
-                    >
-                        {isResending 
-                            ? "Resending..." 
-                            : countdown > 0 
-                                ? `Resend in ${countdown}s` 
-                                : "Resend Code"}
-                    </Button>
-                </p>
-              </div>
+                    <form onSubmit={handleVerification} className="space-y-6">
+                        <Input
+                            type="text"
+                            placeholder="Enter OTP"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value.trim())}
+                            maxLength={6}
+                            className="h-12 text-center text-lg tracking-[8px]"
+                            required
+                        />
+                        <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-white h-12" type="submit" disabled={isLoading}>
+                        {isLoading ? "Verifying..." : "Verify Account"}
+                        </Button>
+                    </form>
+                    
+                    <div className="text-center mt-6">
+                        <p className="text-sm text-muted-foreground">
+                            Didn't receive the code?{' '}
+                            <Button 
+                            variant="link" 
+                            onClick={handleResendOtp} 
+                            disabled={isResending || countdown > 0} 
+                            className="p-0 h-auto text-cyan-500"
+                            >
+                                {isResending 
+                                    ? "Resending..." 
+                                    : countdown > 0 
+                                        ? `Resend in ${countdown}s` 
+                                        : "Resend Code"}
+                            </Button>
+                        </p>
+                    </div>
+                </>
+            )}
             </div>
           </div>
         </div>
