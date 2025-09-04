@@ -47,16 +47,44 @@ const reviews = [
     },
 ];
 
-const businessHours = [
-    { day: "Today", date: "5 Nov 2019", time: "07:00 AM - 09:00 PM", status: "Open Now" },
-    { day: "Monday", time: "07:00 AM - 09:00 PM" },
-    { day: "Tuesday", time: "07:00 AM - 09:00 PM" },
-    { day: "Wednesday", time: "07:00 AM - 09:00 PM" },
-    { day: "Thursday", time: "07:00 AM - 09:00 PM" },
-    { day: "Friday", time: "07:00 AM - 09:00 PM" },
-    { day: "Saturday", time: "07:00 AM - 09:00 PM" },
-    { day: "Sunday", time: "", status: "Closed" },
-];
+const locations = [
+    {
+      name: "Smile Cute Dental Care Center",
+      specialty: "MDS - Periodontology and Oral Implantology, BDS",
+      rating: 4,
+      reviewCount: 4,
+      address: "2286 Sundown Lane, Austin, Texas 78749, USA",
+      images: [
+        { src: "https://placehold.co/80x80.png", hint: "dental clinic" },
+        { src: "https://placehold.co/80x80.png", hint: "dental equipment" },
+        { src: "https://placehold.co/80x80.png", hint: "dentist patient" },
+        { src: "https://placehold.co/80x80.png", hint: "dental chair" },
+      ],
+      hours: [
+        { days: "Mon - Sat", time: "10:00 AM - 2:00 PM\n4:00 PM - 9:00 PM" },
+        { days: "Sun", time: "10:00 AM - 2:00 PM" },
+      ],
+      price: 250,
+    },
+    {
+      name: "The Family Dentistry Clinic",
+      specialty: "MDS - Periodontology and Oral Implantology, BDS",
+      rating: 4,
+      reviewCount: 4,
+      address: "2883 University Street, Seattle, Texas Washington, 98155",
+      images: [
+        { src: "https://placehold.co/80x80.png", hint: "clinic reception" },
+        { src: "https://placehold.co/80x80.png", hint: "medical tools" },
+        { src: "https://placehold.co/80x80.png", hint: "doctor with patient" },
+        { src: "https://placehold.co/80x80.png", hint: "operating room" },
+      ],
+      hours: [
+        { days: "Tue - Fri", time: "11:00 AM - 1:00 PM\n6:00 PM - 11:00 PM" },
+        { days: "Sat - Sun", time: "8:00 AM - 10:00 AM\n3:00 PM - 7:00 PM" },
+      ],
+      price: 350,
+    },
+  ];
 
 function DoctorProfileContent() {
   const searchParams = useSearchParams();
@@ -64,6 +92,7 @@ function DoctorProfileContent() {
   const [doctor, setDoctor] = React.useState<DoctorProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [isAboutMeExpanded, setIsAboutMeExpanded] = React.useState(false);
 
   React.useEffect(() => {
     if (!doctorId) {
@@ -89,6 +118,28 @@ function DoctorProfileContent() {
 
     fetchDoctorProfile();
   }, [doctorId]);
+  
+  const aboutMeText = doctor?.aboutMe || 'No biography available.';
+  const canTruncate = aboutMeText.length > 250;
+  const truncatedAboutMe = canTruncate ? `${aboutMeText.substring(0, 250)}...` : aboutMeText;
+
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    const formattedMinutes = minutes.padStart(2, '0');
+    return `${h12}:${formattedMinutes} ${ampm}`;
+  };
+
+  const getDayOfWeek = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  };
+  
+  const today = new Date().toISOString().split('T')[0];
+  const todayDayName = getDayOfWeek(today);
 
   if (loading) {
     return (
@@ -213,7 +264,14 @@ function DoctorProfileContent() {
             <CardContent className="p-6 space-y-8">
               <div>
                 <h3 className="text-lg font-semibold">About Me</h3>
-                <p className="mt-2 text-muted-foreground">{doctor.aboutMe || 'No biography available.'}</p>
+                <p className="mt-2 text-muted-foreground whitespace-pre-line">
+                    {isAboutMeExpanded ? aboutMeText : truncatedAboutMe}
+                </p>
+                {canTruncate && (
+                    <Button variant="link" onClick={() => setIsAboutMeExpanded(!isAboutMeExpanded)} className="p-0 h-auto text-primary">
+                        {isAboutMeExpanded ? 'Read Less' : 'Read More'}
+                    </Button>
+                )}
               </div>
               
               {doctor.education && doctor.education.length > 0 && (
@@ -285,14 +343,37 @@ function DoctorProfileContent() {
         </TabsContent>
         <TabsContent value="locations" className="mt-6">
             <Card>
-                <CardContent className="p-6">
-                   <h4 className="text-lg font-bold">{doctor.clinicName || 'Main Clinic'}</h4>
-                   <p className="text-sm text-muted-foreground">{doctor.education?.[0]?.degree}</p>
-                   <div className="flex items-start gap-2 text-sm text-muted-foreground mt-2">
-                        <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                        <span>{doctor.clinicAddress || doctor.addressLine1}</span>
-                    </div>
-                    <a href="#" className="text-sm text-cyan-500 hover:underline">Get Directions</a>
+                 <CardContent className="p-0">
+                    {locations.map((location, index) => (
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 border-b last:border-b-0">
+                            <div className="md:col-span-1 space-y-2">
+                                <h4 className="text-lg font-bold">{location.name}</h4>
+                                <p className="text-sm text-muted-foreground">{location.specialty}</p>
+                                <StarRating rating={location.rating} count={location.reviewCount} />
+                                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                                    <span>{location.address}</span>
+                                </div>
+                                <a href="#" className="text-sm text-cyan-500 hover:underline">Get Directions</a>
+                                <div className="flex gap-2 pt-2">
+                                    {location.images.map((image, i) => (
+                                        <Image key={i} src={image.src} alt={`clinic photo ${i + 1}`} width={60} height={60} className="rounded-md object-cover" data-ai-hint={image.hint} />
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="md:col-span-1 space-y-2">
+                                {location.hours.map((hour, i) => (
+                                    <div key={i}>
+                                        <p className="font-semibold">{hour.days}</p>
+                                        <p className="text-sm text-muted-foreground whitespace-pre-line">{hour.time}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="md:col-span-1 text-right">
+                                <p className="text-2xl font-bold">₦{location.price}</p>
+                            </div>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
         </TabsContent>
@@ -352,26 +433,33 @@ function DoctorProfileContent() {
             <Card>
                 <CardContent className="p-6">
                     <ul className="space-y-4">
-                        {businessHours.map((item, index) => (
-                            <li key={index} className="flex justify-between items-center border-b pb-4 last:border-b-0">
-                                <div>
-                                    <p className="font-semibold">{item.day}</p>
-                                    {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
-                                </div>
-                                <div className="text-right">
-                                    {item.status === "Open Now" && (
+                        {doctor.schedule && Object.entries(doctor.schedule).map(([date, slots]) => {
+                             const dayName = getDayOfWeek(date);
+                             const isToday = date === today;
+                             return (
+                                <li key={date} className="flex justify-between items-center border-b pb-4 last:border-b-0">
+                                    <div>
+                                        <p className="font-semibold">{isToday ? "Today" : dayName}</p>
+                                        <p className="text-sm text-muted-foreground">{new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                    </div>
+                                    <div className="text-right">
+                                    {slots.length > 0 ? (
                                         <>
-                                            <p className="text-sm text-muted-foreground">{item.time}</p>
-                                            <Badge className="bg-green-100 text-green-800 mt-1">Open Now</Badge>
+                                            <p className="text-sm text-muted-foreground">
+                                                {slots.map(slot => `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`).join(', ')}
+                                            </p>
+                                            {isToday && <Badge className="bg-green-100 text-green-800 mt-1">Open Now</Badge>}
                                         </>
-                                    )}
-                                    {item.status === "Closed" && (
+                                    ) : (
                                         <Badge variant="destructive" className="bg-red-100 text-red-800">Closed</Badge>
                                     )}
-                                    {!item.status && <p className="text-sm text-muted-foreground">{item.time}</p>}
-                                </div>
-                            </li>
-                        ))}
+                                    </div>
+                                </li>
+                             )
+                        })}
+                        {(!doctor.schedule || Object.keys(doctor.schedule).length === 0) && (
+                            <p className="text-muted-foreground text-center py-4">No schedule set by the doctor.</p>
+                        )}
                     </ul>
                 </CardContent>
             </Card>
