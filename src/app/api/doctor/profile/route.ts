@@ -3,7 +3,6 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { getAdminDb, getAdminAuth, getAdminStorage } from '@/lib/firebase-admin';
-import { headers } from 'next/headers';
 import { z } from 'zod';
 import { doctorConverter } from '@/lib/firestore-converters';
 import { v4 as uuidv4 } from 'uuid';
@@ -88,9 +87,9 @@ async function getSubcollectionData<T>(db: FirebaseFirestore.Firestore, doctorId
 }
 
 // GET handler to fetch doctor profile
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const idToken = request.headers.get('Authorization')?.split('Bearer ')[1];
 
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
