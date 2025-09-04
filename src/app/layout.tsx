@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
-import CookieBanner from "@/components/cookie-banner";
+import CookieBanner from "@/components/shared/cookie-banner";
 
 const poppins = Poppins({
   subsets: ["latin"],

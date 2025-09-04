@@ -1,4 +1,4 @@
-import DoctorProfile from "@/components/doctor-profile";
+import DoctorProfile from "@/components/patient/doctor-profile";
 
 export default function DoctorProfilePage() {
   return <DoctorProfile />;
