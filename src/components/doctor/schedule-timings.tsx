@@ -4,12 +4,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, Clock } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+import { format } from "date-fns";
 
 const allTimeSlots = [
   "12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM", "3:00 AM", "3:30 AM", "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM",
@@ -18,14 +18,18 @@ const allTimeSlots = [
   "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
 ];
 
-type Schedule = Record<string, string[]>;
+type Schedule = Record<string, string[]>; // Key is YYYY-MM-DD date string
 
 export default function ScheduleTimings() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [schedule, setSchedule] = useState<Schedule>({});
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const selectedDateKey = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+  const slotsForSelectedDate = schedule[selectedDateKey] || [];
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -37,14 +41,7 @@ export default function ScheduleTimings() {
         });
         if (!response.ok) throw new Error("Failed to fetch schedule");
         const data = await response.json();
-        
-        // Initialize days that are not in the data
-        const initialSchedule: Schedule = {};
-        daysOfWeek.forEach(day => {
-            initialSchedule[day] = data[day] || [];
-        });
-        setSchedule(initialSchedule);
-        
+        setSchedule(data || {});
       } catch (error) {
         console.error("Error fetching schedule:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not load your schedule." });
@@ -60,25 +57,25 @@ export default function ScheduleTimings() {
     }
   }, [user, authLoading, toast]);
 
-  const addSlot = (day: string) => {
-    // Adds the first available timeslot that is not already in the schedule for that day
-    const existingSlots = schedule[day] || [];
-    const newSlot = allTimeSlots.find(slot => !existingSlots.includes(slot));
-    if (newSlot) {
-        setSchedule({ ...schedule, [day]: [...existingSlots, newSlot] });
-    }
+  const addSlot = () => {
+    if (!selectedDateKey) return;
+    const existingSlots = schedule[selectedDateKey] || [];
+    const newSlot = allTimeSlots.find(slot => !existingSlots.includes(slot)) || "09:00 AM";
+    setSchedule({ ...schedule, [selectedDateKey]: [...existingSlots, newSlot] });
   };
   
-  const removeSlot = (day: string, index: number) => {
-    const newSlots = [...(schedule[day] || [])];
+  const removeSlot = (index: number) => {
+    if (!selectedDateKey) return;
+    const newSlots = [...slotsForSelectedDate];
     newSlots.splice(index, 1);
-    setSchedule({ ...schedule, [day]: newSlots });
+    setSchedule({ ...schedule, [selectedDateKey]: newSlots });
   };
   
-  const handleSlotChange = (day: string, index: number, value: string) => {
-    const newSlots = [...(schedule[day] || [])];
+  const handleSlotChange = (index: number, value: string) => {
+    if (!selectedDateKey) return;
+    const newSlots = [...slotsForSelectedDate];
     newSlots[index] = value;
-    setSchedule({ ...schedule, [day]: newSlots });
+    setSchedule({ ...schedule, [selectedDateKey]: newSlots });
   };
 
   const handleSave = async () => {
@@ -106,6 +103,17 @@ export default function ScheduleTimings() {
         setIsSubmitting(false);
     }
   };
+  
+  const DayWithDot = ({ date }: { date: Date }) => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    const hasSlots = schedule[dateKey] && schedule[dateKey].length > 0;
+    return (
+      <div className="relative">
+        {date.getDate()}
+        {hasSlots && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-cyan-500"></div>}
+      </div>
+    );
+  };
 
   if (loading || authLoading) {
     return <Skeleton className="w-full h-96" />;
@@ -114,43 +122,56 @@ export default function ScheduleTimings() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Schedule Timings</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Manage Your Availability</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            {daysOfWeek.map(day => (
-                <div key={day} className="rounded-lg border p-4">
-                    <h3 className="font-semibold mb-3">{day}</h3>
-                    <div className="space-y-3">
-                    {(schedule[day] || []).map((slot, index) => (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-1">
+            <CardContent className="p-2">
+                <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="w-full"
+                    components={{
+                        Day: ({ date }) => <DayWithDot date={date} />,
+                    }}
+                />
+            </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+            <CardHeader>
+            <CardTitle>
+                Available Slots for {selectedDate ? format(selectedDate, 'PPP') : '...'}
+            </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {slotsForSelectedDate.length > 0 ? (
+                    slotsForSelectedDate.map((slot, index) => (
                         <div key={index} className="flex items-center gap-2">
-                           <div className="flex-1 grid grid-cols-2 gap-2">
-                             <select
+                            <select
                                 value={slot}
-                                onChange={(e) => handleSlotChange(day, index, e.target.value)}
+                                onChange={(e) => handleSlotChange(index, e.target.value)}
                                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                             >
                                 {allTimeSlots.map(time => (
-                                    <option key={time} value={time} disabled={(schedule[day] || []).includes(time) && slot !== time}>
+                                    <option key={time} value={time} disabled={slotsForSelectedDate.includes(time) && slot !== time}>
                                         {time}
                                     </option>
                                 ))}
                             </select>
-                           </div>
-                            <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => removeSlot(day, index)}>
+                            <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => removeSlot(index)}>
                                 <Trash2 className="h-4 w-4"/>
                             </Button>
                         </div>
-                    ))}
-                    </div>
-                     <Button type="button" variant="outline" size="sm" onClick={() => addSlot(day)} className="mt-4 text-cyan-500 border-cyan-500">
-                        <PlusCircle className="mr-2 h-4 w-4"/> Add Slot
-                    </Button>
-                </div>
-            ))}
-        </CardContent>
-      </Card>
+                    ))
+                ) : (
+                    <p className="text-muted-foreground">No slots added for this day.</p>
+                )}
+                <Button type="button" variant="outline" size="sm" onClick={addSlot} disabled={!selectedDate} className="text-cyan-500 border-cyan-500">
+                    <PlusCircle className="mr-2 h-4 w-4"/> Add Slot
+                </Button>
+            </CardContent>
+        </Card>
+      </div>
+
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSubmitting} className="bg-cyan-500 hover:bg-cyan-600 text-white">
             {isSubmitting ? "Saving..." : "Save Changes"}
@@ -159,4 +180,3 @@ export default function ScheduleTimings() {
     </div>
   );
 }
-
