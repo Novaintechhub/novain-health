@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getAdminDb } from '@/lib/firebase-admin';
-import { getAdminAuth } from '@/lib/firebase-admin';
-import { PatientProfile } from '@/lib/types';
-import { patientConverter } from '@/lib/firestore-converters';
+import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
+import type { PatientProfile, Appointment } from '@/lib/types';
+import { patientConverter, appointmentConverter } from '@/lib/firestore-converters';
 import { headers } from 'next/headers';
 
 export async function GET() {
@@ -18,11 +17,9 @@ export async function GET() {
     const doctorId = decodedToken.uid;
     
     const db = getAdminDb();
-    // This is a simplified query. A real-world scenario might involve a subcollection
-    // of patients for each doctor or querying appointments to find unique patients.
-    const appointmentsSnapshot = await db.collection('appointments')
-        .where('doctorId', '==', doctorId)
-        .get();
+    
+    const appointmentsRef = db.collection('appointments').withConverter(appointmentConverter);
+    const appointmentsSnapshot = await appointmentsRef.where('doctorId', '==', doctorId).get();
 
     if (appointmentsSnapshot.empty) {
         return NextResponse.json([]);
@@ -42,7 +39,19 @@ export async function GET() {
     
     const patients: PatientProfile[] = [];
     patientsSnapshot.forEach(doc => {
-        patients.push(doc.data());
+        const patientData = doc.data();
+        const appointmentsForPatient = appointmentsSnapshot.docs
+            .map(d => d.data())
+            .filter(a => a.patientId === patientData.uid);
+
+        const lastVisit = appointmentsForPatient.reduce((latest, current) => {
+            return new Date(current.appointmentDate) > new Date(latest) ? current.appointmentDate : latest;
+        }, '1970-01-01T00:00:00.000Z');
+        
+        patients.push({
+            ...patientData,
+            lastVisit: lastVisit !== '1970-01-01T00:00:00.000Z' ? new Date(lastVisit).toLocaleDateString() : 'N/A',
+        });
     });
 
     return NextResponse.json(patients);
