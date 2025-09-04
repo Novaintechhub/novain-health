@@ -6,12 +6,17 @@ import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 
-// Schedule schema now validates keys as YYYY-MM-DD dates and values as arrays of time strings.
-const scheduleSchema = z.record(
-  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Expected YYYY-MM-DD"),
-  z.array(z.string())
-);
+const timeSlotSchema = z.object({
+  start: z.string(),
+  end: z.string(),
+});
 
+const weeklyScheduleSchema = z.record(z.array(timeSlotSchema));
+
+const schedulePayloadSchema = z.object({
+  schedule: weeklyScheduleSchema,
+  slotDuration: z.string().optional(),
+});
 
 export async function GET(request: Request) {
   try {
@@ -32,8 +37,11 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Doctor profile not found' }, { status: 404 });
     }
     
-    // The field is now 'availability' which stores date-specific slots
-    const schedule = doc.data()?.availability || {};
+    const data = doc.data();
+    const schedule = {
+        schedule: data?.schedule || {},
+        slotDuration: data?.slotDuration || '30',
+    };
 
     return NextResponse.json(schedule);
   } catch (error) {
@@ -55,7 +63,7 @@ export async function POST(request: Request) {
     const doctorId = decodedToken.uid;
     
     const body = await request.json();
-    const validation = scheduleSchema.safeParse(body);
+    const validation = schedulePayloadSchema.safeParse(body);
 
     if (!validation.success) {
         return NextResponse.json({ error: validation.error.format() }, { status: 400 });
@@ -64,9 +72,9 @@ export async function POST(request: Request) {
     const db = getAdminDb();
     const doctorRef = db.collection('doctors').doc(doctorId);
     
-    // Storing under 'availability' field
     await doctorRef.set({
-        availability: validation.data
+        schedule: validation.data.schedule,
+        slotDuration: validation.data.slotDuration,
     }, { merge: true });
 
     return NextResponse.json({ message: 'Schedule updated successfully' });

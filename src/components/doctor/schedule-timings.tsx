@@ -4,32 +4,41 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlusCircle, Trash2, Edit } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
-const allTimeSlots = [
-  "12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM", "3:00 AM", "3:30 AM", "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM",
-  "6:00 AM", "6:30 AM", "7:00 AM", "7:30 AM", "8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM",
-  "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
-];
+const allTimeSlots = Array.from({ length: 48 }, (_, i) => {
+  const hours = Math.floor(i / 2);
+  const minutes = i % 2 === 0 ? "00" : "30";
+  const period = hours < 12 ? "AM" : "PM";
+  const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+  return `${displayHours}:${minutes} ${period}`;
+});
 
-type Schedule = Record<string, string[]>; // Key is YYYY-MM-DD date string
+type WeeklySchedule = {
+  [key: string]: { start: string; end: string }[];
+};
+
+const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 export default function ScheduleTimings() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [schedule, setSchedule] = useState<Schedule>({});
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [schedule, setSchedule] = useState<WeeklySchedule>({});
+  const [selectedDay, setSelectedDay] = useState("monday");
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slotDuration, setSlotDuration] = useState("30");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const selectedDateKey = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
-  const slotsForSelectedDate = schedule[selectedDateKey] || [];
+  const [tempSlots, setTempSlots] = useState<{ start: string; end: string }[]>([]);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -41,7 +50,8 @@ export default function ScheduleTimings() {
         });
         if (!response.ok) throw new Error("Failed to fetch schedule");
         const data = await response.json();
-        setSchedule(data || {});
+        setSchedule(data.schedule || {});
+        setSlotDuration(data.slotDuration || "30");
       } catch (error) {
         console.error("Error fetching schedule:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not load your schedule." });
@@ -56,29 +66,34 @@ export default function ScheduleTimings() {
       setLoading(false);
     }
   }, [user, authLoading, toast]);
-
-  const addSlot = () => {
-    if (!selectedDateKey) return;
-    const existingSlots = schedule[selectedDateKey] || [];
-    const newSlot = allTimeSlots.find(slot => !existingSlots.includes(slot)) || "09:00 AM";
-    setSchedule({ ...schedule, [selectedDateKey]: [...existingSlots, newSlot] });
+  
+  const handleEditClick = () => {
+    setTempSlots(schedule[selectedDay] || [{ start: "09:00 AM", end: "10:00 AM" }]);
+    setIsEditDialogOpen(true);
   };
   
-  const removeSlot = (index: number) => {
-    if (!selectedDateKey) return;
-    const newSlots = [...slotsForSelectedDate];
-    newSlots.splice(index, 1);
-    setSchedule({ ...schedule, [selectedDateKey]: newSlots });
-  };
-  
-  const handleSlotChange = (index: number, value: string) => {
-    if (!selectedDateKey) return;
-    const newSlots = [...slotsForSelectedDate];
-    newSlots[index] = value;
-    setSchedule({ ...schedule, [selectedDateKey]: newSlots });
+  const handleSaveSlots = () => {
+    setSchedule(prev => ({ ...prev, [selectedDay]: tempSlots }));
+    setIsEditDialogOpen(false);
   };
 
-  const handleSave = async () => {
+  const handleAddSlot = () => {
+    setTempSlots(prev => [...prev, { start: "09:00 AM", end: "10:00 AM" }]);
+  };
+
+  const handleRemoveSlot = (index: number) => {
+    setTempSlots(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const handleSlotChange = (index: number, part: 'start' | 'end', value: string) => {
+    setTempSlots(prev => {
+        const newSlots = [...prev];
+        newSlots[index][part] = value;
+        return newSlots;
+    });
+  };
+
+  const handleSaveSchedule = async () => {
     if (!user) return;
     setIsSubmitting(true);
     try {
@@ -89,7 +104,7 @@ export default function ScheduleTimings() {
                 'Authorization': `Bearer ${idToken}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(schedule)
+            body: JSON.stringify({ schedule, slotDuration })
         });
 
         if(!response.ok) {
@@ -103,80 +118,114 @@ export default function ScheduleTimings() {
         setIsSubmitting(false);
     }
   };
-  
-  const DayWithDot = ({ date }: { date: Date }) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
-    const hasSlots = schedule[dateKey] && schedule[dateKey].length > 0;
-    return (
-      <div className="relative">
-        {date.getDate()}
-        {hasSlots && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-cyan-500"></div>}
-      </div>
-    );
-  };
 
   if (loading || authLoading) {
     return <Skeleton className="w-full h-96" />;
   }
-  
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Schedule Timings</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
-            <CardContent className="p-2">
-                <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="w-full"
-                    components={{
-                        Day: ({ date }) => <DayWithDot date={date} />,
-                    }}
-                />
-            </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-            <CardHeader>
-            <CardTitle>
-                Available Slots for {selectedDate ? format(selectedDate, 'PPP') : '...'}
-            </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {slotsForSelectedDate.length > 0 ? (
-                    slotsForSelectedDate.map((slot, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                            <select
-                                value={slot}
-                                onChange={(e) => handleSlotChange(index, e.target.value)}
-                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            >
-                                {allTimeSlots.map(time => (
-                                    <option key={time} value={time} disabled={slotsForSelectedDate.includes(time) && slot !== time}>
-                                        {time}
-                                    </option>
-                                ))}
-                            </select>
-                            <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => removeSlot(index)}>
-                                <Trash2 className="h-4 w-4"/>
-                            </Button>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-muted-foreground">No slots added for this day.</p>
-                )}
-                <Button type="button" variant="outline" size="sm" onClick={addSlot} disabled={!selectedDate} className="text-cyan-500 border-cyan-500">
-                    <PlusCircle className="mr-2 h-4 w-4"/> Add Slot
-                </Button>
-            </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSubmitting} className="bg-cyan-500 hover:bg-cyan-600 text-white">
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-6">
+            <div>
+              <Label>Timing Slot Duration</Label>
+              <Select value={slotDuration} onValueChange={setSlotDuration}>
+                <SelectTrigger className="w-[180px] mt-2">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15">15 mins</SelectItem>
+                  <SelectItem value="30">30 mins</SelectItem>
+                  <SelectItem value="45">45 mins</SelectItem>
+                  <SelectItem value="60">1 hour</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Card className="p-4">
+                <div className="flex flex-wrap gap-2 border-b pb-4">
+                    {daysOfWeek.map(day => (
+                        <Button
+                            key={day}
+                            variant={selectedDay === day ? 'default' : 'outline'}
+                            onClick={() => setSelectedDay(day)}
+                            className={cn(
+                                "capitalize",
+                                selectedDay === day && "bg-pink-500 hover:bg-pink-600 text-white"
+                            )}
+                        >
+                            {day}
+                        </Button>
+                    ))}
+                </div>
+                <div className="pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-semibold">Time Slots</h3>
+                        <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={handleEditClick}>
+                            <Edit className="w-4 h-4 mr-2" /> Edit
+                        </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {(schedule[selectedDay] || []).map((slot, index) => (
+                             <Badge key={index} variant="destructive" className="bg-pink-500 text-white text-sm py-1 px-3 rounded-md">
+                                {slot.start} - {slot.end}
+                            </Badge>
+                        ))}
+                         {(schedule[selectedDay] || []).length === 0 && (
+                            <p className="text-sm text-muted-foreground">Not available on {selectedDay}s.</p>
+                         )}
+                    </div>
+                </div>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+       <div className="flex justify-end">
+        <Button onClick={handleSaveSchedule} disabled={isSubmitting} className="bg-cyan-500 hover:bg-cyan-600 text-white">
             {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </div>
+
+       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit Time Slots for <span className="capitalize">{selectedDay}</span></DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1">
+                {tempSlots.map((slot, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                        <Select value={slot.start} onValueChange={(value) => handleSlotChange(index, 'start', value)}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                {allTimeSlots.map(time => <SelectItem key={`start-${time}`} value={time}>{time}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <span>-</span>
+                        <Select value={slot.end} onValueChange={(value) => handleSlotChange(index, 'end', value)}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                {allTimeSlots.map(time => <SelectItem key={`end-${time}`} value={time}>{time}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleRemoveSlot(index)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ))}
+            </div>
+             <Button variant="outline" onClick={handleAddSlot} className="mt-4">
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Slot
+            </Button>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button onClick={handleSaveSlots}>Save</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
