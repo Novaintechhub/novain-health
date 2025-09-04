@@ -132,15 +132,18 @@ function DoctorProfileContent() {
     const formattedMinutes = minutes.padStart(2, '0');
     return `${h12}:${formattedMinutes} ${ampm}`;
   };
-
-  const getDayOfWeek = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  
+  const getUpcomingWeek = () => {
+    const days = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+        const nextDay = new Date(today);
+        nextDay.setDate(today.getDate() + i);
+        days.push(nextDay);
+    }
+    return days;
   };
   
-  const today = new Date().toISOString().split('T')[0];
-  const todayDayName = getDayOfWeek(today);
-
   if (loading) {
     return (
         <div className="space-y-6">
@@ -433,31 +436,34 @@ function DoctorProfileContent() {
             <Card>
                 <CardContent className="p-6">
                     <ul className="space-y-4">
-                        {doctor.schedule && Object.entries(doctor.schedule).map(([date, slots]) => {
-                             const dayName = getDayOfWeek(date);
-                             const isToday = date === today;
-                             return (
-                                <li key={date} className="flex justify-between items-center border-b pb-4 last:border-b-0">
+                        {getUpcomingWeek().map((date, index) => {
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                            // @ts-ignore
+                            const slots = doctor.schedule?.[dayName] || [];
+                            const isToday = index === 0;
+
+                            return (
+                                <li key={date.toISOString()} className="flex justify-between items-center border-b pb-4 last:border-b-0">
                                     <div>
-                                        <p className="font-semibold">{isToday ? "Today" : dayName}</p>
-                                        <p className="text-sm text-muted-foreground">{new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                        <p className="font-semibold">{isToday ? "Today" : date.toLocaleDateString('en-US', { weekday: 'long' })}</p>
+                                        <p className="text-sm text-muted-foreground">{date.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</p>
                                     </div>
                                     <div className="text-right">
-                                    {slots.length > 0 ? (
-                                        <>
-                                            <p className="text-sm text-muted-foreground">
-                                                {slots.map(slot => `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`).join(', ')}
-                                            </p>
-                                            {isToday && <Badge className="bg-green-100 text-green-800 mt-1">Open Now</Badge>}
-                                        </>
-                                    ) : (
-                                        <Badge variant="destructive" className="bg-red-100 text-red-800">Closed</Badge>
-                                    )}
+                                        {slots.length > 0 ? (
+                                            <>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {slots.map((slot: { start: string; end: string; }) => `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`).join(' / ')}
+                                                </p>
+                                                {isToday && <Badge className="bg-green-100 text-green-800 mt-1">Open Now</Badge>}
+                                            </>
+                                        ) : (
+                                            <Badge variant="destructive" className="bg-red-100 text-red-800">Closed</Badge>
+                                        )}
                                     </div>
                                 </li>
-                             )
+                            );
                         })}
-                        {(!doctor.schedule || Object.keys(doctor.schedule).length === 0) && (
+                         {(!doctor.schedule || Object.keys(doctor.schedule).length === 0) && (
                             <p className="text-muted-foreground text-center py-4">No schedule set by the doctor.</p>
                         )}
                     </ul>
