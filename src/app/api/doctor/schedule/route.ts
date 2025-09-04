@@ -7,14 +7,29 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 
 const timeSlotSchema = z.object({
-  start: z.string(),
-  end: z.string(),
+  start: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
+  end: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),
+}).refine(data => data.start < data.end, {
+  message: "Start time must be before end time",
 });
 
-const weeklyScheduleSchema = z.record(z.array(timeSlotSchema));
+const dailyScheduleSchema = z.array(timeSlotSchema).refine(slots => {
+    if (slots.length <= 1) return true;
+    const sortedSlots = [...slots].sort((a, b) => a.start.localeCompare(b.start));
+    for (let i = 0; i < sortedSlots.length - 1; i++) {
+        if (sortedSlots[i].end > sortedSlots[i + 1].start) {
+            return false; // Found an overlap
+        }
+    }
+    return true;
+}, {
+    message: "Time slots cannot overlap",
+});
+
+const availabilitySchema = z.record(z.string().regex(/^\d{4}-\d{2}-\d{2}$/), dailyScheduleSchema);
 
 const schedulePayloadSchema = z.object({
-  schedule: weeklyScheduleSchema,
+  schedule: availabilitySchema,
   slotDuration: z.string().optional(),
 });
 
@@ -66,7 +81,9 @@ export async function POST(request: Request) {
     const validation = schedulePayloadSchema.safeParse(body);
 
     if (!validation.success) {
-        return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+        const firstError = validation.error.errors[0];
+        const errorMessage = `Invalid schedule for day ${firstError.path.slice(1).join(', ')}: ${firstError.message}`;
+        return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     const db = getAdminDb();
