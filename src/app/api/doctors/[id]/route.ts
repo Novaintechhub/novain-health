@@ -23,14 +23,16 @@ export async function GET(
     }
 
     const db = getAdminDb();
-    const doctorRef = db.collection('doctors').doc(doctorId).withConverter(doctorConverter);
+    // Fetch without converter first to get all raw data, including the schedule
+    const doctorRef = db.collection('doctors').doc(doctorId);
     const doc = await doctorRef.get();
 
     if (!doc.exists) {
         return NextResponse.json({ error: 'Doctor profile not found' }, { status: 404 });
     }
 
-    const coreProfile = doc.data() as DoctorCoreProfile;
+    const doctorData = doc.data()!;
+    const coreProfile = doctorConverter.fromFirestore(doc as any);
     
     const profileDetailsDoc = await db.collection('doctors').doc(doctorId).collection('details').doc('profile').get();
     const details = profileDetailsDoc.data() as DoctorDetails || {};
@@ -51,6 +53,7 @@ export async function GET(
         awards,
         memberships,
         registrations,
+        schedule: doctorData.schedule || {}, // Explicitly include the schedule
     };
     
     return NextResponse.json(fullProfile);
