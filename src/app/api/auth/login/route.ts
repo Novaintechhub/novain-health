@@ -12,6 +12,10 @@ const LoginSchema = z.object({
   password: z.string(),
 });
 
+// For simplicity in this starter app, we'll hardcode the admin email.
+// In a production environment, you might manage admin users in a separate Firestore collection or via environment variables.
+const ADMIN_EMAIL = 'admin@novain.com';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -30,7 +34,6 @@ export async function POST(request: Request) {
         if (!patientQuery.empty) {
             email = patientQuery.docs[0].data().email;
         } else {
-            // No patient found with this ID, but maybe it's a doctor's email that looks like an ID
             const doctorQuery = await db.collection('doctors').where('email', '==', emailOrId).limit(1).get();
             if(doctorQuery.empty) {
                 return NextResponse.json({ error: 'Invalid credentials. Please check your Patient ID/email and password.' }, { status: 401 });
@@ -40,7 +43,6 @@ export async function POST(request: Request) {
     
     // We need to use the client SDK here to verify the password,
     // as the Admin SDK doesn't have a direct method for it.
-    // This is a safe operation on the server.
     const clientAuth = getAuth(app);
     const userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
     const user = userCredential.user;
@@ -49,15 +51,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Now use the Admin SDK to get user details and create a custom token with roles
     const adminAuth = getAdminAuth();
     const adminUserRecord = await adminAuth.getUser(user.uid);
     
     let role = null;
-    if (adminUserRecord.customClaims && adminUserRecord.customClaims.role) {
+    
+    // Special check for the admin user
+    if (adminUserRecord.email === ADMIN_EMAIL) {
+        role = 'admin';
+    } else if (adminUserRecord.customClaims && adminUserRecord.customClaims.role) {
       role = adminUserRecord.customClaims.role;
     } else {
-        // Fallback: check firestore if no claim is set
         const doctorDoc = await db.collection('doctors').doc(user.uid).get();
         if (doctorDoc.exists()) {
             role = 'doctor';
@@ -73,13 +77,17 @@ export async function POST(request: Request) {
          return NextResponse.json({ error: 'Could not determine user role.' }, { status: 500 });
     }
 
+    // Ensure the role is set in custom claims for future sessions
+    if (adminUserRecord.customClaims?.role !== role) {
+        await adminAuth.setCustomUserClaims(user.uid, { role });
+    }
+
     const customToken = await adminAuth.createCustomToken(user.uid, { role });
 
     return NextResponse.json({ token: customToken, role: role });
 
   } catch (error: any) {
     console.error('Login API Error:', error);
-    // Firebase auth errors have a 'code' property
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         return NextResponse.json({ error: 'Invalid credentials. Please check your Patient ID/email and password.' }, { status: 401 });
     }

@@ -1,5 +1,8 @@
+
 "use client";
 
+import { AuthProvider } from '@/context/AuthContext';
+import AdminProtectedLayout from '@/components/shared/AdminProtectedLayout';
 import { usePathname } from 'next/navigation'
 import {
   SidebarProvider,
@@ -35,13 +38,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from '@/context/AuthContext';
 
-export default function AdminLayout({
+function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { handleSignOut } = useAuth();
 
   const getPageTitle = () => {
     const path = pathname.split('/').pop();
@@ -123,7 +128,7 @@ export default function AdminLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Logout">
+                <SidebarMenuButton asChild tooltip="Logout" onClick={handleSignOut}>
                   <Link href="/general-login">
                     <LogOut />
                     <span className="group-data-[collapsible=icon]:hidden">Logout</span>
@@ -169,8 +174,8 @@ export default function AdminLayout({
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/general-login">
+                    <DropdownMenuItem asChild onClick={handleSignOut}>
+                      <Link href="/admin-login">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Log out</span>
                       </Link>
@@ -184,4 +189,14 @@ export default function AdminLayout({
       </div>
     </SidebarProvider>
   );
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <AuthProvider>
+            <AdminProtectedLayout>
+                <AdminDashboardLayout>{children}</AdminDashboardLayout>
+            </AdminProtectedLayout>
+        </AuthProvider>
+    )
 }
