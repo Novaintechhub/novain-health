@@ -27,34 +27,6 @@ export default function OtpVerification() {
   const { toast } = useToast();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    if (!email) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No email address provided. Please start the registration process again.",
-      });
-      const registrationPath = role === "doctor" ? "/doctor-registration" : "/patient-registration";
-      router.push(registrationPath);
-    }
-  }, [email, router, toast, role]);
-
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current!);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-  
   const startCountdown = () => {
     setCountdown(RESEND_INTERVAL);
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -69,6 +41,26 @@ export default function OtpVerification() {
     }, 1000);
   };
 
+  useEffect(() => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No email address provided. Please start the registration process again.",
+      });
+      const registrationPath = role === "doctor" ? "/doctor-registration" : "/patient-registration";
+      router.push(registrationPath);
+    }
+  }, [email, router, toast, role]);
+
+  useEffect(() => {
+    startCountdown();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+  
+
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -81,7 +73,7 @@ export default function OtpVerification() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Verification failed');
+        throw new Error(result.error?.otp?._errors[0] || result.error || 'Verification failed');
       }
 
       toast({
