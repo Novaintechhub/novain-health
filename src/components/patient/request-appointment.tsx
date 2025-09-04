@@ -7,19 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { DoctorProfile } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast, startOfToday } from 'date-fns';
+import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast } from 'date-fns';
 
 function RequestAppointmentContent() {
   const searchParams = useSearchParams();
@@ -55,6 +46,13 @@ function RequestAppointmentContent() {
 
     fetchDoctorProfile();
   }, [doctorId]);
+  
+  const isToday = (someDate: Date) => {
+      const today = new Date()
+      return someDate.getDate() == today.getDate() &&
+        someDate.getMonth() == today.getMonth() &&
+        someDate.getFullYear() == today.getFullYear()
+  }
 
   const handleDateSelect = (day: number) => {
     const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
@@ -65,18 +63,17 @@ function RequestAppointmentContent() {
     setSelectedTime(null); // Reset time when date changes
   };
   
-  const isToday = (someDate: Date) => {
-      const today = new Date()
-      return someDate.getDate() == today.getDate() &&
-        someDate.getMonth() == today.getMonth() &&
-        someDate.getFullYear() == today.getFullYear()
-  }
-
   const handleProceedToCheckout = () => {
-    if (!selectedDate || !selectedTime) {
+    if (!selectedDate || !selectedTime || !doctor) {
       return;
     }
-    router.push('/patients/checkout');
+    const query = new URLSearchParams({
+      doctorId: doctor.uid,
+      date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD
+      time: selectedTime,
+    }).toString();
+
+    router.push(`/patients/checkout?${query}`);
   };
 
   const firstDayOfMonth = getDay(startOfMonth(currentDate));
@@ -223,5 +220,3 @@ export default function RequestAppointment() {
         </React.Suspense>
     );
 }
-
-    
