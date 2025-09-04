@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     const db = getAdminDb();
     const doctorRef = db.collection('doctors').doc(doctorId);
     
-    const dataToSave: { schedule: Availability, slotDuration?: string } = {
+    const dataToSave: { schedule: Availability; slotDuration?: string } = {
         schedule: validation.data,
     };
 
@@ -102,3 +102,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to update schedule' }, { status: 500 });
   }
 }
+
+type Availability = z.infer<typeof availabilitySchema>;
