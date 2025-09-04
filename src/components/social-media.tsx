@@ -29,7 +29,7 @@ export default function SocialMedia() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, formState } = useForm<SocialMediaInput>({
+  const { register, handleSubmit, formState: { errors, isSubmitting, isLoading }, reset } = useForm<SocialMediaInput>({
     resolver: zodResolver(SocialMediaSchema),
   });
 
@@ -50,7 +50,9 @@ export default function SocialMedia() {
         toast({ variant: "destructive", title: "Error", description: "Could not load social media links." });
       }
     };
-    fetchSocialMediaLinks();
+    if(user) {
+        fetchSocialMediaLinks();
+    }
   }, [user, reset, toast]);
 
   const onSubmit = async (data: SocialMediaInput) => {
@@ -74,7 +76,7 @@ export default function SocialMedia() {
     }
   };
 
-  if (formState.isLoading) {
+  if (isLoading && !user) {
     return (
        <div className="space-y-4">
         <Skeleton className="h-8 w-1/3" />

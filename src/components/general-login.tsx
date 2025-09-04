@@ -32,7 +32,7 @@ export default function GeneralLogin() {
                   I am a Medical Professional
                 </Button>
               </Link>
-              <Link href="/signup" passHref>
+              <Link href="/patient-registration" passHref>
                 <Button className="w-full h-12 bg-cyan-400 hover:bg-cyan-500 text-white">
                     I am seeking a Medical Professional
                 </Button>
