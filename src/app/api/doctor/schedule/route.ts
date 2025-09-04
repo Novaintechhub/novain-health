@@ -78,11 +78,14 @@ export async function POST(request: Request) {
     const doctorId = decodedToken.uid;
     
     const body = await request.json();
-    const validation = schedulePayloadSchema.safeParse(body);
-
+    
+    // The frontend sends the schedule directly, not nested.
+    // We'll validate the body as the availability schema.
+    const validation = availabilitySchema.safeParse(body.schedule);
+    
     if (!validation.success) {
         const firstError = validation.error.errors[0];
-        const errorMessage = `Invalid schedule for day ${firstError.path.slice(1).join(', ')}: ${firstError.message}`;
+        const errorMessage = `Invalid schedule for day ${firstError.path.join(', ')}: ${firstError.message}`;
         return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
@@ -90,8 +93,10 @@ export async function POST(request: Request) {
     const doctorRef = db.collection('doctors').doc(doctorId);
     
     await doctorRef.set({
-        schedule: validation.data.schedule,
-        slotDuration: validation.data.slotDuration,
+        schedule: validation.data,
+        // slotDuration is optional and might not be sent every time.
+        // We preserve the existing value if it's not in the payload.
+        slotDuration: body.slotDuration,
     }, { merge: true });
 
     return NextResponse.json({ message: 'Schedule updated successfully' });
