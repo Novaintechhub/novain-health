@@ -122,8 +122,7 @@ export async function GET() {
   }
 }
 
-async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirestore.Firestore, doctorId: string, collectionName: string, data: T[] = []) {
-    const batch = db.batch();
+async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirestore.Firestore, batch: FirebaseFirestore.WriteBatch, doctorId: string, collectionName: string, data: T[] = []) {
     const collectionRef = db.collection('doctors').doc(doctorId).collection(collectionName);
     
     // Simple approach: delete existing and add new ones.
@@ -133,11 +132,9 @@ async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirest
     
     data.forEach(item => {
         const { id, ...itemData } = item; // remove id before writing
-        const docRef = id ? collectionRef.doc(id) : collectionRef.doc();
+        const docRef = collectionRef.doc(); // Always create new doc for simplicity
         batch.set(docRef, itemData);
     });
-
-    return batch;
 }
 
 // POST handler to update doctor profile
@@ -157,12 +154,13 @@ export async function POST(request: Request) {
     const validation = DoctorProfileUpdateSchema.safeParse(body);
 
     if (!validation.success) {
+        console.error("Validation Error:", validation.error.format());
         return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
     
     const { 
         profileImage,
-        firstName, lastName, // These are in core, but disabled on form. We'll ignore them.
+        firstName, lastName, 
         education, experience, awards, memberships, registrations,
         ...detailsData 
     } = validation.data;
@@ -198,11 +196,11 @@ export async function POST(request: Request) {
     batch.set(detailsRef, detailsData, { merge: true });
 
     // Handle subcollections
-    await updateSubcollection(db, doctorId, 'education', education);
-    await updateSubcollection(db, doctorId, 'experience', experience);
-    await updateSubcollection(db, doctorId, 'awards', awards);
-    await updateSubcollection(db, doctorId, 'memberships', memberships);
-    await updateSubcollection(db, doctorId, 'registrations', registrations);
+    await updateSubcollection(db, batch, doctorId, 'education', education);
+    await updateSubcollection(db, batch, doctorId, 'experience', experience);
+    await updateSubcollection(db, batch, doctorId, 'awards', awards);
+    await updateSubcollection(db, batch, doctorId, 'memberships', memberships);
+    await updateSubcollection(db, batch, doctorId, 'registrations', registrations);
 
     await batch.commit();
 
