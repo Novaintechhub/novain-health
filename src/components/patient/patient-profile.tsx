@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,11 +9,44 @@ import { FilePen } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { PatientProfile } from "@/lib/types";
 
 export default function PatientProfile() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (loading || !user) {
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/patient/profile', {
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+        const data = await response.json();
+        setProfile(data);
+      } catch (error) {
+        console.error("Error fetching patient profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const isLoading = authLoading || loading;
+
+  if (isLoading || !user || !profile) {
     return (
         <div className="space-y-6">
             <h1 className="text-2xl font-bold">My Profile</h1>
@@ -48,7 +82,7 @@ export default function PatientProfile() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-                <AvatarImage src={user.photoURL || "https://placehold.co/96x96.png"} alt={user.displayName || "Patient"} data-ai-hint="woman portrait" />
+                <AvatarImage src={profile.imageUrl || user.photoURL || "https://placehold.co/96x96.png"} alt={user.displayName || "Patient"} data-ai-hint="woman portrait" />
                 <AvatarFallback>{user.displayName?.charAt(0) || 'P'}</AvatarFallback>
               </Avatar>
               <div>
@@ -81,7 +115,7 @@ export default function PatientProfile() {
                     </div>
                      <div className="flex justify-between border-b pb-2">
                         <span className="text-muted-foreground">Phone Number</span>
-                        <span className="font-medium">{user.phoneNumber || "Not provided"}</span>
+                        <span className="font-medium">{profile.mobileNumber || "Not provided"}</span>
                     </div>
                 </div>
             </div>
@@ -90,11 +124,11 @@ export default function PatientProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
                     <div className="flex justify-between border-b pb-2">
                         <span className="text-muted-foreground">Blood Group</span>
-                        <span className="font-medium">O+</span>
+                        <span className="font-medium">{profile.bloodGroup || "Not set"}</span>
                     </div>
                     <div className="flex justify-between border-b pb-2">
                         <span className="text-muted-foreground">Genotype</span>
-                        <span className="font-medium">AA</span>
+                        <span className="font-medium">{profile.genotype || "Not set"}</span>
                     </div>
                      <div className="flex justify-between border-b pb-2">
                         <span className="text-muted-foreground">Allergies</span>
