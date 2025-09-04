@@ -5,7 +5,7 @@ import * as React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, MapPin, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -19,7 +19,7 @@ import {
 import { useSearchParams, useRouter } from "next/navigation";
 import type { DoctorProfile } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth } from 'date-fns';
+import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast, startOfToday } from 'date-fns';
 
 function RequestAppointmentContent() {
   const searchParams = useSearchParams();
@@ -31,8 +31,7 @@ function RequestAppointmentContent() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
-  const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
-
+  
   React.useEffect(() => {
     if (!doctorId) {
       setError("No doctor ID provided.");
@@ -42,6 +41,7 @@ function RequestAppointmentContent() {
 
     const fetchDoctorProfile = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`/api/doctors/${doctorId}`);
         if (!response.ok) throw new Error("Failed to fetch doctor profile.");
         const data = await response.json();
@@ -58,28 +58,34 @@ function RequestAppointmentContent() {
 
   const handleDateSelect = (day: number) => {
     const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+     if (isPast(newSelectedDate) && !isToday(newSelectedDate)) {
+      return; // Do not select past dates
+    }
     setSelectedDate(newSelectedDate);
     setSelectedTime(null); // Reset time when date changes
   };
+  
+  const isToday = (someDate: Date) => {
+      const today = new Date()
+      return someDate.getDate() == today.getDate() &&
+        someDate.getMonth() == today.getMonth() &&
+        someDate.getFullYear() == today.getFullYear()
+  }
 
   const handleProceedToCheckout = () => {
     if (!selectedDate || !selectedTime) {
-      // In a real app, you'd show a toast notification here
-      alert("Please select a date and time.");
       return;
     }
-    // Logic to proceed to checkout
     router.push('/patients/checkout');
   };
 
   const firstDayOfMonth = getDay(startOfMonth(currentDate));
   const daysInMonth = getDaysInMonth(currentDate);
 
-  const availableSlots = selectedDate && doctor?.schedule
-    // @ts-ignore
-    ? doctor.schedule[format(selectedDate, 'yyyy-MM-dd')] || []
-    : [];
-
+  const selectedDateString = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+  // @ts-ignore
+  const availableSlots = doctor?.schedule?.[selectedDateString] || [];
+  
   const formatTo12Hour = (time24: string) => {
     if (!time24) return '';
     const [hours, minutes] = time24.split(':');
@@ -90,7 +96,26 @@ function RequestAppointmentContent() {
   };
 
   if (loading) {
-      return <Skeleton className="h-96 w-full" />;
+      return (
+        <div className="space-y-6">
+            <Skeleton className="h-10 w-48" />
+            <Card>
+                <CardHeader className="p-4 border-b">
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-24" />
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-6">
+                    <Skeleton className="h-8 w-1/2" />
+                    <Skeleton className="h-48 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+      )
   }
 
   if (error || !doctor) {
@@ -139,13 +164,15 @@ function RequestAppointmentContent() {
                     {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`} />)}
                     {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
                         const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-                        const isSelected = selectedDate && getDate(selectedDate) === day;
+                        const isSelected = selectedDate && getDate(selectedDate) === day && selectedDate.getMonth() === currentDate.getMonth();
+                        const isPastDate = isPast(date) && !isToday(date);
                         return (
                             <Button
                                 key={day}
                                 variant={isSelected ? 'default' : 'outline'}
                                 onClick={() => handleDateSelect(day)}
-                                className={`rounded-md ${isSelected ? 'bg-cyan-500 text-white' : ''}`}
+                                disabled={isPastDate}
+                                className={`rounded-md ${isSelected ? 'bg-cyan-500 text-white' : ''} ${isPastDate ? 'text-muted-foreground opacity-50' : ''}`}
                             >
                                 {day}
                             </Button>
@@ -158,7 +185,7 @@ function RequestAppointmentContent() {
                 <h3 className="font-semibold mb-4">Available Times on {format(selectedDate, 'MMMM do')}</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {availableSlots.length > 0 ? (
-                    availableSlots.map((slot, index) => {
+                    availableSlots.map((slot: {start: string, end: string}, index: number) => {
                       const timeRange = `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`;
                       return (
                         <Button
@@ -184,25 +211,6 @@ function RequestAppointmentContent() {
       <div className="flex justify-end gap-4">
         <Button size="lg" onClick={handleProceedToCheckout} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>Proceed to Checkout</Button>
       </div>
-
-      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-            <AlertDialogHeader className="items-center text-center">
-                <div className="p-3 bg-green-100 rounded-full w-fit mb-4">
-                    <CheckCircle className="w-8 h-8 text-green-600" />
-                </div>
-                <AlertDialogTitle className="text-2xl">Request Sent!</AlertDialogTitle>
-                <AlertDialogDescription>
-                    Your appointment request has been sent to Dr. {doctor.firstName} {doctor.lastName}. You will be notified once it is confirmed.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="sm:justify-center">
-                <Link href="/patients/appointments" className="w-full">
-                    <AlertDialogAction className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">Done</AlertDialogAction>
-                </Link>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
@@ -210,8 +218,10 @@ function RequestAppointmentContent() {
 
 export default function RequestAppointment() {
     return (
-        <React.Suspense fallback={<div>Loading...</div>}>
+        <React.Suspense fallback={<p>Loading...</p>}>
             <RequestAppointmentContent />
         </React.Suspense>
     );
 }
+
+    
