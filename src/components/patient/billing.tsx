@@ -100,7 +100,7 @@ export default function Billing() {
                                           <TableCell className="text-right">
                                               <div className="flex gap-2 justify-end">
                                                   <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                      <Link href="/patients/invoice-view">
+                                                      <Link href={`/patients/invoice-view?id=${invoice.invoiceNo}`}>
                                                           <Eye className="w-4 h-4 mr-1" />
                                                           View
                                                       </Link>
@@ -143,7 +143,7 @@ export default function Billing() {
                                         </div>
                                         <div className="flex gap-2 justify-end border-t pt-3">
                                             <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                <Link href="/patients/invoice-view">
+                                                <Link href={`/patients/invoice-view?id=${invoice.invoiceNo}`}>
                                                     <Eye className="w-4 h-4 mr-1" /> View
                                                 </Link>
                                             </Button>

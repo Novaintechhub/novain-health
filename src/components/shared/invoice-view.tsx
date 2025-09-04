@@ -1,50 +1,114 @@
 
 "use client";
 
+import { useState, useEffect, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Printer, Download, ChevronLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const invoiceData = {
-  id: "INV-0010",
-  date: "14 Nov 2023",
-  patient: {
-    name: "Tosin Adebayo",
-    address: "2996 Westheimer Rd. Santa Ana, Illinois 85486",
-    avatarUrl: "https://placehold.co/80x80.png",
-    avatarHint: "woman portrait",
-  },
-  doctor: {
-    name: "Dr. Darren Elder",
-    specialty: "Cardiology",
-    clinic: "NovainHealth Medical Center",
-    avatarUrl: "https://placehold.co/80x80.png",
-    avatarHint: "male doctor",
-  },
-  items: [
-    { description: "General Consultation", quantity: 1, price: "₦100.00" },
-    { description: "Medication", quantity: 2, price: "₦25.00" },
-    { description: "Lab Test", quantity: 1, price: "₦50.00" },
-  ],
-  subtotal: "₦200.00",
-  tax: "₦20.00",
-  discount: "-₦10.00",
-  total: "₦210.00",
-  paymentMethod: "Visa ending in 1234",
+type InvoiceItem = {
+    description: string;
+    quantity: number;
+    price: string;
 };
 
-export default function InvoiceView() {
-  const router = useRouter();
+type InvoiceData = {
+    id: string;
+    date: string;
+    patient: {
+        name: string;
+        address: string;
+        avatarUrl: string;
+        avatarHint: string;
+    };
+    doctor: {
+        name: string;
+        specialty: string;
+        clinic: string;
+        avatarUrl: string;
+        avatarHint: string;
+    };
+    items: InvoiceItem[];
+    subtotal: string;
+    tax: string;
+    discount: string;
+    total: string;
+    paymentMethod: string;
+};
 
-  const calculateTotal = (quantity: number, price: string) => {
-    const numericPrice = parseFloat(price.replace('₦', ''));
-    return `₦${(quantity * numericPrice).toFixed(2)}`;
-  };
+function InvoiceViewContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const invoiceId = searchParams.get("id");
+    const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!invoiceId) {
+            setLoading(false);
+            return;
+        }
+
+        async function fetchInvoice() {
+            try {
+                const response = await fetch(`/api/invoice/${invoiceId}`);
+                if (!response.ok) throw new Error("Failed to fetch invoice");
+                const data = await response.json();
+                setInvoiceData(data);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchInvoice();
+    }, [invoiceId]);
+
+
+    const calculateTotal = (quantity: number, price: string) => {
+        const numericPrice = parseFloat(price.replace('₦', ''));
+        return `₦${(quantity * numericPrice).toFixed(2)}`;
+    };
+
+    if (loading) {
+        return (
+             <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-8 w-64" />
+                    <Skeleton className="h-10 w-24" />
+                </div>
+                <Card className="p-4 sm:p-8">
+                    <CardHeader className="p-0 border-b pb-6 mb-6">
+                        <Skeleton className="h-8 w-3/4" />
+                        <Skeleton className="h-4 w-1/2 mt-2" />
+                    </CardHeader>
+                    <CardContent className="p-0 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <Skeleton className="h-24" />
+                            <Skeleton className="h-24" />
+                        </div>
+                        <Skeleton className="h-40 w-full" />
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!invoiceData) {
+      return (
+          <div className="text-center py-10">
+              <h2 className="text-xl font-semibold">Invoice Not Found</h2>
+              <p className="text-muted-foreground mt-2">The invoice you are looking for does not exist or could not be loaded.</p>
+              <Button onClick={() => router.back()} className="mt-4">Go Back</Button>
+          </div>
+      )
+    }
 
   return (
     <div className="space-y-6">
@@ -160,4 +224,13 @@ export default function InvoiceView() {
       </Card>
     </div>
   );
+}
+
+
+export default function InvoiceView() {
+    return (
+        <Suspense fallback={<p>Loading invoice...</p>}>
+            <InvoiceViewContent />
+        </Suspense>
+    )
 }
