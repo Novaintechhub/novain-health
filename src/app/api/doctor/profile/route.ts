@@ -74,8 +74,7 @@ async function getSubcollectionData<T>(db: FirebaseFirestore.Firestore, doctorId
 // GET handler to fetch doctor profile
 export async function GET() {
   try {
-    const headersList = headers();
-    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
 
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -140,8 +139,7 @@ async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirest
 // POST handler to update doctor profile
 export async function POST(request: Request) {
   try {
-    const headersList = headers();
-    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
 
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
