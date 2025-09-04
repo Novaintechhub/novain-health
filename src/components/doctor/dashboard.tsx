@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,17 +34,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-
-type Patient = {
-    id: string;
-    name: string;
-    appointmentDate: string;
-    appointmentTime: string;
-    purpose: string;
-    type: string;
-    paidAmount: string;
-    status: string;
-};
+import { useAuth } from "@/context/AuthContext";
+import type { Appointment } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 type Stats = {
     totalPatients: number;
@@ -107,11 +100,13 @@ const EarningCard = ({ label, value, icon, subtext, cta }: { label: string, valu
 
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [patientData, setPatientData] = useState<Patient[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -131,41 +126,67 @@ export default function Dashboard() {
     }
     
     async function fetchAppointments() {
-      try {
-        const response = await fetch('/api/dashboard-appointments');
-        const data = await response.json();
-        setPatientData(data);
-      } catch (error) {
-        console.error('Failed to fetch appointments:', error);
-      } finally {
-        setLoadingAppointments(false);
-      }
+        if (!user) return;
+        try {
+            const idToken = await user.getIdToken();
+            const response = await fetch('/api/doctor/appointments', {
+                headers: { 'Authorization': `Bearer ${idToken}` }
+            });
+            const data = await response.json();
+            setAppointments(data);
+        } catch (error) {
+            console.error('Failed to fetch appointments:', error);
+        } finally {
+            setLoadingAppointments(false);
+        }
     }
     
     fetchStats();
-    fetchAppointments();
-  }, []);
+    if(user) fetchAppointments();
+  }, [user]);
 
-  const handleApproveClick = (patient: Patient) => {
-    setSelectedPatient(patient);
+  const handleApproveClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmSchedule = () => {
-    setShowConfirmDialog(false);
-    setShowSuccessDialog(true);
-    // Here you would typically make an API call to confirm the appointment
+  const handleConfirmSchedule = async () => {
+    if (!selectedAppointment || !user) return;
+    
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/doctor/appointments/${selectedAppointment.id}/approve`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to approve appointment");
+        }
+        
+        // Update local state to reflect the change
+        setAppointments(prev => prev.map(appt => 
+            appt.id === selectedAppointment.id ? { ...appt, status: 'Approved' } : appt
+        ));
+
+        setShowConfirmDialog(false);
+        setShowSuccessDialog(true);
+
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
   };
 
-  const handleCancelClick = (patient: Patient) => {
-    setSelectedPatient(patient);
+  const handleCancelClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
     setShowCancelDialog(true);
   };
   
   const handleCancelSubmit = () => {
+    // Here you would typically make an API call to cancel the appointment
     setShowCancelDialog(false);
     setShowCancelSuccessDialog(true);
-    // Here you would typically make an API call to cancel the appointment
   };
 
   const TotalPatientIcon = () => (
@@ -180,7 +201,7 @@ export default function Dashboard() {
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
   );
 
-  const upcomingAppointments = patientData.filter(appt => appt.status === 'Approved' || appt.status === 'Pending');
+  const upcomingAppointments = appointments.filter(appt => appt.status === 'Approved' || appt.status === 'Pending');
 
   return (
     <div className="space-y-6">
@@ -253,34 +274,31 @@ export default function Dashboard() {
                     <TableRow>
                       <TableHead>Patient Name</TableHead>
                       <TableHead>Appointment</TableHead>
-                      <TableHead>Purpose</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Paid Amount</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {upcomingAppointments.map((patient, index) => (
-                      <TableRow key={index} className="hover:bg-gray-50">
+                    {upcomingAppointments.map((appt) => (
+                      <TableRow key={appt.id} className="hover:bg-gray-50">
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={`https://placehold.co/40x40.png?text=${patient.name.charAt(0)}`} alt={patient.name} />
-                              <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                              <AvatarImage src={appt.patientAvatar} alt={appt.patientName} data-ai-hint={appt.patientAvatarHint} />
+                              <AvatarFallback>{appt.patientName.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium">{patient.name}</div>
-                              <div className="text-xs text-muted-foreground">{patient.id}</div>
+                              <div className="font-medium">{appt.patientName}</div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div>{patient.appointmentDate}</div>
-                          <div className="text-cyan-500">{patient.appointmentTime}</div>
+                          <div>{new Date(appt.appointmentDate).toLocaleDateString()}</div>
+                          <div className="text-cyan-500">{new Date(appt.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                         </TableCell>
-                        <TableCell>{patient.purpose}</TableCell>
-                        <TableCell>{patient.type}</TableCell>
-                        <TableCell>{patient.paidAmount}</TableCell>
+                        <TableCell>{appt.type}</TableCell>
+                        <TableCell>₦{appt.amount}</TableCell>
                         <TableCell className="text-right">
                             <div className="flex flex-row gap-2 justify-end">
                                 <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
@@ -288,12 +306,12 @@ export default function Dashboard() {
                                       <Eye className="h-4 w-4 mr-1"/> View
                                     </Link>
                                 </Button>
-                                {patient.status === 'Pending' && (
+                                {appt.status === 'Pending' && (
                                   <>
-                                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleApproveClick(patient)}>
+                                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleApproveClick(appt)}>
                                         <Check className="h-4 w-4 mr-1"/> Approve
                                     </Button>
-                                    <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200" onClick={() => handleCancelClick(patient)}>
+                                    <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200" onClick={() => handleCancelClick(appt)}>
                                         <X className="h-4 w-4 mr-1"/> Cancel
                                     </Button>
                                   </>
@@ -307,35 +325,30 @@ export default function Dashboard() {
               </div>
               {/* Mobile View */}
               <div className="md:hidden space-y-4">
-                {upcomingAppointments.map((patient, index) => (
-                  <Card key={index} className="shadow-md">
+                {upcomingAppointments.map((appt) => (
+                  <Card key={appt.id} className="shadow-md">
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={`https://placehold.co/40x40.png?text=${patient.name.charAt(0)}`} alt={patient.name} />
-                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={appt.patientAvatar} alt={appt.patientName} data-ai-hint={appt.patientAvatarHint} />
+                          <AvatarFallback>{appt.patientName.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-bold">{patient.name}</p>
-                          <p className="text-sm text-muted-foreground">{patient.id}</p>
+                          <p className="font-bold">{appt.patientName}</p>
                         </div>
                       </div>
                       <div className="border-t pt-3 space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Appointment:</span>
-                          <span className="font-medium text-right">{patient.appointmentDate} <br/> <span className="text-cyan-500">{patient.appointmentTime}</span></span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Purpose:</span>
-                          <span className="font-medium">{patient.purpose}</span>
+                           <span className="font-medium text-right">{new Date(appt.appointmentDate).toLocaleDateString()} <br/> <span className="text-cyan-500">{new Date(appt.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Type:</span>
-                          <span className="font-medium">{patient.type}</span>
+                          <span className="font-medium">{appt.type}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Paid Amount:</span>
-                          <span className="font-medium">{patient.paidAmount}</span>
+                          <span className="font-medium">₦{appt.amount}</span>
                         </div>
                       </div>
                         <div className="flex gap-2 justify-end border-t pt-3">
@@ -344,12 +357,12 @@ export default function Dashboard() {
                                 <Eye className="w-4 h-4 mr-1"/> View
                               </Link>
                           </Button>
-                          {patient.status === 'Pending' && (
+                          {appt.status === 'Pending' && (
                             <>
-                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleApproveClick(patient)}>
+                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleApproveClick(appt)}>
                                   <Check className="h-4 w-4 mr-1"/> Approve
                               </Button>
-                              <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1" onClick={() => handleCancelClick(patient)}>
+                              <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1" onClick={() => handleCancelClick(appt)}>
                                   <X className="h-4 w-4 mr-1"/> Cancel
                               </Button>
                             </>
@@ -393,10 +406,10 @@ export default function Dashboard() {
                       <Check className="w-8 h-8 text-white" />
                   </div>
                   <DialogTitle className="text-2xl">Appointment booked successfully</DialogTitle>
-                  {selectedPatient && (
+                  {selectedAppointment && (
                     <DialogDescription>
-                        Appointment booked with {selectedPatient.name} <br/>
-                        on {selectedPatient.appointmentDate} at {selectedPatient.appointmentTime}
+                        Appointment booked with {selectedAppointment.patientName} <br/>
+                        on {new Date(selectedAppointment.appointmentDate).toLocaleDateString()} at {new Date(selectedAppointment.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </DialogDescription>
                   )}
               </DialogHeader>
@@ -415,10 +428,10 @@ export default function Dashboard() {
                       <Check className="w-8 h-8 text-white" />
                   </div>
                   <DialogTitle className="text-2xl">Appointment canceled successfully</DialogTitle>
-                  {selectedPatient && (
+                  {selectedAppointment && (
                     <DialogDescription>
-                        Appointment with {selectedPatient.name} has been <br/>
-                        canceled on {selectedPatient.appointmentDate} at {selectedPatient.appointmentTime}
+                        Appointment with {selectedAppointment.patientName} has been <br/>
+                        canceled on {new Date(selectedAppointment.appointmentDate).toLocaleDateString()} at {new Date(selectedAppointment.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </DialogDescription>
                   )}
               </DialogHeader>
