@@ -130,11 +130,11 @@ export default function PatientProfileSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" value={profile.firstName || ''} onChange={handleChange} />
+                        <Input id="firstName" value={profile.firstName || ''} onChange={handleChange} disabled />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" value={profile.lastName || ''} onChange={handleChange} />
+                        <Input id="lastName" value={profile.lastName || ''} onChange={handleChange} disabled />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="dateOfBirth">Date of Birth</Label>
