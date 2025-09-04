@@ -151,6 +151,13 @@ export default function ProfileSettings() {
 
         if (!response.ok) {
             const errorData = await response.json();
+            // Check if errorData.error is an object with _errors, typical of Zod
+            if (typeof errorData.error === 'object' && errorData.error !== null) {
+              const firstError = Object.values(errorData.error)[0];
+              if (typeof firstError === 'object' && firstError && '_errors' in firstError && Array.isArray(firstError._errors)) {
+                 throw new Error(firstError._errors[0] || "Validation failed");
+              }
+            }
             throw new Error(errorData.error || "Failed to update profile");
         }
 

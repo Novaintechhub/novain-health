@@ -17,7 +17,7 @@ const DoctorProfileUpdateSchema = z.object({
   gender: z.string().optional().nullable(),
   dateOfBirth: z.string().optional().nullable(),
   aboutMe: z.string().optional().nullable(),
-  profileImage: z.string().optional(),
+  profileImage: z.string().optional().nullable(),
   
   clinicName: z.string().optional().nullable(),
   clinicAddress: z.string().optional().nullable(),
@@ -202,11 +202,16 @@ export async function POST(request: Request) {
 
     await batch.commit();
 
+    // Update Auth user record after Firestore operations
+    const authUpdatePayload: { displayName?: string; photoURL?: string } = {
+        displayName: `${firstName} ${lastName}`
+    };
     if (imageUrl) {
-        await getAdminAuth().updateUser(doctorId, {
-            photoURL: imageUrl,
-        });
+        authUpdatePayload.photoURL = imageUrl;
     }
+    
+    await getAdminAuth().updateUser(doctorId, authUpdatePayload);
+    
 
     return NextResponse.json({ message: 'Profile updated successfully' });
   } catch (error) {
