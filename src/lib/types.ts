@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 
 // Regex for Nigerian phone numbers. Allows for +234 format or the standard 080/090 format.
@@ -156,3 +155,4 @@ export type Appointment = {
   amount: string;
   cancellationReason?: string;
 };
+
