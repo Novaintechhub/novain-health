@@ -42,7 +42,7 @@ export interface DoctorCoreProfile extends UserProfile {
     reviews?: number;
     location?: string;
     availability?: string;
-    price?: string;
+    price?: string; // This can be a default or average price
     image?: string;
     hint?: string;
     memberSince?: string;
@@ -64,7 +64,6 @@ export interface DoctorDetails {
     stateOfResidence?: string;
     lga?: string;
     language?: string;
-    pricing?: string;
     services?: string[];
     specializations?: string[];
     facebookUrl?: string;
@@ -73,6 +72,10 @@ export interface DoctorDetails {
     pinterestUrl?: string;
     linkedinUrl?: string;
     youtubeUrl?: string;
+    slotDuration?: '15' | '30' | '45' | '60';
+    pricingVideo?: string;
+    pricingVoice?: string;
+    pricingChat?: string;
 }
 
 export interface DoctorEducation {

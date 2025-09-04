@@ -30,7 +30,10 @@ const DoctorProfileUpdateSchema = z.object({
   lga: z.string().optional().nullable(),
   language: z.string().optional().nullable(),
 
-  pricing: z.string().optional().nullable(),
+  slotDuration: z.enum(['15', '30', '45', '60']).optional().nullable(),
+  pricingVideo: z.string().optional().nullable(),
+  pricingVoice: z.string().optional().nullable(),
+  pricingChat: z.string().optional().nullable(),
 
   services: z.array(z.string()).optional(),
   specializations: z.array(z.string()).optional(),
@@ -185,8 +188,12 @@ export async function POST(request: Request) {
     
     const batch = db.batch();
 
-    // Update core profile if there's an image
-    if (Object.keys(coreData).length > 0) {
+    // Update core profile if there's an image or slot duration
+    if (Object.keys(coreData).length > 0 || detailsData.slotDuration) {
+        if (detailsData.slotDuration) {
+            // @ts-ignore
+            coreData.slotDuration = detailsData.slotDuration;
+        }
         batch.set(doctorRef, coreData, { merge: true });
     }
 

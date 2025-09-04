@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { app } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 type TimeSlot = { start: string; end: string };
 
@@ -32,6 +34,7 @@ const formatTo12Hour = (time24: string) => {
 export default function ScheduleTimings() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [availability, setAvailability] = useState<Availability>({});
+  const [slotDuration, setSlotDuration] = useState<string>('30');
   const [newTimeSlot, setNewTimeSlot] = useState({ from: "", to: "" });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -56,6 +59,7 @@ export default function ScheduleTimings() {
           const data = await response.json();
           // The API returns a schedule object which might be empty
           setAvailability(data.schedule || {});
+          setSlotDuration(data.slotDuration || '30');
         } catch (error) {
           console.error("Error fetching schedule:", error);
           toast({
@@ -137,7 +141,7 @@ export default function ScheduleTimings() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${idToken}`
             },
-            body: JSON.stringify({ schedule: availability }), // Send under 'schedule' key
+            body: JSON.stringify({ schedule: availability, slotDuration }), // Send under 'schedule' key
         });
 
         if (!response.ok) {
@@ -193,6 +197,20 @@ export default function ScheduleTimings() {
               className="rounded-md border"
               disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
             />
+             <div className="mt-6 space-y-2">
+                <Label htmlFor="slot-duration">Appointment Slot Duration</Label>
+                <Select value={slotDuration} onValueChange={setSlotDuration}>
+                    <SelectTrigger id="slot-duration">
+                        <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="15">15 mins</SelectItem>
+                        <SelectItem value="30">30 mins</SelectItem>
+                        <SelectItem value="45">45 mins</SelectItem>
+                        <SelectItem value="60">1 hour</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
           </div>
           <div className="space-y-6">
             <CardHeader className="p-0">
