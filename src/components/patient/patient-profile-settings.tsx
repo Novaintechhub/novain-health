@@ -13,11 +13,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { PatientProfile } from "@/lib/types";
 import ImageUpload from "@/components/shared/image-upload";
 import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
+import { useRouter } from "next/navigation";
 
 
 export default function PatientProfileSettings() {
   const { user, loading: authLoading } = useAuth() || {};
   const { toast } = useToast();
+  const router = useRouter();
   const [profile, setProfile] = useState<Partial<PatientProfile>>({});
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,6 +99,7 @@ export default function PatientProfileSettings() {
             title: "Profile Updated",
             description: "Your changes have been saved successfully.",
         });
+        router.refresh(); // This will re-fetch data for the layout
     } catch (error: any) {
         toast({
             variant: "destructive",
