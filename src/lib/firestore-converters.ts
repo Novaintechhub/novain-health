@@ -83,7 +83,6 @@ export const appointmentConverter: FirestoreDataConverter<Appointment> = {
     toFirestore(appointment: Appointment): DocumentData {
         return {
             ...appointment,
-            appointmentDate: new Date(appointment.appointmentDate), // Store as Firestore Timestamp
         };
     },
     fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Appointment {
@@ -92,7 +91,7 @@ export const appointmentConverter: FirestoreDataConverter<Appointment> = {
             id: snapshot.id,
             patientId: data.patientId,
             doctorId: data.doctorId,
-            appointmentDate: data.appointmentDate.toDate().toISOString(), // Convert Timestamp to ISO string
+            appointmentDate: data.appointmentDate, // Keep as ISO string
             bookingDate: data.bookingDate,
             type: data.type,
             status: data.status,
