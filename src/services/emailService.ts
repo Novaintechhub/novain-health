@@ -35,12 +35,15 @@ export const sendVerificationEmail = async (email: string, name: string, otp: st
 
     try {
         const transporter = nodemailer.createTransport(smtpConfig);
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+        const appLogoUrl = `${appUrl}/logo.png`;
 
         let htmlContent = readEmailTemplate('otp.html');
         htmlContent = htmlContent.replace(/{{name}}/g, name)
                                  .replace(/{{otp}}/g, otp)
-                                 .replace(/{{appUrl}}/g, process.env.NEXT_PUBLIC_APP_URL || '')
-                                 .replace(/{{privacyPolicyUrl}}/g, `${process.env.NEXT_PUBLIC_APP_URL}/privacy-policy` || '');
+                                 .replace(/{{appUrl}}/g, appUrl)
+                                 .replace(/{{appLogoUrl}}/g, appLogoUrl)
+                                 .replace(/{{privacyPolicyUrl}}/g, `${appUrl}/privacy-policy`);
 
         const mailOptions = {
             from: `"${process.env.SMTP_SENDER_NAME || 'NovainHealth'}" <${process.env.SMTP_SENDER_EMAIL || smtpConfig.auth.user}>`,
