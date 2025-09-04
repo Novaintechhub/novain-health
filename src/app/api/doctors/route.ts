@@ -1,6 +1,7 @@
+
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { DoctorProfile } from '@/lib/types';
+import type { DoctorProfile } from '@/lib/types';
 import { doctorConverter } from '@/lib/firestore-converters';
 
 export async function GET() {
