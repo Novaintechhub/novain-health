@@ -14,7 +14,7 @@ import type { PatientProfile } from "@/lib/types";
 import ImageUpload from "@/components/shared/image-upload";
 
 export default function PatientProfileSettings() {
-  const { user, loading: authLoading } from useAuth();
+  const { user, loading: authLoading } = useAuth() || {};
   const { toast } = useToast();
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +37,12 @@ export default function PatientProfileSettings() {
         setLoading(false);
       }
     };
-    if (user) fetchProfile();
-  }, [user, toast]);
+    if (user) {
+        fetchProfile();
+    } else if (!authLoading) {
+        setLoading(false); // If there's no user and we are not loading auth, stop loading profile.
+    }
+  }, [user, authLoading, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
