@@ -58,7 +58,6 @@ export default function ProfileSettings() {
           language: '',
           stateOfResidence: '',
           lga: '',
-          pricing: 'Free',
           services: [],
           specializations: [],
           education: [],
@@ -79,9 +78,6 @@ export default function ProfileSettings() {
   
   const selectedState = watch('stateOfResidence');
   const initialImageUrl = useMemo(() => user?.photoURL, [user]);
-  const pricingValue = watch('pricing');
-
-  const [pricingSelection, setPricingSelection] = useState<'Free' | 'Custom'>('Free');
 
   useEffect(() => {
     if (selectedState) {
@@ -103,11 +99,6 @@ export default function ProfileSettings() {
         if (!response.ok) throw new Error("Failed to fetch profile");
         const data: DoctorProfile = await response.json();
         reset(data); // Reset form with fetched data
-        if (data.pricing === 'Free' || !data.pricing) {
-            setPricingSelection('Free');
-        } else {
-            setPricingSelection('Custom');
-        }
         if (data.stateOfResidence) {
           const stateData = nigerianStates.find(s => s.name === data.stateOfResidence);
           setLgas(stateData ? stateData.lgas : []);
@@ -136,7 +127,6 @@ export default function ProfileSettings() {
         const idToken = await user.getIdToken();
         const payload = {
             ...data,
-            pricing: pricingSelection === 'Free' ? 'Free' : data.pricing,
             profileImage: imageToUpload,
         };
         
@@ -264,40 +254,51 @@ export default function ProfileSettings() {
         </CardContent>
       </Card>
 
-      {/* Pricing */}
+       {/* Pricing */}
       <Card>
         <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-            <Label>Set your pricing tier</Label>
-            <div className="flex gap-4 items-center">
-                <Select value={pricingSelection} onValueChange={(value: 'Free' | 'Custom') => setPricingSelection(value)}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select pricing model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Free">Free</SelectItem>
-                        <SelectItem value="Custom">Custom</SelectItem>
-                    </SelectContent>
-                </Select>
-                {pricingSelection === 'Custom' && (
-                    <div className="relative flex-1">
+            <p className="text-sm text-muted-foreground">
+                Set your consultation fees based on the appointment type. The fee should be based on your selected slot duration.
+            </p>
+            <div className="space-y-2">
+                <Label htmlFor="slotDuration">Appointment Slot Duration</Label>
+                <Controller name="slotDuration" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger id="slot-duration" className="w-full md:w-1/2">
+                            <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="15">15 mins</SelectItem>
+                            <SelectItem value="30">30 mins</SelectItem>
+                            <SelectItem value="45">45 mins</SelectItem>
+                            <SelectItem value="60">1 hour</SelectItem>
+                        </SelectContent>
+                    </Select>
+                )}/>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <Label htmlFor="pricingVideo">Video Call</Label>
+                    <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
-                        <Controller
-                            name="pricing"
-                            control={control}
-                            render={({ field }) => (
-                                <Input
-                                    type="number"
-                                    placeholder="Enter amount"
-                                    className="pl-7"
-                                    {...field}
-                                    value={field.value === 'Free' ? '' : field.value}
-                                    onChange={e => field.onChange(e.target.value)}
-                                />
-                            )}
-                        />
+                        <Input id="pricingVideo" type="number" placeholder="e.g., 10000" className="pl-7" {...register("pricingVideo")} />
                     </div>
-                )}
+                </div>
+                 <div>
+                    <Label htmlFor="pricingVoice">Voice Call</Label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
+                        <Input id="pricingVoice" type="number" placeholder="e.g., 8000" className="pl-7" {...register("pricingVoice")} />
+                    </div>
+                </div>
+                 <div>
+                    <Label htmlFor="pricingChat">Chat</Label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
+                        <Input id="pricingChat" type="number" placeholder="e.g., 5000" className="pl-7" {...register("pricingChat")} />
+                    </div>
+                </div>
             </div>
         </CardContent>
       </Card>

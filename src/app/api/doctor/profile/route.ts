@@ -163,6 +163,7 @@ export async function POST(request: Request) {
         profileImage,
         firstName, lastName, 
         education, experience, awards, memberships, registrations,
+        slotDuration,
         ...detailsData 
     } = validation.data;
     
@@ -185,15 +186,14 @@ export async function POST(request: Request) {
     if (imageUrl) {
         coreData.imageUrl = imageUrl;
     }
+    if (slotDuration) {
+        coreData.slotDuration = slotDuration;
+    }
     
     const batch = db.batch();
 
     // Update core profile if there's an image or slot duration
-    if (Object.keys(coreData).length > 0 || detailsData.slotDuration) {
-        if (detailsData.slotDuration) {
-            // @ts-ignore
-            coreData.slotDuration = detailsData.slotDuration;
-        }
+    if (Object.keys(coreData).length > 0) {
         batch.set(doctorRef, coreData, { merge: true });
     }
 

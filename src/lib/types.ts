@@ -48,6 +48,7 @@ export interface DoctorCoreProfile extends UserProfile {
     memberSince?: string;
     earned?: string;
     accountStatus?: "active" | "inactive";
+    slotDuration?: '15' | '30' | '45' | '60';
 }
 
 export interface DoctorDetails {
@@ -72,7 +73,6 @@ export interface DoctorDetails {
     pinterestUrl?: string;
     linkedinUrl?: string;
     youtubeUrl?: string;
-    slotDuration?: '15' | '30' | '45' | '60';
     pricingVideo?: string;
     pricingVoice?: string;
     pricingChat?: string;
