@@ -46,10 +46,84 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect } from 'react';
+import type { PatientProfile } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format, differenceInYears } from 'date-fns';
 
 function PatientDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, handleSignOut } = useAuth();
+  const { user, handleSignOut, loading: authLoading } = useAuth();
+  const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/patient/profile', {
+          headers: { 'Authorization': `Bearer ${idToken}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch patient profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchProfile();
+    } else if (!authLoading) {
+      setLoading(false);
+    }
+  }, [user, authLoading]);
+
+  const getAge = (dob: string | undefined) => {
+    if (!dob) return '';
+    try {
+      return `${differenceInYears(new Date(), new Date(dob))} years`;
+    } catch {
+      return '';
+    }
+  };
+
+  const SidebarProfile = () => {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
+          <Skeleton className="h-24 w-24 rounded-full" />
+          <Skeleton className="h-6 w-32 mt-4" />
+          <Skeleton className="h-4 w-20 mt-2" />
+          <Skeleton className="h-4 w-28 mt-2" />
+          <Skeleton className="h-4 w-24 mt-1" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
+        <Avatar className="h-24 w-24 border-2 border-primary rounded-full shadow-lg">
+          <AvatarImage src={profile?.imageUrl || user?.photoURL || "https://placehold.co/96x96.png"} alt={user?.displayName || "Patient"} data-ai-hint="woman portrait" />
+          <AvatarFallback>{user?.displayName?.charAt(0) || 'P'}</AvatarFallback>
+        </Avatar>
+        <h3 className="mt-4 text-xl font-semibold">{user?.displayName || "Patient"}</h3>
+        <p className="text-sm text-muted-foreground">Patient ID: {profile?.patientId}</p>
+        <div className="text-center text-sm text-muted-foreground mt-2 space-y-1">
+          {profile?.dateOfBirth && <p>{format(new Date(profile.dateOfBirth), 'dd MMM yyyy')}, {getAge(profile.dateOfBirth)}</p>}
+          {(profile?.lga || profile?.stateOfResidence) && <p>{profile.lga}, {profile.stateOfResidence}</p>}
+        </div>
+        <Button asChild variant="outline" className="mt-4 text-primary border-primary">
+          <Link href="/patients/profile">View Details</Link>
+        </Button>
+      </div>
+    );
+  };
+  
 
   return (
     <SidebarProvider>
@@ -57,21 +131,7 @@ function PatientDashboardLayout({ children }: { children: React.ReactNode }) {
         <Sidebar className="bg-white border-r" collapsible="icon">
           <SidebarContent className="p-4">
             <SidebarGroup>
-               <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
-                <Avatar className="h-24 w-24 border-2 border-primary rounded-full shadow-lg">
-                  <AvatarImage src={user?.photoURL || "https://placehold.co/96x96.png"} alt={user?.displayName || "Patient"} data-ai-hint="woman portrait" />
-                  <AvatarFallback>{user?.displayName?.charAt(0) || 'P'}</AvatarFallback>
-                </Avatar>
-                <h3 className="mt-4 text-xl font-semibold">{user?.displayName || "Tosin Chukwuka"}</h3>
-                <p className="text-sm text-muted-foreground">Patient</p>
-                <div className="text-center text-sm text-muted-foreground mt-2 space-y-1">
-                  <p>24 Jul 1983, 38 years</p>
-                  <p>Newyork, USA</p>
-                </div>
-                <Button asChild variant="outline" className="mt-4 text-primary border-primary">
-                  <Link href="/patients/profile">View Details</Link>
-                </Button>
-              </div>
+               <SidebarProfile />
             </SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -198,7 +258,7 @@ function PatientDashboardLayout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user?.photoURL || "https://placehold.co/40x40.png"} alt={user?.displayName || "Patient"} data-ai-hint="woman portrait" />
+                        <AvatarImage src={profile?.imageUrl || user?.photoURL || "https://placehold.co/40x40.png"} alt={user?.displayName || "Patient"} data-ai-hint="woman portrait" />
                         <AvatarFallback>{user?.displayName?.charAt(0) || 'P'}</AvatarFallback>
                       </Avatar>
                     </Button>
@@ -206,7 +266,7 @@ function PatientDashboardLayout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user?.displayName || "Tosin Chukwuka"}</p>
+                        <p className="text-sm font-medium leading-none">{user?.displayName || "Patient User"}</p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user?.email}
                         </p>
