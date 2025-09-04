@@ -8,7 +8,7 @@ import { app } from '@/lib/firebase';
 import { z } from 'zod';
 
 const LoginSchema = z.object({
-  email: z.string().email(),
+  emailOrId: z.string(), // Can be email or patient ID
   password: z.string(),
 });
 
@@ -17,10 +17,26 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validation = LoginSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
-    const { email, password } = validation.data;
+    const { emailOrId, password } = validation.data;
+    const db = getAdminDb();
+    let email = emailOrId;
+
+    // Check if the input is a patient ID
+    if (emailOrId.toUpperCase().startsWith('NOV-')) {
+        const patientQuery = await db.collection('patients').where('patientId', '==', emailOrId.toUpperCase()).limit(1).get();
+        if (!patientQuery.empty) {
+            email = patientQuery.docs[0].data().email;
+        } else {
+            // No patient found with this ID, but maybe it's a doctor's email that looks like an ID
+            const doctorQuery = await db.collection('doctors').where('email', '==', emailOrId).limit(1).get();
+            if(doctorQuery.empty) {
+                return NextResponse.json({ error: 'Invalid credentials. Please check your Patient ID/email and password.' }, { status: 401 });
+            }
+        }
+    }
     
     // We need to use the client SDK here to verify the password,
     // as the Admin SDK doesn't have a direct method for it.
@@ -42,7 +58,6 @@ export async function POST(request: Request) {
       role = adminUserRecord.customClaims.role;
     } else {
         // Fallback: check firestore if no claim is set
-        const db = getAdminDb();
         const doctorDoc = await db.collection('doctors').doc(user.uid).get();
         if (doctorDoc.exists()) {
             role = 'doctor';
@@ -66,7 +81,7 @@ export async function POST(request: Request) {
     console.error('Login API Error:', error);
     // Firebase auth errors have a 'code' property
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        return NextResponse.json({ error: 'Invalid credentials. Please check your email and password.' }, { status: 401 });
+        return NextResponse.json({ error: 'Invalid credentials. Please check your Patient ID/email and password.' }, { status: 401 });
     }
     return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
   }

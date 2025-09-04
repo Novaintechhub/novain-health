@@ -32,7 +32,7 @@ const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function PatientLogin() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [emailOrId, setEmailOrId] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function PatientLogin() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ emailOrId, password }),
       });
 
       const data = await response.json();
@@ -138,10 +138,10 @@ export default function PatientLogin() {
               
               <form className="space-y-4" onSubmit={handleSignIn}>
                 <Input 
-                    type="email" 
-                    placeholder="Email Address" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text" 
+                    placeholder="Email Address or Patient ID" 
+                    value={emailOrId}
+                    onChange={(e) => setEmailOrId(e.target.value)}
                     required
                 />
                 <div className="relative">

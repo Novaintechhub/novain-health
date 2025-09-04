@@ -122,6 +122,7 @@ export interface DoctorProfile extends DoctorCoreProfile, DoctorDetails {
 // Patient specific profile fields
 export interface PatientProfile extends UserProfile {
     role: 'patient';
+    patientId?: string; // New patient ID
     mobileNumber: string;
     stateOfResidence: string;
     lga: string;
@@ -155,4 +156,3 @@ export type Appointment = {
   amount: string;
   cancellationReason?: string;
 };
-

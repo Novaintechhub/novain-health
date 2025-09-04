@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         }
     }
 
-    const userProfile = {
+    const userProfile: any = {
       uid: userRecord.uid,
       email,
       firstName,
@@ -86,7 +86,18 @@ export async function POST(request: Request) {
       ...profileData,
     };
     
-    await db.collection(`${role}s`).doc(userRecord.uid).set(userProfile);
+    if (role === 'patient') {
+      const counterRef = db.collection('counters').doc('patientCounter');
+      await db.runTransaction(async (transaction) => {
+          const counterDoc = await transaction.get(counterRef);
+          const newCount = (counterDoc.data()?.count || 1000) + 1;
+          userProfile.patientId = `NOV-${newCount}`;
+          transaction.set(db.collection('patients').doc(userRecord.uid), userProfile);
+          transaction.set(counterRef, { count: newCount });
+      });
+    } else {
+      await db.collection(`${role}s`).doc(userRecord.uid).set(userProfile);
+    }
     
     // Send verification email
     await sendVerificationEmail(email, firstName, otp);

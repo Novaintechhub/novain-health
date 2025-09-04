@@ -87,7 +87,7 @@ export default function PatientProfile() {
               </Avatar>
               <div>
                 <CardTitle className="text-3xl">{user.displayName || "Tosin Chukwuka"}</CardTitle>
-                <p className="text-muted-foreground">Patient ID: {user.uid.substring(0, 8).toUpperCase()}</p>
+                <p className="text-muted-foreground">Patient ID: {profile.patientId}</p>
               </div>
             </div>
             <Button asChild variant="outline" className="text-primary border-primary hover:bg-primary/5 hover:text-primary">
