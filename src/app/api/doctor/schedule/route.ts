@@ -28,11 +28,6 @@ const dailyScheduleSchema = z.array(timeSlotSchema).refine(slots => {
 
 const availabilitySchema = z.record(z.string().regex(/^\d{4}-\d{2}-\d{2}$/), dailyScheduleSchema);
 
-const schedulePayloadSchema = z.object({
-  schedule: availabilitySchema,
-  slotDuration: z.string().optional(),
-});
-
 export async function GET(request: Request) {
   try {
     const idToken = headers().get('Authorization')?.split('Bearer ')[1];
@@ -79,8 +74,7 @@ export async function POST(request: Request) {
     
     const body = await request.json();
     
-    // The frontend sends the schedule directly, not nested.
-    // We'll validate the body as the availability schema.
+    // The frontend sends { schedule: availability }, so we validate body.schedule
     const validation = availabilitySchema.safeParse(body.schedule);
     
     if (!validation.success) {
@@ -92,12 +86,15 @@ export async function POST(request: Request) {
     const db = getAdminDb();
     const doctorRef = db.collection('doctors').doc(doctorId);
     
-    await doctorRef.set({
+    const dataToSave: { schedule: Availability, slotDuration?: string } = {
         schedule: validation.data,
-        // slotDuration is optional and might not be sent every time.
-        // We preserve the existing value if it's not in the payload.
-        slotDuration: body.slotDuration,
-    }, { merge: true });
+    };
+
+    if (body.slotDuration) {
+        dataToSave.slotDuration = body.slotDuration;
+    }
+    
+    await doctorRef.set(dataToSave, { merge: true });
 
     return NextResponse.json({ message: 'Schedule updated successfully' });
   } catch (error) {
