@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,20 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft } from "lucide-react";
 
+const RESEND_INTERVAL = 60; // 60 seconds
+
 export default function OtpVerification() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
-  const role = searchParams.get("role") || "patient"; // Default to patient
+  const role = searchParams.get("role") || "patient";
 
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [countdown, setCountdown] = useState(RESEND_INTERVAL);
   const { toast } = useToast();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!email) {
@@ -30,9 +34,40 @@ export default function OtpVerification() {
         title: "Error",
         description: "No email address provided. Please start the registration process again.",
       });
-      router.push("/patient-registration");
+      const registrationPath = role === "doctor" ? "/doctor-registration" : "/patient-registration";
+      router.push(registrationPath);
     }
-  }, [email, router, toast]);
+  }, [email, router, toast, role]);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+  
+  const startCountdown = () => {
+    setCountdown(RESEND_INTERVAL);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +104,7 @@ export default function OtpVerification() {
   };
 
   const handleResendOtp = async () => {
+    if (countdown > 0) return;
     setIsResending(true);
     try {
       const response = await fetch('/api/auth/resend-otp', {
@@ -81,7 +117,8 @@ export default function OtpVerification() {
       if (!response.ok) {
         throw new Error(result.error || 'Failed to resend OTP');
       }
-
+      
+      startCountdown();
       toast({
         title: "OTP Resent",
         description: "A new OTP has been sent to your email address.",
@@ -116,10 +153,10 @@ export default function OtpVerification() {
           <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-4 sm:p-8 overflow-y-auto bg-white">
             <div className="w-full max-w-md">
                 <div className="mb-6">
-                    <Link href="#" className="flex items-center text-sm text-gray-500 hover:text-gray-700" onClick={() => router.back()}>
+                    <button onClick={() => router.back()} className="flex items-center text-sm text-gray-500 hover:text-gray-700">
                         <ChevronLeft className="w-4 h-4 mr-1" />
                         Back
-                    </Link>
+                    </button>
                 </div>
               <div className="flex justify-center mb-6">
                 <Image src="/logo.png" alt="NovainHealth Logo" width={148} height={64} />
@@ -137,7 +174,7 @@ export default function OtpVerification() {
                     type="text"
                     placeholder="Enter OTP"
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    onChange={(e) => setOtp(e.target.value.trim())}
                     maxLength={6}
                     className="h-12 text-center text-lg tracking-[8px]"
                     required
@@ -150,8 +187,17 @@ export default function OtpVerification() {
               <div className="text-center mt-6">
                 <p className="text-sm text-muted-foreground">
                     Didn't receive the code?{' '}
-                    <Button variant="link" onClick={handleResendOtp} disabled={isResending} className="p-0 h-auto text-cyan-500">
-                        {isResending ? "Resending..." : "Resend Code"}
+                    <Button 
+                      variant="link" 
+                      onClick={handleResendOtp} 
+                      disabled={isResending || countdown > 0} 
+                      className="p-0 h-auto text-cyan-500"
+                    >
+                        {isResending 
+                            ? "Resending..." 
+                            : countdown > 0 
+                                ? `Resend in ${countdown}s` 
+                                : "Resend Code"}
                     </Button>
                 </p>
               </div>
