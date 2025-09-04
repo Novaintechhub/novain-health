@@ -81,6 +81,8 @@ export default function ProfileSettings() {
   const initialImageUrl = useMemo(() => user?.photoURL, [user]);
   const pricingValue = watch('pricing');
 
+  const [pricingSelection, setPricingSelection] = useState<'Free' | 'Custom'>('Free');
+
   useEffect(() => {
     if (selectedState) {
       const stateData = nigerianStates.find(s => s.name === selectedState);
@@ -101,6 +103,11 @@ export default function ProfileSettings() {
         if (!response.ok) throw new Error("Failed to fetch profile");
         const data: DoctorProfile = await response.json();
         reset(data); // Reset form with fetched data
+        if (data.pricing === 'Free' || !data.pricing) {
+            setPricingSelection('Free');
+        } else {
+            setPricingSelection('Custom');
+        }
         if (data.stateOfResidence) {
           const stateData = nigerianStates.find(s => s.name === data.stateOfResidence);
           setLgas(stateData ? stateData.lgas : []);
@@ -129,6 +136,7 @@ export default function ProfileSettings() {
         const idToken = await user.getIdToken();
         const payload = {
             ...data,
+            pricing: pricingSelection === 'Free' ? 'Free' : data.pricing,
             profileImage: imageToUpload,
         };
         
@@ -253,26 +261,35 @@ export default function ProfileSettings() {
       <Card>
         <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-            <Label htmlFor="pricing">Set your pricing tier</Label>
+            <Label>Set your pricing tier</Label>
             <div className="flex gap-4 items-center">
-                <Controller name="pricing" control={control} render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Free">Free</SelectItem>
-                            <SelectItem value="1000">₦1000</SelectItem>
-                            <SelectItem value="2500">₦2500</SelectItem>
-                            <SelectItem value="5000">₦5000</SelectItem>
-                            <SelectItem value="Custom">Custom</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )}/>
-                 {pricingValue === 'Custom' && (
-                    <Input 
-                      type="number" 
-                      placeholder="Enter custom amount" 
-                      onChange={(e) => setValue('pricing', e.target.value)} 
-                    />
+                <Select value={pricingSelection} onValueChange={(value: 'Free' | 'Custom') => setPricingSelection(value)}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select pricing model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Free">Free</SelectItem>
+                        <SelectItem value="Custom">Custom</SelectItem>
+                    </SelectContent>
+                </Select>
+                {pricingSelection === 'Custom' && (
+                    <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
+                        <Controller
+                            name="pricing"
+                            control={control}
+                            render={({ field }) => (
+                                <Input
+                                    type="number"
+                                    placeholder="Enter amount"
+                                    className="pl-7"
+                                    {...field}
+                                    value={field.value === 'Free' ? '' : field.value}
+                                    onChange={e => field.onChange(e.target.value)}
+                                />
+                            )}
+                        />
+                    </div>
                 )}
             </div>
         </CardContent>
