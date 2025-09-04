@@ -18,6 +18,7 @@ const RESEND_INTERVAL = 60; // 60 seconds
 export default function OtpVerification() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isClient, setIsClient] = useState(false);
   const email = searchParams.get("email");
   const role = searchParams.get("role") || "patient";
 
@@ -27,11 +28,6 @@ export default function OtpVerification() {
   const [countdown, setCountdown] = useState(RESEND_INTERVAL);
   const { toast } = useToast();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const startCountdown = () => {
     setCountdown(RESEND_INTERVAL);
@@ -46,6 +42,10 @@ export default function OtpVerification() {
       });
     }, 1000);
   };
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (!isClient) return;
@@ -186,7 +186,7 @@ export default function OtpVerification() {
                             type="text"
                             placeholder="Enter OTP"
                             value={otp}
-                            onChange={(e) => setOtp(e.target.value.trim())}
+                            onChange={(e) => setOtp(e.target.value.trim().toUpperCase())}
                             maxLength={6}
                             className="h-12 text-center text-lg tracking-[8px]"
                             required
