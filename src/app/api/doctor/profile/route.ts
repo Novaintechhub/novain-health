@@ -1,7 +1,7 @@
 
 'use server';
 
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { getAdminDb, getAdminAuth, getAdminStorage } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
@@ -153,9 +153,9 @@ async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirest
 }
 
 // POST handler to update doctor profile
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const idToken = request.headers.get('Authorization')?.split('Bearer ')[1];
 
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
