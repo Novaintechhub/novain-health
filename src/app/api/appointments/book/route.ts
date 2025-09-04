@@ -6,6 +6,7 @@ import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import { patientConverter, doctorConverter } from '@/lib/firestore-converters';
+import { sendAppointmentRequestEmails } from '@/services/emailService';
 
 const BookAppointmentSchema = z.object({
   doctorId: z.string(),
@@ -32,7 +33,6 @@ export async function POST(request: Request) {
     const { doctorId, date, time } = validation.data;
     const db = getAdminDb();
     
-    // Fetch patient and doctor details to enrich the appointment document
     const patientRef = db.collection('patients').doc(patientId).withConverter(patientConverter);
     const doctorRef = db.collection('doctors').doc(doctorId).withConverter(doctorConverter);
 
@@ -45,8 +45,7 @@ export async function POST(request: Request) {
     const patientData = patientDoc.data()!;
     const doctorData = doctorDoc.data()!;
 
-    // Combine date and start time to create a full Date object for sorting
-    const startTime = time.split(' - ')[0]; // "8:00 AM"
+    const startTime = time.split(' - ')[0]; 
     const [timePart, ampm] = startTime.split(' ');
     let [hours, minutes] = timePart.split(':').map(Number);
     if (ampm === 'PM' && hours < 12) hours += 12;
@@ -55,15 +54,14 @@ export async function POST(request: Request) {
     const appointmentDate = new Date(date);
     appointmentDate.setUTCHours(hours, minutes, 0, 0);
 
-    const newAppointment = {
+    const newAppointmentData = {
         patientId,
         doctorId,
         appointmentDate: appointmentDate.toISOString(),
         bookingDate: new Date().toISOString(),
-        type: 'Video Call', // Default or could be passed from client
+        type: 'Video Call', 
         status: 'Pending',
         amount: doctorData.price || '0',
-        // Denormalized data for easier display
         patientName: `${patientData.firstName} ${patientData.lastName}`,
         patientAvatar: patientData.imageUrl || '',
         doctorName: `Dr. ${doctorData.firstName} ${doctorData.lastName}`,
@@ -71,7 +69,39 @@ export async function POST(request: Request) {
         specialty: doctorData.specialty || 'General Practice',
     };
 
-    await db.collection('appointments').add(newAppointment);
+    const appointmentRef = await db.collection('appointments').add(newAppointmentData);
+    const appointmentId = appointmentRef.id;
+
+    // Create in-app notifications
+    const notificationsRef = db.collection('notifications');
+    const patientNotification = {
+      userId: patientId,
+      message: `Your appointment request with ${newAppointmentData.doctorName} has been sent.`,
+      link: `/patients/appointments`,
+      createdAt: new Date().toISOString(),
+      read: false,
+    };
+    const doctorNotification = {
+        userId: doctorId,
+        message: `You have a new appointment request from ${newAppointmentData.patientName}.`,
+        link: `/doctor/appointments`,
+        createdAt: new Date().toISOString(),
+        read: false,
+    };
+    await Promise.all([
+        notificationsRef.add(patientNotification),
+        notificationsRef.add(doctorNotification)
+    ]);
+    
+    // Send emails
+    await sendAppointmentRequestEmails({
+        appointmentId,
+        patient: { name: newAppointmentData.patientName, email: patientData.email! },
+        doctor: { name: newAppointmentData.doctorName, email: doctorData.email! },
+        appointmentDate: appointmentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        appointmentTime: time,
+    });
+
 
     return NextResponse.json({ message: 'Appointment requested successfully' });
   } catch (error) {
