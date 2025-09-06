@@ -302,7 +302,7 @@ export default function Dashboard() {
                         <TableCell className="text-right">
                             <div className="flex flex-row gap-2 justify-end">
                                 <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                                    <Link href="/doctor/view-appointment">
+                                    <Link href={`/doctor/view-appointment?id=${appt.id}`}>
                                       <Eye className="h-4 w-4 mr-1"/> View
                                     </Link>
                                 </Button>
@@ -353,7 +353,7 @@ export default function Dashboard() {
                       </div>
                         <div className="flex gap-2 justify-end border-t pt-3">
                           <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200 flex-1">
-                              <Link href="/doctor/view-appointment">
+                              <Link href={`/doctor/view-appointment?id=${appt.id}`}>
                                 <Eye className="w-4 h-4 mr-1"/> View
                               </Link>
                           </Button>
@@ -464,3 +464,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+    
