@@ -39,9 +39,8 @@ const generateYears = () => {
   return years;
 };
 
-const CertificateUploader = ({ index, control, setValue }: { index: number, control: any, setValue: any }) => {
+const CertificateUploader = ({ value, onChange }: { value?: string; onChange: (dataUri: string) => void; }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const certificateUrl = control.getValues(`registrations.${index}.certificateUrl`);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -49,7 +48,7 @@ const CertificateUploader = ({ index, control, setValue }: { index: number, cont
             const reader = new FileReader();
             reader.onloadend = () => {
                 const result = reader.result as string;
-                setValue(`registrations.${index}.certificateUrl`, result);
+                onChange(result);
             };
             reader.readAsDataURL(file);
         }
@@ -65,8 +64,8 @@ const CertificateUploader = ({ index, control, setValue }: { index: number, cont
                 accept="image/png, image/jpeg, application/pdf"
             />
             <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground font-normal" onClick={() => fileInputRef.current?.click()}>
-                {certificateUrl ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Upload className="mr-2 h-4 w-4"/>}
-                <span>{certificateUrl ? 'Certificate Selected' : 'Click to upload'}</span>
+                {value ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Upload className="mr-2 h-4 w-4"/>}
+                <span>{value ? 'Certificate Selected' : 'Click to upload'}</span>
             </Button>
         </div>
     );
@@ -552,7 +551,13 @@ export default function ProfileSettings() {
                     </div>
                     <div>
                         <Label>Upload Certificate</Label>
-                        <CertificateUploader index={index} control={control} setValue={setValue} />
+                        <Controller
+                            name={`registrations.${index}.certificateUrl`}
+                            control={control}
+                            render={({ field }) => (
+                                <CertificateUploader value={field.value} onChange={field.onChange} />
+                            )}
+                        />
                     </div>
                 </div>
               </div>
