@@ -33,7 +33,14 @@ export async function GET() {
     const detailsDoc = await getDetailsRef(doctorId).get();
     
     if (!detailsDoc.exists) {
-        return NextResponse.json({});
+        return NextResponse.json({
+            facebookUrl: '',
+            twitterUrl: '',
+            instagramUrl: '',
+            pinterestUrl: '',
+            linkedinUrl: '',
+            youtubeUrl: '',
+        });
     }
 
     const data = detailsDoc.data() || {};
