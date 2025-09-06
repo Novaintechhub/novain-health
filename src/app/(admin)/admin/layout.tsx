@@ -17,6 +17,17 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -54,6 +65,26 @@ function AdminDashboardLayout({
     if (!path) return 'Admin';
     return path.charAt(0).toUpperCase() + path.slice(1).replace('-', ' ');
   };
+
+  const LogoutDialog = ({ trigger }: { trigger: React.ReactNode }) => (
+    <AlertDialog>
+        <AlertDialogTrigger asChild>
+            {trigger}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    You will be returned to the login page.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleSignOut} className="bg-destructive hover:bg-destructive/90">Log Out</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+  );
 
   return (
     <SidebarProvider>
@@ -128,17 +159,19 @@ function AdminDashboardLayout({
           <SidebarFooter>
             <SidebarMenu className="p-4">
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Logout" onClick={handleSignOut}>
-                  <Link href="/general-login">
-                    <LogOut />
-                    <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-                  </Link>
-                </SidebarMenuButton>
+                <LogoutDialog trigger={
+                    <SidebarMenuButton asChild tooltip="Logout">
+                        <div className="flex items-center gap-3 w-full">
+                            <LogOut />
+                            <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                        </div>
+                    </SidebarMenuButton>
+                }/>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset className="flex flex-col h-screen">
+        <SidebarInset className="flex flex-col">
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-white px-4 sm:px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
@@ -174,12 +207,12 @@ function AdminDashboardLayout({
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild onClick={handleSignOut}>
-                      <Link href="/admin-login">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Log out</span>
-                      </Link>
-                    </DropdownMenuItem>
+                     <LogoutDialog trigger={
+                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                        </DropdownMenuItem>
+                     } />
                   </DropdownMenuContent>
                 </DropdownMenu>
             </div>
