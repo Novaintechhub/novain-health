@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, PlusCircle, Trash2, Upload } from "lucide-react";
+import { AlertCircle, PlusCircle, Trash2, Upload, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
