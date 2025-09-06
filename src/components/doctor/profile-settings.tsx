@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, PlusCircle, Trash2 } from "lucide-react";
+import { AlertCircle, PlusCircle, Trash2, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,7 @@ import type { DoctorProfile } from "@/lib/types";
 import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
 import ImageUpload from "@/components/shared/image-upload";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
+import medicalSpecialties from "@/lib/medical-specialties";
 
 type ProfileFormData = Omit<DoctorProfile, 'uid' | 'email' | 'role' | 'createdAt' | 'isVerified' | 'rating' | 'reviews' | 'location' | 'availability' | 'price' | 'image' | 'hint' | 'memberSince' | 'earned' | 'accountStatus'>;
 
@@ -301,10 +302,41 @@ export default function ProfileSettings() {
       
       {/* Clinic Info */}
       <Card>
-          <CardHeader><CardTitle>Clinic Info</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Clinic Info & Specializations</CardTitle></CardHeader>
           <CardContent className="space-y-4">
               <div><Label htmlFor="clinicName">Clinic Name</Label><Input id="clinicName" {...register("clinicName")} /></div>
               <div><Label htmlFor="clinicAddress">Clinic Address</Label><Input id="clinicAddress" {...register("clinicAddress")} /></div>
+              <div>
+                <Label htmlFor="specializations">Specializations</Label>
+                <Controller 
+                  name="specializations"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={(val) => field.onChange([...(field.value || []), val])}>
+                       <SelectTrigger id="specializations"><SelectValue placeholder="Select specializations" /></SelectTrigger>
+                       <SelectContent>
+                          {medicalSpecialties.map(spec => <SelectItem key={spec} value={spec}>{spec}</SelectItem>)}
+                       </SelectContent>
+                    </Select>
+                  )}
+                />
+                 <div className="flex flex-wrap gap-2 mt-2">
+                    {watch('specializations')?.map((spec, index) => (
+                        <div key={index} className="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1 text-sm">
+                            <span>{spec}</span>
+                            <button type="button" onClick={() => setValue('specializations', watch('specializations').filter(s => s !== spec))}><X className="w-3 h-3"/></button>
+                        </div>
+                    ))}
+                </div>
+                 <Input className="mt-2" placeholder="Add a custom specialization if not listed" onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value) {
+                        e.preventDefault();
+                        const currentSpecs = watch('specializations') || [];
+                        setValue('specializations', [...currentSpecs, e.currentTarget.value]);
+                        e.currentTarget.value = '';
+                    }
+                 }}/>
+              </div>
           </CardContent>
       </Card>
 
@@ -470,23 +502,31 @@ export default function ProfileSettings() {
         <CardHeader><CardTitle>Registrations</CardTitle></CardHeader>
         <CardContent className="space-y-4">
             {registrationsFields.map((field, index) => (
-              <div key={field.id} className="flex items-end gap-2">
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><Label>Registration</Label><Input {...register(`registrations.${index}.registration`)} /></div>
-                  <div>
-                    <Label>Year</Label>
-                    <Controller name={`registrations.${index}.year`} control={control} render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
-                        <SelectContent>{years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
-                      </Select>
-                    )} />
-                  </div>
+              <div key={field.id} className="space-y-2 border p-4 rounded-md relative">
+                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => removeRegistration(index)}><Trash2 className="h-4 w-4" /></Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><Label>License Body</Label><Input {...register(`registrations.${index}.licenseBody`)} /></div>
+                    <div><Label>Registration Number</Label><Input {...register(`registrations.${index}.registrationNumber`)} /></div>
+                    <div>
+                        <Label>Year</Label>
+                        <Controller name={`registrations.${index}.year`} control={control} render={({ field }) => (
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                            <SelectContent>{years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
+                          </Select>
+                        )} />
+                    </div>
+                    <div>
+                        <Label>Upload Certificate</Label>
+                        <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground font-normal">
+                            <Upload className="mr-2 h-4 w-4"/>
+                            <span>Click to upload</span>
+                        </Button>
+                    </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => removeRegistration(index)}><Trash2 className="h-4 w-4" /></Button>
               </div>
             ))}
-          <Button type="button" variant="outline" onClick={() => appendRegistration({ registration: '', year: '' })}><PlusCircle className="mr-2 h-4 w-4" /> Add Registration</Button>
+          <Button type="button" variant="outline" onClick={() => appendRegistration({ licenseBody: '', registrationNumber: '', year: '' })}><PlusCircle className="mr-2 h-4 w-4" /> Add Registration</Button>
         </CardContent>
       </Card>
 

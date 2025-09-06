@@ -54,7 +54,13 @@ const DoctorProfileUpdateSchema = z.object({
   experience: z.array(z.object({ id: z.string().optional(), hospital: z.string(), designation: z.string(), from: z.string(), to: z.string() })).optional(),
   awards: z.array(z.object({ id: z.string().optional(), name: z.string(), year: z.string() })).optional(),
   memberships: z.array(z.object({ id: z.string().optional(), organization: z.string() })).optional(),
-  registrations: z.array(z.object({ id: z.string().optional(), registration: z.string(), year: z.string() })).optional(),
+  registrations: z.array(z.object({ 
+    id: z.string().optional(), 
+    licenseBody: z.string(), 
+    registrationNumber: z.string(), 
+    year: z.string(), 
+    certificateUrl: z.string().optional() 
+  })).optional(),
 });
 
 async function uploadProfileImage(dataUri: string, uid: string): Promise<string> {
@@ -128,6 +134,7 @@ export async function GET(request: NextRequest) {
     const fullProfile: DoctorProfile = {
         ...coreProfile,
         ...details,
+        mobileNumber: details.mobileNumber || coreProfile.mobileNumber,
         language: details.language || coreProfile.language,
         stateOfResidence: details.stateOfResidence || coreProfile.stateOfResidence,
         lga: details.lga || coreProfile.lga,

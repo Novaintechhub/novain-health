@@ -116,10 +116,20 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
         </AlertDialogContent>
     </AlertDialog>
   );
+  
+  const doctorTitle = () => {
+    if (!profile) return 'BDS, MDS - Oral & Maxillofacial Surgery';
+    
+    const degree = profile.education?.[0]?.degree || 'BDS';
+    const designation = profile.experience?.[0]?.designation || 'MDS';
+    const specialty = profile.specialty || 'General Practice';
+    
+    return `${degree}, ${designation} - ${specialty}`;
+  };
 
   return (
     <SidebarProvider>
-      <div className="flex bg-gray-50/50 w-full">
+      <div className="flex bg-gray-50/50 w-full min-h-screen">
         <Sidebar className="bg-white border-r" collapsible="icon">
           <SidebarContent className="p-4">
             <SidebarGroup>
@@ -129,7 +139,7 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
                   <AvatarFallback>{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
                 </Avatar>
                 <h3 className="mt-4 text-xl font-semibold">{user?.displayName || "Dr. User"}</h3>
-                <p className="text-sm text-muted-foreground">{profile?.specialty || 'BDS, MDS - Oral & Maxillofacial Surgery'}</p>
+                <p className="text-sm text-muted-foreground">{doctorTitle()}</p>
               </div>
             </SidebarGroup>
             <SidebarMenu>
@@ -332,7 +342,7 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenu>
             </div>
           </header>
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
+          <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -51,6 +51,7 @@ export interface DoctorCoreProfile extends UserProfile {
     stateOfResidence?: string;
     lga?: string;
     language?: string;
+    mobileNumber?: string;
 }
 
 export interface DoctorDetails {
@@ -117,8 +118,10 @@ export interface DoctorMembership {
 
 export interface DoctorRegistration {
     id?: string;
-    registration: string;
+    licenseBody: string;
+    registrationNumber: string;
     year: string;
+    certificateUrl?: string;
 }
 
 

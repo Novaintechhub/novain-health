@@ -38,6 +38,7 @@ export const doctorConverter: FirestoreDataConverter<DoctorCoreProfile> = {
       stateOfResidence: data.stateOfResidence,
       lga: data.lga,
       language: data.language,
+      mobileNumber: data.mobileNumber,
     };
   },
 };
@@ -78,6 +79,7 @@ export const patientConverter: FirestoreDataConverter<PatientProfile> = {
       avatarHint: data.avatarHint || 'person portrait',
       genotype: data.genotype || 'N/A',
       bloodGroup: data.bloodGroup || 'N/A',
+      dateOfBirth: data.dateOfBirth,
     };
   },
 };
