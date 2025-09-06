@@ -128,6 +128,9 @@ export async function GET(request: NextRequest) {
     const fullProfile: DoctorProfile = {
         ...coreProfile,
         ...details,
+        language: details.language || coreProfile.language,
+        stateOfResidence: details.stateOfResidence || coreProfile.stateOfResidence,
+        lga: details.lga || coreProfile.lga,
         education,
         experience,
         awards,

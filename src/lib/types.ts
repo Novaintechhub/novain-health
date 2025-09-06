@@ -48,6 +48,9 @@ export interface DoctorCoreProfile extends UserProfile {
     memberSince?: string;
     earned?: string;
     accountStatus?: "active" | "inactive";
+    stateOfResidence?: string;
+    lga?: string;
+    language?: string;
 }
 
 export interface DoctorDetails {

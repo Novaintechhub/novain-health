@@ -35,6 +35,9 @@ export const doctorConverter: FirestoreDataConverter<DoctorCoreProfile> = {
       memberSince: data.memberSince || new Date().toISOString().split('T')[0],
       earned: data.earned || "₦0.00",
       accountStatus: data.accountStatus || 'active',
+      stateOfResidence: data.stateOfResidence,
+      lga: data.lga,
+      language: data.language,
     };
   },
 };

@@ -62,10 +62,40 @@ import Link from "next/link";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect } from 'react';
+import type { DoctorProfile } from '@/lib/types';
 
 function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, handleSignOut } = useAuth();
+  const { user, handleSignOut, loading: authLoading } = useAuth();
+  const [profile, setProfile] = useState<DoctorProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/doctor/profile', {
+          headers: { 'Authorization': `Bearer ${idToken}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch doctor profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchProfile();
+    } else if (!authLoading) {
+      setLoading(false);
+    }
+  }, [user, authLoading]);
 
   const LogoutDialog = ({ trigger }: { trigger: React.ReactNode }) => (
     <AlertDialog>
@@ -89,17 +119,17 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gray-50/50 w-full">
+      <div className="flex bg-gray-50/50 w-full">
         <Sidebar className="bg-white border-r" collapsible="icon">
           <SidebarContent className="p-4">
             <SidebarGroup>
               <div className="flex flex-col items-center p-4 text-center group-data-[collapsible=icon]:hidden">
                 <Avatar className="h-24 w-24 border-2 border-white rounded-full shadow-lg">
-                  <AvatarImage src={user?.photoURL || "https://placehold.co/96x96.png"} alt={user?.displayName || "Doctor"} data-ai-hint="female doctor" />
+                  <AvatarImage src={profile?.imageUrl || user?.photoURL || "https://placehold.co/96x96.png"} alt={user?.displayName || "Doctor"} data-ai-hint="female doctor" />
                   <AvatarFallback>{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
                 </Avatar>
                 <h3 className="mt-4 text-xl font-semibold">{user?.displayName || "Dr. User"}</h3>
-                <p className="text-sm text-muted-foreground">BDS, MDS - Oral & Maxillofacial Surgery</p>
+                <p className="text-sm text-muted-foreground">{profile?.specialty || 'BDS, MDS - Oral & Maxillofacial Surgery'}</p>
               </div>
             </SidebarGroup>
             <SidebarMenu>
@@ -261,7 +291,7 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user?.photoURL || "https://placehold.co/40x40.png"} alt={user?.displayName || "Doctor"} data-ai-hint="female doctor" />
+                        <AvatarImage src={profile?.imageUrl || user?.photoURL || "https://placehold.co/40x40.png"} alt={user?.displayName || "Doctor"} data-ai-hint="female doctor" />
                         <AvatarFallback>{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
                       </Avatar>
                     </Button>
