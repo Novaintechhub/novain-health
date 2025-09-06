@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { doctorConverter } from '@/lib/firestore-converters';
 import { v4 as uuidv4 } from 'uuid';
 import type { DoctorProfile, DoctorDetails, DoctorEducation, DoctorExperience, DoctorAward, DoctorMembership, DoctorRegistration, DoctorCoreProfile } from '@/lib/types';
+import { headers } from 'next/headers';
 
 const pricingDurationSchema = z.object({
     '15': z.preprocess(val => val === '' ? 0 : Number(val), z.number().optional()),
@@ -63,19 +64,19 @@ const DoctorProfileUpdateSchema = z.object({
   })).optional(),
 });
 
-async function uploadProfileImage(dataUri: string, uid: string): Promise<string> {
+async function uploadAsset(dataUri: string, uid: string, assetType: 'profile-images' | 'certificates'): Promise<string> {
     const storage = getAdminStorage();
     const bucket = storage.bucket();
 
-    const match = dataUri.match(/^data:(image\/\w+);base64,(.+)$/);
+    const match = dataUri.match(/^data:(image\/\w+|application\/pdf);base64,(.+)$/);
     if (!match) {
-        throw new Error('Invalid Data URI for profile image.');
+        throw new Error('Invalid Data URI.');
     }
     const contentType = match[1];
     const base64Data = match[2];
     const buffer = Buffer.from(base64Data, 'base64');
     
-    const filePath = `profile-images/${uid}/${uuidv4()}`;
+    const filePath = `${assetType}/${uid}/${uuidv4()}`;
     const file = bucket.file(filePath);
 
     await file.save(buffer, {
@@ -154,20 +155,30 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirestore.Firestore, batch: FirebaseFirestore.WriteBatch, doctorId: string, collectionName: string, data: T[] = []) {
+async function updateSubcollection<T extends { id?: string }>(db: FirebaseFirestore.Firestore, batch: FirebaseFirestore.WriteBatch, doctorId: string, collectionName: string, data: T[] = [], assetType?: 'certificates') {
     const collectionRef = db.collection('doctors').doc(doctorId).collection(collectionName);
     
-    // Simple approach: delete existing and add new ones.
-    // A more sophisticated approach would be to diff and update/delete/add selectively.
     const snapshot = await collectionRef.get();
     snapshot.docs.forEach(doc => batch.delete(doc.ref));
     
-    data.forEach(item => {
-        const { id, ...itemData } = item; // remove id before writing
-        const docRef = collectionRef.doc(); // Always create new doc for simplicity
+    for (const item of data) {
+        const { id, ...itemData } = item as any;
+        const docRef = collectionRef.doc();
+        
+        if (assetType && itemData.certificateUrl && itemData.certificateUrl.startsWith('data:')) {
+            try {
+                itemData.certificateUrl = await uploadAsset(itemData.certificateUrl, doctorId, assetType);
+            } catch (uploadError) {
+                console.error(`Failed to upload ${assetType}:`, uploadError);
+                // Decide how to handle this - skip this item, or save without URL?
+                // For now, let's just not save the URL.
+                delete itemData.certificateUrl;
+            }
+        }
         batch.set(docRef, itemData);
-    });
+    }
 }
+
 
 // POST handler to update doctor profile
 export async function POST(request: NextRequest) {
@@ -200,7 +211,7 @@ export async function POST(request: NextRequest) {
 
     if (profileImage && profileImage.startsWith('data:image')) {
         try {
-            imageUrl = await uploadProfileImage(profileImage, doctorId);
+            imageUrl = await uploadAsset(profileImage, doctorId, 'profile-images');
         } catch(uploadError) {
             console.error("Image upload failed:", uploadError);
             return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
@@ -211,8 +222,6 @@ export async function POST(request: NextRequest) {
     const doctorRef = db.collection('doctors').doc(doctorId);
     const detailsRef = doctorRef.collection('details').doc('profile');
 
-    // Although names are disabled on the frontend, we still need to update them in the DB
-    // to keep the Auth display name in sync. We'll update the core document.
     const coreData: Partial<DoctorCoreProfile> = {
         firstName,
         lastName,
@@ -234,11 +243,10 @@ export async function POST(request: NextRequest) {
     await updateSubcollection(db, batch, doctorId, 'experience', experience);
     await updateSubcollection(db, batch, doctorId, 'awards', awards);
     await updateSubcollection(db, batch, doctorId, 'memberships', memberships);
-    await updateSubcollection(db, batch, doctorId, 'registrations', registrations);
+    await updateSubcollection(db, batch, doctorId, 'registrations', registrations, 'certificates');
 
     await batch.commit();
 
-    // Update Auth user record after Firestore operations
     const authUpdatePayload: { displayName?: string; photoURL?: string } = {
         displayName: `${firstName} ${lastName}`
     };

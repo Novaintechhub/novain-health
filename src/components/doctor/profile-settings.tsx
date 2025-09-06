@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,12 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, PlusCircle, Trash2, Upload, X } from "lucide-react";
+import { AlertCircle, PlusCircle, Trash2, Upload, X, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DoctorProfile } from "@/lib/types";
+import type { DoctorProfile, DoctorRegistration } from "@/lib/types";
 import { nigerianStates, nigerianLanguages } from "@/lib/nigeria-data";
 import ImageUpload from "@/components/shared/image-upload";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
@@ -38,6 +38,40 @@ const generateYears = () => {
   }
   return years;
 };
+
+const CertificateUploader = ({ index, control, setValue }: { index: number, control: any, setValue: any }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const certificateUrl = control.getValues(`registrations.${index}.certificateUrl`);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setValue(`registrations.${index}.certificateUrl`, result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    return (
+        <div>
+            <Input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/png, image/jpeg, application/pdf"
+            />
+            <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground font-normal" onClick={() => fileInputRef.current?.click()}>
+                {certificateUrl ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Upload className="mr-2 h-4 w-4"/>}
+                <span>{certificateUrl ? 'Certificate Selected' : 'Click to upload'}</span>
+            </Button>
+        </div>
+    );
+};
+
 
 export default function ProfileSettings() {
   const { user, loading: authLoading } = useAuth();
@@ -269,7 +303,7 @@ export default function ProfileSettings() {
               <div><Label htmlFor="firstName">First Name</Label><Input id="firstName" {...register("firstName")} disabled /></div>
               <div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" {...register("lastName")} disabled /></div>
            </div>
-            <Alert>
+            <Alert variant="destructive" className="bg-yellow-50 border-yellow-200 text-yellow-800 [&>svg]:text-yellow-500">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                     To change your name, please contact an administrator. This is to ensure the integrity of your professional profile.
@@ -518,10 +552,7 @@ export default function ProfileSettings() {
                     </div>
                     <div>
                         <Label>Upload Certificate</Label>
-                        <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground font-normal">
-                            <Upload className="mr-2 h-4 w-4"/>
-                            <span>Click to upload</span>
-                        </Button>
+                        <CertificateUploader index={index} control={control} setValue={setValue} />
                     </div>
                 </div>
               </div>

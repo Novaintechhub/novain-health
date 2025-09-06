@@ -117,12 +117,12 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
     </AlertDialog>
   );
   
-  const doctorTitle = () => {
+  const getDoctorTitle = () => {
     if (!profile) return 'BDS, MDS - Oral & Maxillofacial Surgery';
     
     const degree = profile.education?.[0]?.degree || 'BDS';
     const designation = profile.experience?.[0]?.designation || 'MDS';
-    const specialty = profile.specialty || 'General Practice';
+    const specialty = profile.specializations?.[0] || 'General Practice';
     
     return `${degree}, ${designation} - ${specialty}`;
   };
@@ -139,7 +139,7 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
                   <AvatarFallback>{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
                 </Avatar>
                 <h3 className="mt-4 text-xl font-semibold">{user?.displayName || "Dr. User"}</h3>
-                <p className="text-sm text-muted-foreground">{doctorTitle()}</p>
+                <p className="text-sm text-muted-foreground">{getDoctorTitle()}</p>
               </div>
             </SidebarGroup>
             <SidebarMenu>
@@ -342,7 +342,7 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenu>
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
