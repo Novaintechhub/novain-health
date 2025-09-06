@@ -201,17 +201,20 @@ export async function POST(request: NextRequest) {
     const doctorRef = db.collection('doctors').doc(doctorId);
     const detailsRef = doctorRef.collection('details').doc('profile');
 
-    const coreData: Partial<DoctorCoreProfile> = {};
+    // Although names are disabled on the frontend, we still need to update them in the DB
+    // to keep the Auth display name in sync. We'll update the core document.
+    const coreData: Partial<DoctorCoreProfile> = {
+        firstName,
+        lastName,
+    };
     if (imageUrl) {
         coreData.imageUrl = imageUrl;
     }
     
     const batch = db.batch();
 
-    // Update core profile if there's an image
-    if (Object.keys(coreData).length > 0) {
-        batch.set(doctorRef, coreData, { merge: true });
-    }
+    // Update core profile
+    batch.set(doctorRef, coreData, { merge: true });
 
     // Update details subcollection
     batch.set(detailsRef, detailsData, { merge: true });

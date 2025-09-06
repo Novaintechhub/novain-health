@@ -79,9 +79,9 @@ export interface DoctorDetails {
         chat: boolean;
     };
     customPricing?: {
-        video: { '15': number, '30': number, '45': number, '60': number };
-        voice: { '15': number, '30': number, '45': number, '60': number };
-        chat: { '15': number, '30': number, '45': number, '60': number };
+        video: { '15'?: number, '30'?: number, '45'?: number, '60'?: number };
+        voice: { '15'?: number, '30'?: number, '45'?: number, '60'?: number };
+        chat: { '15'?: number, '30'?: number, '45'?: number, '60'?: number };
     };
 }
 
@@ -146,6 +146,7 @@ export interface PatientProfile extends UserProfile {
     avatarHint?: string;
     genotype?: string;
     bloodGroup?: string;
+    dateOfBirth?: string;
 }
 
 export type Appointment = {
