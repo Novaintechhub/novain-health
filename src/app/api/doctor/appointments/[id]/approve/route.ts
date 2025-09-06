@@ -3,7 +3,7 @@
 
 import { NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
-import { appointmentConverter, patientConverter, doctorConverter } from '@/lib/firestore-converters';
+import { appointmentConverter, patientConverter } from '@/lib/firestore-converters';
 import { sendAppointmentConfirmedEmail } from '@/services/emailService';
 
 export async function POST(
@@ -43,14 +43,14 @@ export async function POST(
 
     // Fetch patient and doctor details for email
     const patientRef = db.collection('patients').doc(appointment.patientId).withConverter(patientConverter);
-    const doctorRef = db.collection('doctors').doc(appointment.doctorId).withConverter(doctorConverter);
+    const doctorRef = db.collection('doctors').doc(appointment.doctorId); // Fetch without converter
     const [patientDoc, doctorDoc] = await Promise.all([patientRef.get(), doctorRef.get()]);
 
     if (!patientDoc.exists() || !doctorDoc.exists()) {
         console.warn(`Could not find patient or doctor for appointment ${appointmentId}`);
     } else {
         const patientData = patientDoc.data()!;
-        const doctorData = doctorDoc.data()!;
+        const doctorData = doctorDoc.data()!; // Raw data
 
         // Create in-app notification for the patient
         await db.collection('notifications').add({
