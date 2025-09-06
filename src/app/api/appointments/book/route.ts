@@ -62,6 +62,7 @@ export async function POST(request: Request) {
         type: 'Video Call', 
         status: 'Pending',
         amount: doctorData.price || '0',
+        isPaid: false,
         patientName: `${patientData.firstName} ${patientData.lastName}`,
         patientAvatar: patientData.imageUrl || '',
         doctorName: `Dr. ${doctorData.firstName} ${doctorData.lastName}`,

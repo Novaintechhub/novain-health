@@ -164,5 +164,6 @@ export type Appointment = {
   type: string;
   status: "Approved" | "Cancelled" | "Pending" | "Completed";
   amount: string;
+  isPaid: boolean;
   cancellationReason?: string;
 };
