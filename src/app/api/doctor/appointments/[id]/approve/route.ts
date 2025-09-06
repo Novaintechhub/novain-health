@@ -3,7 +3,6 @@
 
 import { NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
-import { headers } from 'next/headers';
 import { appointmentConverter, patientConverter, doctorConverter } from '@/lib/firestore-converters';
 import { sendAppointmentConfirmedEmail } from '@/services/emailService';
 
@@ -12,7 +11,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const idToken = request.headers.get('Authorization')?.split('Bearer ')[1];
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
