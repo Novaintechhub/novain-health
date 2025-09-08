@@ -266,8 +266,37 @@ function CheckoutContent() {
 
 export default function Checkout() {
     return (
-        <Suspense fallback={<p>Loading checkout...</p>}>
+        <Suspense fallback={
+            <div className="space-y-6">
+                <h1 className="text-2xl font-bold">Checkout</h1>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2">
+                        <Card>
+                            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+                            <CardContent className="space-y-4">
+                                <Skeleton className="h-24 w-full" />
+                                <Skeleton className="h-px w-full" />
+                                <Skeleton className="h-16 w-full" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="lg:col-span-1">
+                        <Card>
+                            <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+                            <CardContent className="space-y-4">
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-px w-full" />
+                                <Skeleton className="h-8 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        }>
             <CheckoutContent />
         </Suspense>
     )
 }
+
+    
