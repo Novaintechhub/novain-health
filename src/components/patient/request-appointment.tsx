@@ -16,6 +16,10 @@ function RequestAppointmentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const doctorId = searchParams.get("doctorId");
+  const method = searchParams.get("method");
+  const duration = searchParams.get("duration");
+  const price = searchParams.get("price");
+
   const [doctor, setDoctor] = React.useState<DoctorProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -64,13 +68,16 @@ function RequestAppointmentContent() {
   };
   
   const handleProceedToCheckout = () => {
-    if (!selectedDate || !selectedTime || !doctor) {
+    if (!selectedDate || !selectedTime || !doctor || !method || !duration || !price) {
       return;
     }
     const query = new URLSearchParams({
       doctorId: doctor.uid,
       date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD
       time: selectedTime,
+      method: method,
+      duration: duration,
+      price: price,
     }).toString();
 
     router.push(`/patients/checkout?${query}`);
