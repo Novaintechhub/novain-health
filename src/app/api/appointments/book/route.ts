@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     if (ampm === 'PM' && hours < 12) hours += 12;
     if (ampm === 'AM' && hours === 12) hours = 0;
 
-    const appointmentDate = new Date(date);
+    const appointmentDate = new Date(`${date}T00:00:00.000Z`);
     appointmentDate.setUTCHours(hours, minutes, 0, 0);
 
     const newAppointmentData = {
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         appointmentId,
         patient: { name: newAppointmentData.patientName, email: patientData.email! },
         doctor: { name: newAppointmentData.doctorName, email: doctorData.email! },
-        appointmentDate: appointmentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        appointmentDate: new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
         appointmentTime: time,
     });
 
