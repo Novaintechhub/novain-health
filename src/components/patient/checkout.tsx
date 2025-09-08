@@ -34,6 +34,7 @@ function CheckoutContent() {
   const method = searchParams.get("method") as 'Video Call' | 'Voice Call' | 'Chat' | null;
   const price = searchParams.get("price");
   const duration = searchParams.get("duration");
+  const appointmentIdToEdit = searchParams.get("edit");
 
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,27 +78,36 @@ function CheckoutContent() {
         return;
     }
     setIsSubmitting(true);
+
     try {
         const idToken = await user.getIdToken();
-        const response = await fetch('/api/appointments/book', {
+        const isEditing = !!appointmentIdToEdit;
+        
+        const apiPath = isEditing 
+            ? `/api/appointments/${appointmentIdToEdit}/update`
+            : '/api/appointments/book';
+
+        const payload = {
+            doctorId: isEditing ? undefined : doctor.uid, // Only send doctorId for new bookings
+            date,
+            time,
+            method,
+            price: parseFloat(price),
+            duration,
+        };
+            
+        const response = await fetch(apiPath, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${idToken}`,
             },
-            body: JSON.stringify({
-                doctorId: doctor.uid,
-                date,
-                time,
-                method,
-                price: parseFloat(price),
-                duration,
-            }),
+            body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to request appointment.");
+            throw new Error(errorData.error || `Failed to ${isEditing ? 'update' : 'request'} appointment.`);
         }
         
         setShowSuccessDialog(true);
@@ -115,6 +125,7 @@ function CheckoutContent() {
 
   const consultationFee = price ? parseFloat(price) : 0;
   const totalAmount = consultationFee + bookingFee - discount;
+  const isEditing = !!appointmentIdToEdit;
 
   if (loading) {
     return (
@@ -168,7 +179,7 @@ function CheckoutContent() {
   return (
     <>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Confirm Appointment Request</h1>
+        <h1 className="text-2xl font-bold">{isEditing ? 'Confirm Reschedule' : 'Confirm Appointment Request'}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Card>
@@ -234,7 +245,7 @@ function CheckoutContent() {
                   onClick={handleRequestAppointment}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : "Request an Appointment"}
+                  {isSubmitting ? "Submitting..." : isEditing ? "Confirm Reschedule" : "Request an Appointment"}
                 </Button>
               </CardContent>
             </Card>
@@ -250,7 +261,7 @@ function CheckoutContent() {
                 </div>
                 <AlertDialogTitle className="text-2xl">Request Sent Successfully!</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Your appointment request has been sent to Dr. {doctor.lastName}. You will be notified once it is confirmed and can proceed to payment.
+                    Your appointment request has been {isEditing ? 'updated and' : ''} sent to Dr. {doctor.lastName}. You will be notified once it is confirmed and can proceed to payment.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">

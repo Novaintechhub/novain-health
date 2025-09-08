@@ -19,6 +19,7 @@ function RequestAppointmentContent() {
   const method = searchParams.get("method");
   const duration = searchParams.get("duration");
   const price = searchParams.get("price");
+  const appointmentIdToEdit = searchParams.get("edit"); // New param
 
   const [doctor, setDoctor] = React.useState<DoctorProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -78,9 +79,13 @@ function RequestAppointmentContent() {
       method: method,
       duration: duration,
       price: price,
-    }).toString();
+    });
 
-    router.push(`/patients/checkout?${query}`);
+    if (appointmentIdToEdit) {
+        query.set('edit', appointmentIdToEdit);
+    }
+
+    router.push(`/patients/checkout?${query.toString()}`);
   };
 
   const firstDayOfMonth = getDay(startOfMonth(currentDate));
@@ -152,14 +157,18 @@ function RequestAppointmentContent() {
       return <div className="text-center text-red-500 py-10">{error || "Doctor not found."}</div>
   }
 
+  const backLink = appointmentIdToEdit 
+    ? `/patients/appointments` 
+    : `/patients/doctor-profile?id=${doctorId}`;
+
   return (
     <div className="space-y-6">
       <div>
-        <Link href={`/patients/doctor-profile?id=${doctorId}`} className="flex items-center text-sm text-muted-foreground hover:text-foreground">
+        <Link href={backLink} className="flex items-center text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-4 h-4 mr-1" />
-          Back to Doctor Profile
+          {appointmentIdToEdit ? 'Back to Appointments' : 'Back to Doctor Profile'}
         </Link>
-        <h1 className="text-2xl font-bold mt-2">Request an Appointment</h1>
+        <h1 className="text-2xl font-bold mt-2">{appointmentIdToEdit ? 'Reschedule Appointment' : 'Request an Appointment'}</h1>
       </div>
       <Card>
         <CardHeader className="flex flex-row items-center gap-4 p-4 border-b">
@@ -244,7 +253,9 @@ function RequestAppointmentContent() {
       </Card>
       
       <div className="flex justify-end gap-4">
-        <Button size="lg" onClick={handleProceedToCheckout} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>Confirm Request</Button>
+        <Button size="lg" onClick={handleProceedToCheckout} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>
+          {appointmentIdToEdit ? 'Confirm Reschedule' : 'Confirm Request'}
+        </Button>
       </div>
     </div>
   );

@@ -102,6 +102,7 @@ const PricingTabContent = ({ doctor }: { doctor: DoctorProfile }) => {
 function DoctorProfileContent() {
   const searchParams = useSearchParams();
   const doctorId = searchParams.get("id");
+  const appointmentIdToEdit = searchParams.get("edit"); // New param
   const [doctor, setDoctor] = React.useState<DoctorProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -183,15 +184,12 @@ function DoctorProfileContent() {
         return;
     }
 
-    // Find the correct method key ('video', 'voice', or 'chat')
     const methodOption = consultationOptions.find(opt => opt.method === method);
     if (!methodOption) {
-        setSelectedPrice(null); // Or some error state
+        setSelectedPrice(null);
         return;
     }
     const methodKey = methodOption.methodKey;
-
-    // Correctly access the nested price object
     const price = doctor.customPricing?.[methodKey]?.[selectedDuration as '15'|'30'|'45'|'60'] ?? null;
     setSelectedPrice(price);
   };
@@ -254,6 +252,19 @@ function DoctorProfileContent() {
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
     return `${h12}:${minutes} ${ampm}`;
+  };
+
+  const getRequestAppointmentUrl = () => {
+    const params = new URLSearchParams({
+        doctorId: doctor.uid,
+        method: selectedMethod || '',
+        duration: selectedDuration || '',
+        price: selectedPrice?.toString() || '0',
+    });
+    if (appointmentIdToEdit) {
+        params.set('edit', appointmentIdToEdit);
+    }
+    return `/patients/request-appointment?${params.toString()}`;
   };
 
   return (
@@ -370,7 +381,7 @@ function DoctorProfileContent() {
               </div>
 
               <Button asChild className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4" disabled={!selectedMethod || !selectedDuration}>
-                <Link href={`/patients/request-appointment?doctorId=${doctor.uid}&method=${selectedMethod}&duration=${selectedDuration}&price=${selectedPrice}`}>
+                <Link href={getRequestAppointmentUrl()}>
                     Request Appointment
                 </Link>
               </Button>
@@ -581,5 +592,3 @@ export default function DoctorProfilePage() {
         </React.Suspense>
     )
 }
-
-    
