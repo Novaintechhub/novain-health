@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/context/AuthContext";
 import type { Appointment } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 const TypeIcon = ({ type }: { type: string }) => {
     let icon;
@@ -37,7 +38,7 @@ const TypeIcon = ({ type }: { type: string }) => {
             href = "/patients/video-call";
             className = "text-green-500";
             break;
-        case "Audio Call":
+        case "Voice Call":
             icon = <Phone className="h-5 w-5 text-blue-500" />;
             href = "/patients/voice-call";
             className = "text-blue-500";
@@ -71,18 +72,41 @@ const StatusBadge = ({ status }: { status: string }) => {
   return <Badge className={`capitalize ${statusClasses[status] || ''}`}>{status}</Badge>;
 };
 
-const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
+const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: Appointment, onCancelSuccess: (id: string) => void }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const appointmentDate = new Date(appointment.appointmentDate);
   const isAppointmentPast = isPast(appointmentDate);
 
-  const handleCancel = () => {
-    // Logic to cancel appointment would go here
-    console.log("Appointment cancelled");
-    setShowCancelDialog(false);
+  const handleCancel = async () => {
+    if (!user) return;
+    setIsCancelling(true);
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/appointments/${appointment.id}/cancel`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to cancel appointment.");
+        }
+        
+        toast({ title: "Success", description: "Appointment cancelled." });
+        onCancelSuccess(appointment.id); // Notify parent to update state
+        setShowCancelDialog(false);
+
+    } catch (error: any) {
+        toast({ variant: "destructive", title: "Error", description: error.message });
+    } finally {
+        setIsCancelling(false);
+    }
   };
 
   return (
@@ -125,7 +149,9 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Back</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCancel}>Confirm Cancellation</AlertDialogAction>
+                        <AlertDialogAction onClick={handleCancel} disabled={isCancelling}>
+                            {isCancelling ? 'Cancelling...' : 'Confirm Cancellation'}
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -223,31 +249,39 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    async function fetchAppointments() {
-      if (!user) {
-        setLoading(false);
-        return;
-      };
-      
-      try {
-        const idToken = await user.getIdToken();
-        const response = await fetch('/api/appointments', {
-            headers: {
-                'Authorization': `Bearer ${idToken}`
-            }
-        });
-        if (!response.ok) throw new Error("Failed to fetch appointments");
-        const data = await response.json();
-        setAppointments(data);
-      } catch (error) {
-        console.error('Failed to fetch appointments:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchAppointments = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    };
+    
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/appointments', {
+          headers: {
+              'Authorization': `Bearer ${idToken}`
+          }
+      });
+      if (!response.ok) throw new Error("Failed to fetch appointments");
+      const data = await response.json();
+      setAppointments(data);
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchAppointments();
   }, [user]);
+
+  const handleCancelSuccess = (cancelledId: string) => {
+    setAppointments(prev => prev.map(appt => 
+      appt.id === cancelledId ? { ...appt, status: 'Cancelled' } : appt
+    ));
+  };
+
 
   return (
     <div className="space-y-4">
@@ -326,7 +360,7 @@ export default function Appointments() {
                                                 <StatusBadge status={appointment.status} />
                                             </TableCell>
                                             <TableCell className="text-right">
-                                               <AppointmentActions appointment={appointment} />
+                                               <AppointmentActions appointment={appointment} onCancelSuccess={handleCancelSuccess} />
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -369,7 +403,7 @@ export default function Appointments() {
                                 </div>
                                 </div>
                                 <div className="border-t pt-3">
-                                    <AppointmentActions appointment={appointment} />
+                                    <AppointmentActions appointment={appointment} onCancelSuccess={handleCancelSuccess} />
                                 </div>
                             </CardContent>
                             </Card>

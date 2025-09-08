@@ -75,7 +75,7 @@ export async function POST(
     const doctorRef = db.collection('doctors').doc(doctorId).withConverter(doctorConverter);
     const doctorDoc = await doctorRef.get();
 
-    if (doctorDoc.exists) {
+    if (doctorDoc.exists()) {
         const doctorData = doctorDoc.data()!;
         const patientData = (await db.collection('patients').doc(patientId).get()).data()!;
 
