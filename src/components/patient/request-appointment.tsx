@@ -68,7 +68,7 @@ function RequestAppointmentContent() {
   };
   
   const handleProceedToCheckout = () => {
-    if (!selectedDate || !selectedTime || !doctor || !method || !duration || !price) {
+    if (!selectedDate || !selectedTime || !doctor || !method || !duration || price === null) {
       return;
     }
     const query = new URLSearchParams({
