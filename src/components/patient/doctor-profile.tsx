@@ -14,6 +14,8 @@ import { useSearchParams } from "next/navigation";
 import { type DoctorProfile } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const StarRating = ({ rating, count }: { rating: number; count?: number; }) => (
   <div className="flex items-center gap-1">
@@ -102,6 +104,7 @@ function DoctorProfileContent() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [isAboutMeExpanded, setIsAboutMeExpanded] = React.useState(false);
+  const [selectedConsultation, setSelectedConsultation] = React.useState<{ method: string; duration: string; price: string; } | null>(null);
 
   React.useEffect(() => {
     if (!doctorId) {
@@ -205,6 +208,12 @@ function DoctorProfileContent() {
       return `${years} years`;
   }
 
+  const consultationOptions = [
+      { method: 'Video Call', methodKey: 'video', icon: Video },
+      { method: 'Voice Call', methodKey: 'voice', icon: Phone },
+      { method: 'Chat', methodKey: 'chat', icon: MessageCircle },
+  ] as const;
+
   return (
     <div className="space-y-6">
       <div>
@@ -273,8 +282,37 @@ function DoctorProfileContent() {
                     </Link>
                  </div>
               </div>
-              <Button asChild className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4">
-                <Link href={`/patients/request-appointment?doctorId=${doctor.uid}`}>Request Appointment</Link>
+              <div className="mt-4">
+                  <h3 className="font-semibold mb-2">Select Consultation Method & Duration</h3>
+                   <RadioGroup onValueChange={(value) => {
+                      const [method, duration, price] = value.split('|');
+                      setSelectedConsultation({ method, duration, price });
+                   }}>
+                      <div className="space-y-2">
+                          {consultationOptions.map(option => {
+                              const price30 = doctor.pricingModel === 'free' ? 0 : (doctor.customPricing?.[option.methodKey]?.['30'] || null);
+                              const isAvailable = doctor.pricingModel === 'free' ? doctor.freeMethods?.[option.methodKey] : price30 !== null;
+
+                              if (!isAvailable) return null;
+
+                              const value = `${option.method}|30|${price30}`;
+                              return (
+                                  <Label key={option.methodKey} htmlFor={option.methodKey} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary">
+                                      <RadioGroupItem value={value} id={option.methodKey} />
+                                      <option.icon className="w-5 h-5 text-muted-foreground" />
+                                      <span className="flex-grow">{option.method}</span>
+                                      <span className="font-semibold">{price30 === 0 ? "Free" : `₦${price30}`}</span>
+                                  </Label>
+                              );
+                          })}
+                      </div>
+                  </RadioGroup>
+              </div>
+
+              <Button asChild className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4" disabled={!selectedConsultation}>
+                <Link href={selectedConsultation ? `/patients/request-appointment?doctorId=${doctor.uid}&method=${selectedConsultation.method}&duration=${selectedConsultation.duration}&price=${selectedConsultation.price}` : '#'}>
+                    Request Appointment
+                </Link>
               </Button>
             </div>
           </div>
@@ -483,5 +521,3 @@ export default function DoctorProfilePage() {
         </React.Suspense>
     )
 }
-
-    
