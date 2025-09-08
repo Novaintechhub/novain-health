@@ -206,7 +206,7 @@ function RequestAppointmentContent() {
       </Card>
       
       <div className="flex justify-end gap-4">
-        <Button size="lg" onClick={handleProceedToCheckout} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>Proceed to Checkout</Button>
+        <Button size="lg" onClick={handleProceedToCheckout} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>Confirm Request</Button>
       </div>
     </div>
   );
