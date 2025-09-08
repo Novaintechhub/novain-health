@@ -110,7 +110,7 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
         {appointment.status === 'Pending' && (
           <>
             <Button asChild variant="outline" size="sm">
-              <Link href={`/patients/reschedule-appointment?id=${appointment.id}`}><Edit className="w-4 h-4 mr-1" /> Edit</Link>
+              <Link href={`/patients/doctor-profile?id=${appointment.doctorId}`}><Edit className="w-4 h-4 mr-1" /> Edit</Link>
             </Button>
             <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
                 <AlertDialogTrigger asChild>
