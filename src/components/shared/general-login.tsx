@@ -25,14 +25,14 @@ export default function GeneralLogin() {
             <div className="flex justify-center mb-6">
                 <Image src="/logo.png" alt="NovainHealth Logo" width={148} height={64} />
             </div>
-            <h1 className="text-xl font-bold text-gray-800 mb-6">Create an account</h1>
+            <h1 className="text-xl font-bold text-gray-800 mb-6">Log in to your account</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link href="/doctor-registration" passHref>
+              <Link href="/doctor-login" passHref>
                 <Button variant="outline" className="w-full h-12 border-cyan-400 text-cyan-400 hover:bg-cyan-50 hover:text-cyan-500">
                   I am a Medical Professional
                 </Button>
               </Link>
-              <Link href="/patient-registration" passHref>
+              <Link href="/patient-login" passHref>
                 <Button className="w-full h-12 bg-cyan-400 hover:bg-cyan-500 text-white">
                     I am seeking a Medical Professional
                 </Button>
