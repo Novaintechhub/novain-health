@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight, Reply, ThumbsDown } from "lucide-react";
+import { Star, MapPin, ThumbsUp, MessageCircle, DollarSign, Bookmark, Phone, Video, CheckCircle, ArrowRight, Reply, ThumbsDown, Languages } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -157,6 +157,13 @@ function DoctorProfileContent() {
     return date.toISOString().split('T')[0];
   }
   
+  const getPricePerHour = (doctor: DoctorProfile | null): string => {
+    if (!doctor) return "N/A";
+    if (doctor.pricingModel === 'free') return "Free";
+    const price = doctor.customPricing?.video?.[60];
+    return price && price > 0 ? `₦${price.toFixed(2)} per hour` : "Not set";
+  }
+
   if (loading) {
     return (
         <div className="space-y-6">
@@ -229,8 +236,14 @@ function DoctorProfileContent() {
               </div>
               <div className="flex items-center gap-2 mt-2 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>{doctor.city || 'N/A'}, {doctor.stateOfResidence || 'N/A'} - <a href="#" className="text-primary hover:underline">Get Directions</a></span>
+                <span>{doctor.lga || 'N/A'}, {doctor.stateOfResidence || 'N/A'}</span>
               </div>
+              {doctor.language && (
+                <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+                    <Languages className="h-4 w-4" />
+                    <span>{doctor.language}</span>
+                </div>
+              )}
               {doctor.specializations && doctor.specializations.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
                   {doctor.specializations.slice(0, 2).map((spec, i) => (
@@ -245,8 +258,8 @@ function DoctorProfileContent() {
                   <div className="flex items-center gap-2"><ThumbsUp className="h-4 w-4 text-muted-foreground" /> <span>{doctor.rating ? `${doctor.rating * 20}%` : 'N/A'}</span></div>
                   <div className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-muted-foreground" /> <span>{doctor.reviews} Feedback</span></div>
                 </div>
-                 <div className="flex items-center gap-2 mt-2 text-sm"><MapPin className="h-4 w-4 text-muted-foreground" /> <span>{doctor.city}, {doctor.stateOfResidence}</span></div>
-                 <div className="flex items-center gap-2 mt-2 text-sm"><span className="font-bold text-lg">₦</span> <span>{doctor.pricing === 'Free' ? 'Free' : `${doctor.pricing} per hour`}</span></div>
+                 <div className="flex items-center gap-2 mt-2 text-sm"><MapPin className="h-4 w-4 text-muted-foreground" /> <span>{doctor.lga}, {doctor.stateOfResidence}</span></div>
+                 <div className="flex items-center gap-2 mt-2 text-sm"><span className="font-bold text-lg">₦</span> <span>{getPricePerHour(doctor)}</span></div>
                  <div className="flex justify-start gap-2 mt-4">
                     <Button variant="outline" size="icon"><Bookmark /></Button>
                     <Link href="/patients/messages">
@@ -470,3 +483,5 @@ export default function DoctorProfilePage() {
         </React.Suspense>
     )
 }
+
+    
