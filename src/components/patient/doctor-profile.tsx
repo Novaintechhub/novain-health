@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const StarRating = ({ rating, count }: { rating: number; count?: number; }) => (
   <div className="flex items-center gap-1">
@@ -104,7 +105,8 @@ function DoctorProfileContent() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [isAboutMeExpanded, setIsAboutMeExpanded] = React.useState(false);
-  const [selectedConsultation, setSelectedConsultation] = React.useState<{ method: string; duration: string; price: string; } | null>(null);
+  const [selectedConsultation, setSelectedConsultation] = React.useState<{ method: string; duration: string; price: number; } | null>(null);
+  const [selectedMethod, setSelectedMethod] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!doctorId) {
@@ -167,6 +169,33 @@ function DoctorProfileContent() {
     return price && price > 0 ? `₦${price.toFixed(2)} per hour` : "Not set";
   }
 
+  const handleMethodChange = (method: string) => {
+    setSelectedMethod(method);
+    setSelectedConsultation(null); // Reset full selection when method changes
+  }
+
+  const handleDurationChange = (duration: string) => {
+    if (!doctor || !selectedMethod) return;
+
+    if (doctor.pricingModel === 'free') {
+        setSelectedConsultation({
+            method: selectedMethod,
+            duration: '30', // Assume a default duration for free consultations
+            price: 0
+        });
+        return;
+    }
+
+    const methodKey = selectedMethod.toLowerCase().replace(' ', '') as 'video' | 'voice' | 'chat';
+    const price = doctor.customPricing?.[methodKey]?.[duration as '15'|'30'|'45'|'60'] ?? 0;
+    
+    setSelectedConsultation({
+      method: selectedMethod,
+      duration,
+      price,
+    });
+  };
+
   if (loading) {
     return (
         <div className="space-y-6">
@@ -213,6 +242,14 @@ function DoctorProfileContent() {
       { method: 'Voice Call', methodKey: 'voice', icon: Phone },
       { method: 'Chat', methodKey: 'chat', icon: MessageCircle },
   ] as const;
+  
+  const isMethodAvailable = (methodKey: 'video' | 'voice' | 'chat') => {
+      if (doctor.pricingModel === 'free') {
+          return doctor.freeMethods?.[methodKey];
+      }
+      // Check if there's at least one price set for this method
+      return Object.values(doctor.customPricing?.[methodKey] ?? {}).some(price => price && price > 0);
+  }
 
   return (
     <div className="space-y-6">
@@ -268,7 +305,7 @@ function DoctorProfileContent() {
                   <div className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-muted-foreground" /> <span>{doctor.reviews} Feedback</span></div>
                 </div>
                  <div className="flex items-center gap-2 mt-2 text-sm"><MapPin className="h-4 w-4 text-muted-foreground" /> <span>{doctor.lga}, {doctor.stateOfResidence}</span></div>
-                 <div className="flex items-center gap-2 mt-2 text-sm"><span className="font-bold text-lg">₦</span> <span>{getPricePerHour(doctor)}</span></div>
+                 <div className="flex items-center gap-2 mt-2 text-sm"><DollarSign className="h-4 w-4" /> <span>{getPricePerHour(doctor)}</span></div>
                  <div className="flex justify-start gap-2 mt-4">
                     <Button variant="outline" size="icon"><Bookmark /></Button>
                     <Link href="/patients/messages">
@@ -282,34 +319,43 @@ function DoctorProfileContent() {
                     </Link>
                  </div>
               </div>
-              <div className="mt-4">
-                  <h3 className="font-semibold mb-2">Select Consultation Method & Duration</h3>
-                   <RadioGroup onValueChange={(value) => {
-                      const [method, duration, price] = value.split('|');
-                      setSelectedConsultation({ method, duration, price });
-                   }}>
-                      <div className="space-y-2">
-                          {consultationOptions.map(option => {
-                              const price30 = doctor.pricingModel === 'free' ? 0 : (doctor.customPricing?.[option.methodKey]?.['30'] || null);
-                              const isAvailable = doctor.pricingModel === 'free' ? doctor.freeMethods?.[option.methodKey] : price30 !== null;
+              <div className="mt-4 space-y-4">
+                  <h3 className="font-semibold mb-2">Select Consultation</h3>
+                   <RadioGroup onValueChange={handleMethodChange} value={selectedMethod || ""}>
+                        {consultationOptions.map(option => (
+                           isMethodAvailable(option.methodKey) && (
+                               <Label key={option.methodKey} htmlFor={option.methodKey} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary">
+                                    <RadioGroupItem value={option.method} id={option.methodKey} />
+                                    <option.icon className="w-5 h-5 text-muted-foreground" />
+                                    <span className="flex-grow">{option.method}</span>
+                                </Label>
+                           )
+                        ))}
+                    </RadioGroup>
 
-                              if (!isAvailable) return null;
-
-                              const value = `${option.method}|30|${price30}`;
-                              return (
-                                  <Label key={option.methodKey} htmlFor={option.methodKey} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent has-[:checked]:bg-accent has-[:checked]:border-primary">
-                                      <RadioGroupItem value={value} id={option.methodKey} />
-                                      <option.icon className="w-5 h-5 text-muted-foreground" />
-                                      <span className="flex-grow">{option.method}</span>
-                                      <span className="font-semibold">{price30 === 0 ? "Free" : `₦${price30}`}</span>
-                                  </Label>
-                              );
-                          })}
-                      </div>
-                  </RadioGroup>
+                    {selectedMethod && doctor.pricingModel === 'custom' && (
+                        <div>
+                             <Label>Select Duration</Label>
+                             <Select onValueChange={handleDurationChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select duration" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {['15', '30', '45', '60'].map(duration => {
+                                        const methodKey = selectedMethod.toLowerCase().replace(' ', '') as 'video' | 'voice' | 'chat';
+                                        const price = doctor.customPricing?.[methodKey]?.[duration as '15'|'30'|'45'|'60'];
+                                        if (price && price > 0) {
+                                            return <SelectItem key={duration} value={duration}>{duration} mins - ₦{price}</SelectItem>
+                                        }
+                                        return null;
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
               </div>
 
-              <Button asChild className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4" disabled={!selectedConsultation}>
+              <Button asChild className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-4" disabled={!selectedConsultation && !(doctor.pricingModel === 'free' && selectedMethod !== null)}>
                 <Link href={selectedConsultation ? `/patients/request-appointment?doctorId=${doctor.uid}&method=${selectedConsultation.method}&duration=${selectedConsultation.duration}&price=${selectedConsultation.price}` : '#'}>
                     Request Appointment
                 </Link>
@@ -521,3 +567,5 @@ export default function DoctorProfilePage() {
         </React.Suspense>
     )
 }
+
+    
