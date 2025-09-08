@@ -77,7 +77,7 @@ export async function POST(
 
     const [doctorDoc, patientDoc] = await Promise.all([doctorRef.get(), patientRef.get()]);
 
-    if (doctorDoc.exists() && patientDoc.exists()) {
+    if (doctorDoc.exists && patientDoc.exists) {
         const doctorData = doctorDoc.data()!;
         const patientData = patientDoc.data()!;
 
