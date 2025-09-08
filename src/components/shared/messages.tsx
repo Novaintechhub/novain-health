@@ -58,7 +58,7 @@ const initialMessages = [
     },
 ];
 
-export default function MyChat() {
+export default function Messages() {
   const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
   const [messages, setMessages] = useState(initialMessages);
   const [newMessage, setNewMessage] = useState('');
@@ -78,7 +78,7 @@ export default function MyChat() {
 
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-white">
+    <div className="flex h-[calc(100vh-10rem)] md:h-[calc(100vh-4rem)] bg-white rounded-lg border">
       <aside className={cn(
         "w-full md:w-80 border-r flex-col",
         isChatActive ? "hidden md:flex" : "flex"
