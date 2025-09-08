@@ -56,7 +56,7 @@ export async function POST(
     const patientRef = db.collection('patients').doc(appointment.patientId).withConverter(patientConverter);
     const patientDoc = await patientRef.get();
 
-    if (patientDoc.exists()) {
+    if (patientDoc.exists) {
         const patientData = patientDoc.data()!;
 
         await db.collection('notifications').add({

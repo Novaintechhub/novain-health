@@ -46,7 +46,7 @@ export async function POST(
     const doctorRef = db.collection('doctors').doc(appointment.doctorId); // Fetch without converter
     const [patientDoc, doctorDoc] = await Promise.all([patientRef.get(), doctorRef.get()]);
 
-    if (!patientDoc.exists() || !doctorDoc.exists()) {
+    if (!patientDoc.exists || !doctorDoc.exists) {
         console.warn(`Could not find patient or doctor for appointment ${appointmentId}`);
     } else {
         const patientData = patientDoc.data()!;
