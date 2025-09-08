@@ -12,7 +12,7 @@ import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, 
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { parse, isPast } from 'date-fns';
+import { parse, isPast, format } from 'date-fns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,18 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/context/AuthContext";
-
-type Appointment = {
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  date: string;
-  bookingDate: string;
-  type: string;
-  status: "Approved" | "Cancelled" | "Pending" | "Completed";
-  amount: string;
-  cancellationReason?: string;
-};
+import type { Appointment } from "@/lib/types";
 
 const TypeIcon = ({ type }: { type: string }) => {
     let icon;
@@ -87,8 +76,7 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
 
-  // The date is already formatted as a string from the API, we can parse it for comparison
-  const appointmentDate = new Date(appointment.date);
+  const appointmentDate = new Date(appointment.appointmentDate);
   const isAppointmentPast = isPast(appointmentDate);
 
   const handleCancel = () => {
@@ -163,16 +151,16 @@ const AppointmentActions = ({ appointment }: { appointment: Appointment }) => {
                         <div className="space-y-4 py-4">
                             <div className="flex items-center gap-4">
                             <Avatar className="h-16 w-16">
-                                    <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                                    <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={appointment.doctorAvatar} alt={appointment.doctorName} data-ai-hint={appointment.doctorAvatarHint} />
+                                    <AvatarFallback>{appointment.doctorName?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <h3 className="font-bold">{appointment.name}</h3>
+                                    <h3 className="font-bold">{appointment.doctorName}</h3>
                                 </div>
                             </div>
                             <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span>{appointment.date.split(',')[0]}</span></div>
-                                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-muted-foreground"/><span>{appointment.date.split(',')[1]}</span></div>
+                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span>{format(new Date(appointment.appointmentDate), 'do MMM yyyy')}</span></div>
+                                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-muted-foreground"/><span>{format(new Date(appointment.appointmentDate), 'p')}</span></div>
                                 <div className="flex items-center gap-2"><Video className="w-4 h-4 text-muted-foreground"/><span>{appointment.type}</span></div>
                             </div>
                         </div>
@@ -314,26 +302,26 @@ export default function Appointments() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {appointments.map((appointment, index) => (
-                                        <TableRow key={index}>
+                                    {appointments.map((appointment) => (
+                                        <TableRow key={appointment.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-10 w-10">
-                                                        <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                                                        <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                                        <AvatarImage src={appointment.doctorAvatar} alt={appointment.doctorName} data-ai-hint={appointment.doctorAvatarHint} />
+                                                        <AvatarFallback>{appointment.doctorName?.charAt(0)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="font-medium">{appointment.name}</span>
+                                                    <span className="font-medium">{appointment.doctorName}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <div>{appointment.date.split(',')[0]}</div>
-                                                <div className="text-sm text-muted-foreground">{appointment.date.split(',')[1]}</div>
+                                                <div>{format(new Date(appointment.appointmentDate), 'do MMM yyyy')}</div>
+                                                <div className="text-sm text-muted-foreground">{format(new Date(appointment.appointmentDate), 'p')}</div>
                                             </TableCell>
-                                            <TableCell>{appointment.bookingDate}</TableCell>
+                                            <TableCell>{format(new Date(appointment.bookingDate), 'do MMM yyyy')}</TableCell>
                                             <TableCell>
                                                 <TypeIcon type={appointment.type} />
                                             </TableCell>
-                                            <TableCell>{appointment.amount}</TableCell>
+                                            <TableCell>₦{appointment.amount}</TableCell>
                                             <TableCell>
                                                 <StatusBadge status={appointment.status} />
                                             </TableCell>
@@ -349,27 +337,27 @@ export default function Appointments() {
                     </div>
                     {/* Mobile View */}
                     <div className="md:hidden space-y-4">
-                        {appointments.map((appointment, index) => (
-                            <Card key={index} className="shadow-md">
+                        {appointments.map((appointment) => (
+                            <Card key={appointment.id} className="shadow-md">
                             <CardContent className="p-4 space-y-3">
                                 <div className="flex items-center gap-3">
                                 <Avatar className="h-12 w-12">
-                                    <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                                    <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={appointment.doctorAvatar} alt={appointment.doctorName} data-ai-hint={appointment.doctorAvatarHint} />
+                                    <AvatarFallback>{appointment.doctorName?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-bold">{appointment.name}</p>
+                                    <p className="font-bold">{appointment.doctorName}</p>
                                     <StatusBadge status={appointment.status} />
                                 </div>
                                 </div>
                                 <div className="border-t pt-3 space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Appt Date:</span>
-                                    <span className="font-medium">{appointment.date}</span>
+                                    <span className="font-medium">{format(new Date(appointment.appointmentDate), 'PPp')}</span>
                                 </div>
                                     <div className="flex justify-between">
                                     <span className="text-muted-foreground">Booking Date:</span>
-                                    <span className="font-medium">{appointment.bookingDate}</span>
+                                    <span className="font-medium">{format(new Date(appointment.bookingDate), 'PP')}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">Type:</span>
@@ -377,7 +365,7 @@ export default function Appointments() {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Amount:</span>
-                                    <span className="font-medium">{appointment.amount}</span>
+                                    <span className="font-medium">₦{appointment.amount}</span>
                                 </div>
                                 </div>
                                 <div className="border-t pt-3">
