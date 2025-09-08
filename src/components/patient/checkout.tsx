@@ -69,7 +69,7 @@ function CheckoutContent() {
   }, [doctorId]);
 
   const handleRequestAppointment = async () => {
-    if (!user || !doctor || !date || !time || !method || !price || !duration) {
+    if (!user || !doctor || !date || !time || !method || price === null || !duration) {
         toast({
             variant: "destructive",
             title: "Error",
@@ -200,10 +200,6 @@ function CheckoutContent() {
                    <div className="flex justify-between">
                     <span className="text-muted-foreground">Consultation Method</span>
                     <span>{method} ({duration} mins)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Type</span>
-                    <span>New Patient</span>
                   </div>
                 </div>
               </CardContent>
