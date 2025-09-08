@@ -172,19 +172,27 @@ function DoctorProfileContent() {
     setSelectedMethod(null); // Reset method when duration changes
     setSelectedPrice(null);
   };
-
+  
   const handleMethodChange = (method: string) => {
     if (!doctor || !selectedDuration) return;
-    
+
     setSelectedMethod(method);
-    
+
     if (doctor.pricingModel === 'free') {
-      setSelectedPrice(0);
-      return;
+        setSelectedPrice(0);
+        return;
     }
 
-    const methodKey = method.toLowerCase().replace(' ', '') as 'video'|'voice'|'chat';
-    const price = doctor.customPricing?.[methodKey]?.[selectedDuration as '15'|'30'|'45'|'60'] ?? 0;
+    // Find the correct method key ('video', 'voice', or 'chat')
+    const methodOption = consultationOptions.find(opt => opt.method === method);
+    if (!methodOption) {
+        setSelectedPrice(null); // Or some error state
+        return;
+    }
+    const methodKey = methodOption.methodKey;
+
+    // Correctly access the nested price object
+    const price = doctor.customPricing?.[methodKey]?.[selectedDuration as '15'|'30'|'45'|'60'] ?? null;
     setSelectedPrice(price);
   };
   
@@ -573,3 +581,5 @@ export default function DoctorProfilePage() {
         </React.Suspense>
     )
 }
+
+    
