@@ -12,6 +12,9 @@ const BookAppointmentSchema = z.object({
   doctorId: z.string(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
   time: z.string(), // e.g., "8:00 AM - 8:30 AM"
+  method: z.enum(['Video Call', 'Voice Call', 'Chat']),
+  price: z.number(),
+  duration: z.string(),
 });
 
 export async function POST(request: Request) {
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const { doctorId, date, time } = validation.data;
+    const { doctorId, date, time, method, price, duration } = validation.data;
     const db = getAdminDb();
     
     const patientRef = db.collection('patients').doc(patientId).withConverter(patientConverter);
@@ -59,9 +62,10 @@ export async function POST(request: Request) {
         doctorId,
         appointmentDate: appointmentDate.toISOString(),
         bookingDate: new Date().toISOString(),
-        type: 'Video Call', 
+        type: method, 
         status: 'Pending',
-        amount: doctorData.price || '0',
+        amount: price.toString(),
+        duration: duration,
         isPaid: false,
         patientName: `${patientData.firstName} ${patientData.lastName}`,
         patientAvatar: patientData.imageUrl || '',

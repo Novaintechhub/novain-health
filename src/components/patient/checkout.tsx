@@ -32,6 +32,9 @@ function CheckoutContent() {
   const doctorId = searchParams.get("doctorId");
   const date = searchParams.get("date");
   const time = searchParams.get("time");
+  const method = searchParams.get("method") as 'Video Call' | 'Voice Call' | 'Chat' | null;
+  const price = searchParams.get("price");
+  const duration = searchParams.get("duration");
 
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +69,7 @@ function CheckoutContent() {
   }, [doctorId]);
 
   const handleRequestAppointment = async () => {
-    if (!user || !doctor || !date || !time) {
+    if (!user || !doctor || !date || !time || !method || !price || !duration) {
         toast({
             variant: "destructive",
             title: "Error",
@@ -87,6 +90,9 @@ function CheckoutContent() {
                 doctorId: doctor.uid,
                 date,
                 time,
+                method,
+                price: parseFloat(price),
+                duration,
             }),
         });
 
@@ -108,7 +114,7 @@ function CheckoutContent() {
     }
   };
 
-  const consultationFee = (doctor?.pricing && doctor.pricing !== 'Free') ? parseFloat(doctor.pricing) : 0;
+  const consultationFee = price ? parseFloat(price) : 0;
   const totalAmount = consultationFee + bookingFee - discount;
 
   if (loading) {
@@ -190,6 +196,10 @@ function CheckoutContent() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Time</span>
                     <span>{time}</span>
+                  </div>
+                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Consultation Method</span>
+                    <span>{method} ({duration} mins)</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Type</span>
