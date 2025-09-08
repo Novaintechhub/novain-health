@@ -25,33 +25,9 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    const appointments: Partial<Appointment>[] = [];
+    const appointments: Appointment[] = [];
     snapshot.forEach(doc => {
-        const appointmentData = doc.data();
-        // The frontend component expects 'name' for the doctor's name and 'avatarUrl' for the avatar.
-        // Let's map the fields to match what the component expects.
-        appointments.push({
-            name: appointmentData.doctorName,
-            avatarUrl: appointmentData.doctorAvatar,
-            avatarHint: appointmentData.doctorAvatarHint,
-            date: new Date(appointmentData.appointmentDate).toLocaleString('en-US', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true,
-            }),
-            bookingDate: new Date(appointmentData.bookingDate).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-            }),
-            type: appointmentData.type,
-            status: appointmentData.status,
-            amount: `₦${appointmentData.amount}`,
-            cancellationReason: appointmentData.cancellationReason,
-        });
+        appointments.push(doc.data());
     });
 
     return NextResponse.json(appointments);

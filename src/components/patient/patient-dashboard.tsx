@@ -9,16 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar, FileText, Heart, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-
-type Appointment = {
-    doctorName: string;
-    doctorSpecialty: string;
-    doctorAvatar: string;
-    doctorAvatarHint: string;
-    date: string;
-    time: string;
-    status: string;
-};
+import { useAuth } from "@/context/AuthContext";
+import { Appointment } from "@/lib/types";
+import { format } from 'date-fns';
 
 const StatCard = ({ title, value, icon, href }: { title: string; value: string | number; icon: React.ElementType; href: string }) => {
     const Icon = icon;
@@ -37,52 +30,45 @@ const StatCard = ({ title, value, icon, href }: { title: string; value: string |
     );
 };
 
-
 export default function PatientDashboard() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [stats, setStats] = useState({ appointments: 0, prescriptions: 0, medicalRecords: 0, billing: 0 });
+  const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
+  const [stats, setStats] = useState({ appointments: 0, prescriptions: 0, medicalRecords: 0, billing: 12000 }); // Billing is still mock
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
+        if (!user) return;
         try {
-            // In a real app, you would fetch this data from your API
-            const dummyAppointments: Appointment[] = [
-                {
-                    doctorName: "Dr. Tosin Adebayo",
-                    doctorSpecialty: "Cardiologist",
-                    doctorAvatar: "https://placehold.co/40x40.png",
-                    doctorAvatarHint: "female doctor",
-                    date: "2024-12-11",
-                    time: "10:00 AM",
-                    status: "Upcoming"
-                },
-                {
-                    doctorName: "Dr. Musa Ahmed",
-                    doctorSpecialty: "Neurologist",
-                    doctorAvatar: "https://placehold.co/40x40.png",
-                    doctorAvatarHint: "male doctor portrait",
-                    date: "2024-12-14",
-                    time: "01:00 PM",
-                    status: "Upcoming"
-                }
-            ];
-            const dummyStats = {
-                appointments: 5,
-                prescriptions: 3,
+            const idToken = await user.getIdToken();
+            const response = await fetch('/api/appointments', {
+                headers: { 'Authorization': `Bearer ${idToken}` }
+            });
+            if (!response.ok) throw new Error("Failed to fetch appointments");
+            const appointmentsData = await response.json();
+            setAllAppointments(appointmentsData);
+            setStats(prev => ({
+                ...prev,
+                appointments: appointmentsData.length,
+                // In a real app, you would fetch these counts too
+                prescriptions: 3, 
                 medicalRecords: 2,
-                billing: 12000
-            };
-            setAppointments(dummyAppointments);
-            setStats(dummyStats);
+            }));
         } catch (error) {
             console.error("Failed to fetch dashboard data:", error);
         } finally {
             setLoading(false);
         }
     }
-    fetchData();
-  }, []);
+    if (user) {
+        fetchData();
+    }
+  }, [user]);
+  
+  const upcomingAppointments = allAppointments.filter(
+    appt => appt.status === 'Pending' || appt.status === 'Approved'
+  );
+
 
   if (loading) {
     return (
@@ -122,29 +108,37 @@ export default function PatientDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {appointments.map((appt, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={appt.doctorAvatar} alt={appt.doctorName} data-ai-hint={appt.doctorAvatarHint} />
-                        <AvatarFallback>{appt.doctorName.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{appt.doctorName}</p>
-                        <p className="text-sm text-muted-foreground">{appt.doctorSpecialty}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{new Date(appt.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{appt.time}</TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="outline">
-                        <Link href="/patients/appointments">View</Link>
-                    </Button>
-                  </TableCell>
+              {upcomingAppointments.length > 0 ? (
+                upcomingAppointments.map((appt, index) => (
+                    <TableRow key={index}>
+                    <TableCell>
+                        <div className="flex items-center gap-3">
+                        <Avatar>
+                            <AvatarImage src={appt.doctorAvatar} alt={appt.doctorName} data-ai-hint={appt.doctorAvatarHint} />
+                            <AvatarFallback>{appt.doctorName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="font-medium">{appt.doctorName}</p>
+                            <p className="text-sm text-muted-foreground">{appt.specialty}</p>
+                        </div>
+                        </div>
+                    </TableCell>
+                    <TableCell>{format(new Date(appt.appointmentDate), 'do MMM yyyy')}</TableCell>
+                    <TableCell>{format(new Date(appt.appointmentDate), 'p')}</TableCell>
+                    <TableCell className="text-right">
+                        <Button asChild variant="outline">
+                            <Link href="/patients/appointments">View</Link>
+                        </Button>
+                    </TableCell>
+                    </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        No upcoming appointments.
+                    </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -152,4 +146,3 @@ export default function PatientDashboard() {
     </div>
   );
 }
-
