@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { type DoctorProfile } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const StarRating = ({ rating, count }: { rating: number; count?: number; }) => (
   <div className="flex items-center gap-1">
@@ -47,44 +48,52 @@ const reviews = [
     },
 ];
 
-const locations = [
-    {
-      name: "Smile Cute Dental Care Center",
-      specialty: "MDS - Periodontology and Oral Implantology, BDS",
-      rating: 4,
-      reviewCount: 4,
-      address: "2286 Sundown Lane, Austin, Texas 78749, USA",
-      images: [
-        { src: "https://placehold.co/80x80.png", hint: "dental clinic" },
-        { src: "https://placehold.co/80x80.png", hint: "dental equipment" },
-        { src: "https://placehold.co/80x80.png", hint: "dentist patient" },
-        { src: "https://placehold.co/80x80.png", hint: "dental chair" },
-      ],
-      hours: [
-        { days: "Mon - Sat", time: "10:00 AM - 2:00 PM\n4:00 PM - 9:00 PM" },
-        { days: "Sun", time: "10:00 AM - 2:00 PM" },
-      ],
-      price: 250,
-    },
-    {
-      name: "The Family Dentistry Clinic",
-      specialty: "MDS - Periodontology and Oral Implantology, BDS",
-      rating: 4,
-      reviewCount: 4,
-      address: "2883 University Street, Seattle, Texas Washington, 98155",
-      images: [
-        { src: "https://placehold.co/80x80.png", hint: "clinic reception" },
-        { src: "https://placehold.co/80x80.png", hint: "medical tools" },
-        { src: "https://placehold.co/80x80.png", hint: "doctor with patient" },
-        { src: "https://placehold.co/80x80.png", hint: "operating room" },
-      ],
-      hours: [
-        { days: "Tue - Fri", time: "11:00 AM - 1:00 PM\n6:00 PM - 11:00 PM" },
-        { days: "Sat - Sun", time: "8:00 AM - 10:00 AM\n3:00 PM - 7:00 PM" },
-      ],
-      price: 350,
-    },
-  ];
+const PricingTabContent = ({ doctor }: { doctor: DoctorProfile }) => {
+  if (doctor.pricingModel === 'free') {
+    return (
+      <div className="text-center py-8">
+        <h3 className="text-xl font-semibold">Free Consultation</h3>
+        <p className="text-muted-foreground mt-2">This doctor offers consultations at no cost.</p>
+        <div className="flex justify-center gap-4 mt-4">
+          {doctor.freeMethods?.video && <Badge variant="outline">Video Call</Badge>}
+          {doctor.freeMethods?.voice && <Badge variant="outline">Voice Call</Badge>}
+          {doctor.freeMethods?.chat && <Badge variant="outline">Chat</Badge>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Duration</TableHead>
+            <TableHead className="text-center">Video Call</TableHead>
+            <TableHead className="text-center">Voice Call</TableHead>
+            <TableHead className="text-center">Chat</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {['15', '30', '45', '60'].map(duration => (
+            <TableRow key={duration}>
+              <TableCell className="font-medium">{duration} mins</TableCell>
+              {(['video', 'voice', 'chat'] as const).map(method => {
+                const price = doctor.customPricing?.[method]?.[duration as '15'|'30'|'45'|'60'];
+                return (
+                  <TableCell key={method} className="text-center">
+                    {price && price > 0 ? `₦${price.toFixed(2)}` : <span className="text-muted-foreground">-</span>}
+                  </TableCell>
+                )
+              })}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
 
 function DoctorProfileContent() {
   const searchParams = useSearchParams();
@@ -262,7 +271,7 @@ function DoctorProfileContent() {
       <Tabs defaultValue="overview">
         <TabsList className="bg-transparent border-b rounded-none p-0">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="locations">Locations</TabsTrigger>
+          <TabsTrigger value="pricing">Pricing</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
           <TabsTrigger value="business-hours">Business Hours</TabsTrigger>
         </TabsList>
@@ -348,39 +357,10 @@ function DoctorProfileContent() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="locations" className="mt-6">
+        <TabsContent value="pricing" className="mt-6">
             <Card>
-                 <CardContent className="p-0">
-                    {locations.map((location, index) => (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 border-b last:border-b-0">
-                            <div className="md:col-span-1 space-y-2">
-                                <h4 className="text-lg font-bold">{location.name}</h4>
-                                <p className="text-sm text-muted-foreground">{location.specialty}</p>
-                                <StarRating rating={location.rating} count={location.reviewCount} />
-                                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                                    <span>{location.address}</span>
-                                </div>
-                                <a href="#" className="text-sm text-cyan-500 hover:underline">Get Directions</a>
-                                <div className="flex gap-2 pt-2">
-                                    {location.images.map((image, i) => (
-                                        <Image key={i} src={image.src} alt={`clinic photo ${i + 1}`} width={60} height={60} className="rounded-md object-cover" data-ai-hint={image.hint} />
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="md:col-span-1 space-y-2">
-                                {location.hours.map((hour, i) => (
-                                    <div key={i}>
-                                        <p className="font-semibold">{hour.days}</p>
-                                        <p className="text-sm text-muted-foreground whitespace-pre-line">{hour.time}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="md:col-span-1 text-right">
-                                <p className="text-2xl font-bold">₦{location.price}</p>
-                            </div>
-                        </div>
-                    ))}
+                 <CardContent className="p-6">
+                   <PricingTabContent doctor={doctor} />
                 </CardContent>
             </Card>
         </TabsContent>
