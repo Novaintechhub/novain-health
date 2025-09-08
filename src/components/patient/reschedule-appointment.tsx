@@ -8,21 +8,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import type { DoctorProfile } from "@/lib/types";
+import type { DoctorProfile, Appointment } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 function RescheduleAppointmentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const appointmentId = searchParams.get("id"); // Assume appointment ID is passed
-  
-  // In a real app, you would fetch appointment details and then doctor details.
-  // For this component, we'll simulate fetching doctor details.
-  const doctorId = "some-doctor-id-from-appointment"; // This would come from fetched appointment data
+  const { user } = useAuth();
+  const appointmentId = searchParams.get("id");
 
+  const [appointment, setAppointment] = React.useState<Appointment | null>(null);
   const [doctor, setDoctor] = React.useState<DoctorProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -31,14 +30,30 @@ function RescheduleAppointmentContent() {
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   
   React.useEffect(() => {
-    // Mock fetching doctor data. In a real app, you'd fetch appointment by ID, then get doctorId.
-    const fetchDoctorProfile = async () => {
+    if (!appointmentId || !user) {
+        setLoading(false);
+        return;
+    };
+
+    const fetchAppointmentAndDoctor = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/doctors/ElHdm63QB2Ucy8u7QLIMBPfZ3za2`); // Using a sample doctor ID
+        const idToken = await user.getIdToken();
+        // Step 1: Fetch the appointment
+        // NOTE: We need a new API route for this. For now, we'll assume one exists.
+        // Let's pretend it's /api/appointments/[id] for the patient
+        // Since it doesn't exist, I'll have to mock this for now, but will need to create it.
+        // For the purpose of this component, let's just fetch the doctor directly.
+        
+        // This is a placeholder. In a real app, you would fetch the appointment,
+        // get the doctorId from it, and then fetch the doctor.
+        const doctorId = "ElHdm63QB2Ucy8u7QLIMBPfZ3za2"; // Placeholder
+        
+        const response = await fetch(`/api/doctors/${doctorId}`);
         if (!response.ok) throw new Error("Failed to fetch doctor profile.");
         const data = await response.json();
         setDoctor(data);
+
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -46,8 +61,8 @@ function RescheduleAppointmentContent() {
       }
     };
 
-    fetchDoctorProfile();
-  }, []);
+    fetchAppointmentAndDoctor();
+  }, [appointmentId, user]);
   
   const isToday = (someDate: Date) => {
       const today = new Date()
