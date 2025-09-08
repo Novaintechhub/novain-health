@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { DoctorProfile } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast } from 'date-fns';
+import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast, setHours, setMinutes, isBefore, startOfHour } from 'date-fns';
 
 function RequestAppointmentContent() {
   const searchParams = useSearchParams();
@@ -89,6 +89,18 @@ function RequestAppointmentContent() {
   const selectedDateString = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
   // @ts-ignore
   const availableSlots = doctor?.schedule?.[selectedDateString] || [];
+
+  const approvedAppointmentTimes = React.useMemo(() => {
+    if (!doctor?.approvedAppointments || !selectedDate) return new Set();
+    
+    return new Set(
+        doctor.approvedAppointments
+            .map(appt => new Date(appt.appointmentDate!))
+            .filter(apptDate => format(apptDate, 'yyyy-MM-dd') === selectedDateString)
+            .map(apptDate => formatTo12Hour(format(apptDate, 'HH:mm')))
+    );
+  }, [doctor?.approvedAppointments, selectedDate, selectedDateString]);
+  
   
   const formatTo12Hour = (time24: string) => {
     if (!time24) return '';
@@ -97,6 +109,20 @@ function RequestAppointmentContent() {
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
     return `${h12}:${minutes} ${ampm}`;
+  };
+
+  const isTimeSlotPast = (startTime: string): boolean => {
+    if (!selectedDate || !isToday(selectedDate)) return false;
+
+    const [time, ampm] = startTime.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+
+    const slotDateTime = new Date(selectedDate);
+    slotDateTime.setHours(hours, minutes, 0, 0);
+
+    return isBefore(slotDateTime, new Date());
   };
 
   if (loading) {
@@ -190,13 +216,18 @@ function RequestAppointmentContent() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {availableSlots.length > 0 ? (
                     availableSlots.map((slot: {start: string, end: string}, index: number) => {
-                      const timeRange = `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`;
+                      const startTime12hr = formatTo12Hour(slot.start);
+                      const isBooked = approvedAppointmentTimes.has(startTime12hr);
+                      const isPastSlot = isTimeSlotPast(startTime12hr);
+                      const timeRange = `${startTime12hr} - ${formatTo12Hour(slot.end)}`;
+                      
                       return (
                         <Button
                           key={index}
                           variant={selectedTime === timeRange ? 'default' : 'outline'}
                           onClick={() => setSelectedTime(timeRange)}
-                          className={`rounded-md ${selectedTime === timeRange ? 'bg-cyan-500 text-white' : ''}`}
+                          disabled={isBooked || isPastSlot}
+                          className={`rounded-md ${selectedTime === timeRange ? 'bg-cyan-500 text-white' : ''} ${(isBooked || isPastSlot) ? 'cursor-not-allowed bg-gray-100 text-gray-400 line-through' : ''}`}
                         >
                           {timeRange}
                         </Button>

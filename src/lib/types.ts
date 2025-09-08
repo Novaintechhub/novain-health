@@ -132,6 +132,8 @@ export interface DoctorProfile extends DoctorCoreProfile, DoctorDetails {
     awards?: DoctorAward[];
     memberships?: DoctorMembership[];
     registrations?: DoctorRegistration[];
+    schedule?: any; // Consider a more specific type later
+    approvedAppointments?: Partial<Appointment>[];
 }
 
 
@@ -173,4 +175,5 @@ export type Appointment = {
   amount: string;
   isPaid: boolean;
   cancellationReason?: string;
+  duration?: string;
 };

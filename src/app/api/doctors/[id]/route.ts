@@ -4,7 +4,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { doctorConverter } from '@/lib/firestore-converters';
-import type { DoctorProfile, DoctorDetails, DoctorEducation, DoctorExperience, DoctorAward, DoctorMembership, DoctorRegistration, DoctorCoreProfile } from '@/lib/types';
+import type { DoctorProfile, DoctorDetails, DoctorEducation, DoctorExperience, DoctorAward, DoctorMembership, DoctorRegistration, DoctorCoreProfile, Appointment } from '@/lib/types';
 
 async function getSubcollectionData<T>(db: FirebaseFirestore.Firestore, doctorId: string, collectionName: string): Promise<T[]> {
     const snapshot = await db.collection('doctors').doc(doctorId).collection(collectionName).get();
@@ -23,7 +23,6 @@ export async function GET(
     }
 
     const db = getAdminDb();
-    // Fetch without converter first to get all raw data, including the schedule
     const doctorRef = db.collection('doctors').doc(doctorId);
     const doc = await doctorRef.get();
 
@@ -37,13 +36,18 @@ export async function GET(
     const profileDetailsDoc = await db.collection('doctors').doc(doctorId).collection('details').doc('profile').get();
     const details = profileDetailsDoc.data() as DoctorDetails || {};
 
-    const [education, experience, awards, memberships, registrations] = await Promise.all([
+    const [education, experience, awards, memberships, registrations, appointmentsSnapshot] = await Promise.all([
         getSubcollectionData<DoctorEducation>(db, doctorId, 'education'),
         getSubcollectionData<DoctorExperience>(db, doctorId, 'experience'),
         getSubcollectionData<DoctorAward>(db, doctorId, 'awards'),
         getSubcollectionData<DoctorMembership>(db, doctorId, 'memberships'),
         getSubcollectionData<DoctorRegistration>(db, doctorId, 'registrations'),
+        db.collection('appointments').where('doctorId', '==', doctorId).where('status', '==', 'Approved').get()
     ]);
+
+    const approvedAppointments: Partial<Appointment>[] = appointmentsSnapshot.docs.map(doc => ({
+        appointmentDate: doc.data().appointmentDate
+    }));
 
     const fullProfile: DoctorProfile = {
         ...coreProfile,
@@ -53,7 +57,8 @@ export async function GET(
         awards,
         memberships,
         registrations,
-        schedule: doctorData.schedule || {}, // Explicitly include the schedule
+        schedule: doctorData.schedule || {},
+        approvedAppointments: approvedAppointments,
     };
     
     return NextResponse.json(fullProfile);
