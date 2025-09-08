@@ -141,6 +141,32 @@ export const sendAppointmentConfirmedEmail = async (payload: AppointmentConfirme
     });
 };
 
+type AppointmentRescheduledPayload = {
+    patient: { name: string, email: string };
+    doctorName: string;
+    appointmentDate: string;
+    appointmentTime: string;
+}
+
+export const sendAppointmentRescheduledEmail = async (payload: AppointmentRescheduledPayload) => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    let htmlContent = readEmailTemplate('appointment-rescheduled-patient.html');
+    htmlContent = htmlContent.replace(/{{patientName}}/g, payload.patient.name)
+                             .replace(/{{doctorName}}/g, payload.doctorName)
+                             .replace(/{{appointmentDate}}/g, payload.appointmentDate)
+                             .replace(/{{appointmentTime}}/g, payload.appointmentTime)
+                             .replace(/{{appUrl}}/g, appUrl)
+                             .replace(/{{appLogoUrl}}/g, `${appUrl}/logo.png`)
+                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}/privacy-policy`);
+
+    await sendEmail({
+        to: payload.patient.email,
+        subject: "Your Appointment Change Request has been Submitted",
+        html: htmlContent,
+    });
+};
+
+
 type AppointmentCancelledPayload = {
     patient: { name: string, email: string };
     doctorName: string;

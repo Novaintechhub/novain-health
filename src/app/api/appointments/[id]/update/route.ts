@@ -5,8 +5,8 @@ import { NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
-import { doctorConverter } from '@/lib/firestore-converters';
-import { sendAppointmentRequestEmails } from '@/services/emailService';
+import { doctorConverter, patientConverter } from '@/lib/firestore-converters';
+import { sendAppointmentRescheduledEmail } from '@/services/emailService';
 
 const UpdateAppointmentSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
@@ -70,14 +70,16 @@ export async function POST(
 
     await appointmentRef.update(updatedAppointmentData);
     
-    // Notify doctor about the update
+    // Notify doctor about the update and send email to patient
     const doctorId = appointmentDoc.data()?.doctorId;
     const doctorRef = db.collection('doctors').doc(doctorId).withConverter(doctorConverter);
-    const doctorDoc = await doctorRef.get();
+    const patientRef = db.collection('patients').doc(patientId).withConverter(patientConverter);
 
-    if (doctorDoc.exists()) {
+    const [doctorDoc, patientDoc] = await Promise.all([doctorRef.get(), patientRef.get()]);
+
+    if (doctorDoc.exists() && patientDoc.exists()) {
         const doctorData = doctorDoc.data()!;
-        const patientData = (await db.collection('patients').doc(patientId).get()).data()!;
+        const patientData = patientDoc.data()!;
 
         await db.collection('notifications').add({
             userId: doctorId,
@@ -86,11 +88,11 @@ export async function POST(
             createdAt: new Date().toISOString(),
             read: false,
         });
-
-        await sendAppointmentRequestEmails({
-            appointmentId,
+        
+        // Send email to patient confirming the change request
+        await sendAppointmentRescheduledEmail({
             patient: { name: `${patientData.firstName} ${patientData.lastName}`, email: patientData.email! },
-            doctor: { name: `Dr. ${doctorData.firstName} ${doctorData.lastName}`, email: doctorData.email! },
+            doctorName: `Dr. ${doctorData.firstName} ${doctorData.lastName}`,
             appointmentDate: new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
             appointmentTime: time,
         });
