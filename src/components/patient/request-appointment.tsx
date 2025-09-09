@@ -5,12 +5,12 @@ import * as React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Upload } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { DoctorProfile, ConsultationDetails } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast, setHours, setMinutes, isBefore, startOfHour } from 'date-fns';
+import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast, setHours, setMinutes, isBefore, startOfHour, isToday } from 'date-fns';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -25,7 +25,9 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
         currentMedications: '',
         allergies: '',
         seenDoctorBefore: 'No',
+        medicalRecordUri: '',
     });
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,6 +35,18 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
 
     const handleRadioChange = (value: 'Yes' | 'No') => {
         setFormData({ ...formData, seenDoctorBefore: value });
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setFormData(prev => ({ ...prev, medicalRecordUri: result }));
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -79,6 +93,23 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
                         </div>
                     </RadioGroup>
                 </div>
+
+                <div>
+                    <Label>Upload recent medical records (optional)</Label>
+                    <div
+                        className="mt-2 flex justify-center items-center w-full border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-cyan-400 hover:bg-cyan-50"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                         <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} accept="image/*,.pdf,.doc,.docx"/>
+                         <div className="text-center">
+                            <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                            <p className="mt-2 text-sm text-cyan-500">
+                                {formData.medicalRecordUri ? "File Selected" : "Upload recent medical records"}
+                            </p>
+                            {formData.medicalRecordUri && <p className="text-xs text-muted-foreground">Click to change file</p>}
+                         </div>
+                    </div>
+                </div>
             </div>
 
             <div className="flex justify-end">
@@ -107,6 +138,15 @@ function RequestAppointmentContent() {
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${minutes} ${ampm}`;
+  };
   
   React.useEffect(() => {
     if (!doctorId) {
@@ -132,12 +172,6 @@ function RequestAppointmentContent() {
     fetchDoctorProfile();
   }, [doctorId]);
   
-  const isToday = (someDate: Date) => {
-      const today = new Date()
-      return someDate.getDate() == today.getDate() &&
-        someDate.getMonth() == today.getMonth() &&
-        someDate.getFullYear() == today.getFullYear()
-  }
 
   const handleDateSelect = (day: number) => {
     const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
@@ -186,14 +220,6 @@ function RequestAppointmentContent() {
 
   const selectedDateString = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
   
-  const formatTo12Hour = (time24: string) => {
-    if (!time24) return '';
-    const [hours, minutes] = time24.split(':');
-    const h = parseInt(hours, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h % 12 || 12;
-    return `${h12}:${minutes} ${ampm}`;
-  };
   
   // @ts-ignore
   const availableSlots = doctor?.schedule?.[selectedDateString] || [];

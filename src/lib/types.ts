@@ -164,6 +164,7 @@ export type ConsultationDetails = {
     currentMedications: string;
     allergies: string;
     seenDoctorBefore: 'Yes' | 'No';
+    medicalRecordUri?: string;
 };
 
 export type Appointment = {

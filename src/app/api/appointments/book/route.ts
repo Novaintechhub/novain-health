@@ -15,6 +15,7 @@ const ConsultationDetailsSchema = z.object({
   currentMedications: z.string().min(1, "Current medications are required."),
   allergies: z.string().min(1, "Allergies are required."),
   seenDoctorBefore: z.enum(['Yes', 'No']),
+  medicalRecordUri: z.string().optional(),
 });
 
 const BookAppointmentSchema = z.object({
