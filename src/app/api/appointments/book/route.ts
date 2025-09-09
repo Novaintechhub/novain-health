@@ -15,7 +15,7 @@ const ConsultationDetailsSchema = z.object({
   currentMedications: z.string().min(1, "Current medications are required."),
   allergies: z.string().min(1, "Allergies are required."),
   seenDoctorBefore: z.enum(['Yes', 'No']),
-  medicalRecordUris: z.array(z.string()).optional(),
+  medicalRecordUris: z.array(z.string().url()).optional(),
 });
 
 const BookAppointmentSchema = z.object({
@@ -30,7 +30,9 @@ const BookAppointmentSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const headersList = headers();
+    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -121,8 +123,12 @@ export async function POST(request: Request) {
 
 
     return NextResponse.json({ message: 'Appointment requested successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error booking appointment:', error);
+    // Provide a more specific error message if it's a known error type
+    if (error.code === 3 && error.details?.includes('exceeds the maximum allowed size')) {
+      return NextResponse.json({ error: 'File size is too large. Please upload smaller files.' }, { status: 413 });
+    }
     return NextResponse.json({ error: 'Failed to book appointment' }, { status: 500 });
   }
 }

@@ -26,7 +26,7 @@ type FilePreview = {
   dataUri: string;
 };
 
-function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: ConsultationDetails) => void; isSubmitting: boolean; }) {
+function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Omit<ConsultationDetails, 'medicalRecordUris'>, files: FilePreview[]) => void; isSubmitting: boolean; }) {
     const [formData, setFormData] = React.useState<Omit<ConsultationDetails, 'medicalRecordUris'>>({
         symptoms: '',
         symptomsStartDate: '',
@@ -77,7 +77,6 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
             reader.readAsDataURL(file);
         });
 
-        // Reset file input to allow re-selection of the same file
         if(fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -89,11 +88,7 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const finalData: ConsultationDetails = {
-            ...formData,
-            medicalRecordUris: filePreviews.map(f => f.dataUri),
-        }
-        onSubmit(finalData);
+        onSubmit(formData, filePreviews);
     };
 
     return (
@@ -249,7 +244,7 @@ function RequestAppointmentContent() {
     setSelectedTime(null); // Reset time when date changes
   };
   
- const handleProceed = async (consultationDetails: ConsultationDetails) => {
+ const handleProceed = async (consultationFormData: Omit<ConsultationDetails, 'medicalRecordUris'>, files: FilePreview[]) => {
     if (!selectedDate || !selectedTime || !doctor || !method || !duration || price === null || !user) {
         toast({
             variant: "destructive",
@@ -263,6 +258,24 @@ function RequestAppointmentContent() {
     
     try {
         const idToken = await user.getIdToken();
+        let fileUrls: string[] = [];
+
+        // Step 1: Upload files if any
+        if (files.length > 0) {
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                body: JSON.stringify({ files: files.map(f => ({ name: f.name, dataUri: f.dataUri })) }),
+            });
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json();
+                throw new Error(errorData.error || 'File upload failed.');
+            }
+            const uploadResult = await uploadResponse.json();
+            fileUrls = uploadResult.urls;
+        }
+
+        // Step 2: Book appointment with file URLs
         const apiPath = appointmentIdToEdit ? `/api/appointments/${appointmentIdToEdit}/update` : '/api/appointments/book';
         const payload = {
             doctorId: doctorId,
@@ -271,7 +284,10 @@ function RequestAppointmentContent() {
             method,
             price: parseFloat(price),
             duration,
-            consultationDetails,
+            consultationDetails: {
+                ...consultationFormData,
+                medicalRecordUris: fileUrls,
+            },
         };
 
         const response = await fetch(apiPath, {
