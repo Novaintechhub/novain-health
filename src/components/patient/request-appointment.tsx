@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -119,7 +120,7 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
                 </div>
                  <div>
                     <Label htmlFor="allergies">Do you have any allergies?</Label>
-                    <Input id="allergies" name="allergies" value={formData.allergies} placeholder="E.g. Penicillin, nuts" required />
+                    <Input id="allergies" name="allergies" value={formData.allergies} onChange={handleChange} placeholder="E.g. Penicillin, nuts" required />
                 </div>
                 <div>
                     <Label>Have you seen another doctor about this before?</Label>
@@ -286,7 +287,7 @@ function RequestAppointmentContent() {
 
         toast({
             title: appointmentIdToEdit ? "Appointment Rescheduled!" : "Appointment Requested!",
-            description: `Your request has been sent to ${doctor.doctorName}. You will be notified of its status.`,
+            description: `Your request has been sent to ${doctor.firstName} ${doctor.lastName}. You will be notified of its status.`,
         });
         router.push('/patients/appointments');
         
