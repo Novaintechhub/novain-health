@@ -185,6 +185,16 @@ function RequestAppointmentContent() {
   const daysInMonth = getDaysInMonth(currentDate);
 
   const selectedDateString = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+  
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${minutes} ${ampm}`;
+  };
+  
   // @ts-ignore
   const availableSlots = doctor?.schedule?.[selectedDateString] || [];
 
@@ -199,16 +209,6 @@ function RequestAppointmentContent() {
     );
   }, [doctor?.approvedAppointments, selectedDate, selectedDateString]);
   
-  
-  const formatTo12Hour = (time24: string) => {
-    if (!time24) return '';
-    const [hours, minutes] = time24.split(':');
-    const h = parseInt(hours, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h % 12 || 12;
-    return `${h12}:${minutes} ${ampm}`;
-  };
-
   const isTimeSlotPast = (startTime: string): boolean => {
     if (!selectedDate || !isToday(selectedDate)) return false;
 
