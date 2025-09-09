@@ -8,13 +8,92 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import type { DoctorProfile } from "@/lib/types";
+import type { DoctorProfile, ConsultationDetails } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { addMonths, subMonths, format, startOfMonth, getDay, getDate, getDaysInMonth, isPast, setHours, setMinutes, isBefore, startOfHour } from 'date-fns';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+
+function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: ConsultationDetails) => void; isSubmitting: boolean; }) {
+    const [formData, setFormData] = React.useState<ConsultationDetails>({
+        symptoms: '',
+        symptomsStartDate: '',
+        existingConditions: '',
+        currentMedications: '',
+        allergies: '',
+        seenDoctorBefore: 'No',
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleRadioChange = (value: 'Yes' | 'No') => {
+        setFormData({ ...formData, seenDoctorBefore: value });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="border-t pt-6 space-y-6">
+            <h3 className="text-xl font-bold">Start Your Consultation</h3>
+            <p className="text-muted-foreground">Tell us a bit about how you're feeling so the doctor can prepare and respond quickly.</p>
+            
+            <div className="space-y-4">
+                <div>
+                    <Label htmlFor="symptoms">What are you experiencing right now?</Label>
+                    <Textarea id="symptoms" name="symptoms" value={formData.symptoms} onChange={handleChange} placeholder="Describe your symptoms in your own words." required />
+                </div>
+                <div>
+                    <Label htmlFor="symptomsStartDate">When did your symptoms start?</Label>
+                    <Input id="symptomsStartDate" name="symptomsStartDate" value={formData.symptomsStartDate} onChange={handleChange} placeholder="E.g., 3 days ago, this morning, last week" required />
+                </div>
+                <div>
+                    <Label htmlFor="existingConditions">Do you have any existing medical conditions?</Label>
+                    <Input id="existingConditions" name="existingConditions" value={formData.existingConditions} onChange={handleChange} placeholder="E.g., Hypertension, Ulcer, Diabetes" required />
+                </div>
+                <div>
+                    <Label htmlFor="currentMedications">Are you currently taking any medications?</Label>
+                    <Input id="currentMedications" name="currentMedications" value={formData.currentMedications} onChange={handleChange} placeholder="I'm taking amlodipine daily for blood pressure" required />
+                </div>
+                 <div>
+                    <Label htmlFor="allergies">Do you have any allergies?</Label>
+                    <Input id="allergies" name="allergies" value={formData.allergies} onChange={handleChange} placeholder="E.g. Penicillin, nuts" required />
+                </div>
+                <div>
+                    <Label>Have you seen another doctor about this before?</Label>
+                    <RadioGroup value={formData.seenDoctorBefore} onValueChange={handleRadioChange} className="flex gap-4 mt-2">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="Yes" id="seen-yes" />
+                            <Label htmlFor="seen-yes">Yes I have</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="No" id="seen-no" />
+                            <Label htmlFor="seen-no">No, I haven't</Label>
+                        </div>
+                    </RadioGroup>
+                </div>
+            </div>
+
+            <div className="flex justify-end">
+                <Button type="submit" size="lg" className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={isSubmitting}>
+                    {isSubmitting ? 'Submitting...' : 'Confirm Request'}
+                </Button>
+            </div>
+        </form>
+    );
+}
 
 function RequestAppointmentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
   const doctorId = searchParams.get("doctorId");
   const method = searchParams.get("method");
   const duration = searchParams.get("duration");
@@ -27,6 +106,7 @@ function RequestAppointmentContent() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   React.useEffect(() => {
     if (!doctorId) {
@@ -68,24 +148,37 @@ function RequestAppointmentContent() {
     setSelectedTime(null); // Reset time when date changes
   };
   
-  const handleProceedToCheckout = () => {
+  const handleProceedToCheckout = (consultationDetails: ConsultationDetails) => {
     if (!selectedDate || !selectedTime || !doctor || !method || !duration || price === null) {
-      return;
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Missing required information to book an appointment.",
+        });
+        return;
     }
-    const query = new URLSearchParams({
-      doctorId: doctor.uid,
-      date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD
+    
+    // Here we will call the API directly instead of going to checkout
+    // as the checkout is now for payment.
+    const payload = {
+      doctorId,
+      date: selectedDate.toISOString().split('T')[0],
       time: selectedTime,
-      method: method,
-      duration: duration,
-      price: price,
+      method,
+      duration,
+      price: parseFloat(price),
+      consultationDetails,
+    };
+    
+    // TODO: Send this payload to the booking API
+    console.log("Submitting appointment request:", payload);
+    
+    // For now, let's just show a success message and redirect
+     toast({
+      title: "Appointment Requested",
+      description: "Your request has been sent to the doctor.",
     });
-
-    if (appointmentIdToEdit) {
-        query.set('edit', appointmentIdToEdit);
-    }
-
-    router.push(`/patients/checkout?${query.toString()}`);
+    router.push('/patients/appointments');
   };
 
   const firstDayOfMonth = getDay(startOfMonth(currentDate));
@@ -248,15 +341,12 @@ function RequestAppointmentContent() {
                 </div>
                 </div>
             )}
+             {selectedDate && selectedTime && (
+                <ConsultationForm onSubmit={handleProceedToCheckout} isSubmitting={isSubmitting} />
+             )}
           </div>
         </CardContent>
       </Card>
-      
-      <div className="flex justify-end gap-4">
-        <Button size="lg" onClick={handleProceedToCheckout} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>
-          {appointmentIdToEdit ? 'Confirm Reschedule' : 'Confirm Request'}
-        </Button>
-      </div>
     </div>
   );
 }

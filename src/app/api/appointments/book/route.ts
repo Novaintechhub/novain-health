@@ -8,6 +8,15 @@ import { z } from 'zod';
 import { patientConverter, doctorConverter } from '@/lib/firestore-converters';
 import { sendAppointmentRequestEmails } from '@/services/emailService';
 
+const ConsultationDetailsSchema = z.object({
+  symptoms: z.string().min(1, "Symptoms are required."),
+  symptomsStartDate: z.string().min(1, "Symptom start date is required."),
+  existingConditions: z.string().min(1, "Existing conditions are required."),
+  currentMedications: z.string().min(1, "Current medications are required."),
+  allergies: z.string().min(1, "Allergies are required."),
+  seenDoctorBefore: z.enum(['Yes', 'No']),
+});
+
 const BookAppointmentSchema = z.object({
   doctorId: z.string(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
@@ -15,6 +24,7 @@ const BookAppointmentSchema = z.object({
   method: z.enum(['Video Call', 'Voice Call', 'Chat']),
   price: z.number(),
   duration: z.string(),
+  consultationDetails: ConsultationDetailsSchema,
 });
 
 export async function POST(request: Request) {
@@ -33,7 +43,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const { doctorId, date, time, method, price, duration } = validation.data;
+    const { doctorId, date, time, method, price, duration, consultationDetails } = validation.data;
     const db = getAdminDb();
     
     const patientRef = db.collection('patients').doc(patientId).withConverter(patientConverter);
@@ -72,6 +82,7 @@ export async function POST(request: Request) {
         doctorName: `Dr. ${doctorData.firstName} ${doctorData.lastName}`,
         doctorAvatar: doctorData.imageUrl || '',
         specialty: doctorData.specialty || 'General Practice',
+        consultationDetails: consultationDetails,
     };
 
     const appointmentRef = await db.collection('appointments').add(newAppointmentData);

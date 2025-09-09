@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, ChevronLeft, MessageSquare, Phone, Check, X } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, ChevronLeft, MessageSquare, Phone, Check, X, User, Heart, Pill, ShieldAlert, GitBranch } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Appointment } from "@/lib/types";
@@ -16,6 +16,18 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+
+const InfoCard = ({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
+    <div className="flex items-start gap-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+            <Icon className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <div>
+            <h4 className="font-semibold">{title}</h4>
+            <div className="text-muted-foreground text-sm">{children}</div>
+        </div>
+    </div>
+);
 
 export default function DoctorViewAppointment() {
   const router = useRouter();
@@ -141,6 +153,7 @@ export default function DoctorViewAppointment() {
   }
   
   const totalAmount = parseFloat(appointment.amount || '0');
+  const details = appointment.consultationDetails;
 
   return (
     <div className="space-y-6">
@@ -217,6 +230,31 @@ export default function DoctorViewAppointment() {
                     <p className="font-semibold">₦{totalAmount.toFixed(2)}</p>
                 </div>
             </div>
+
+            {details && (
+                <div className="py-6 border-b">
+                    <h3 className="text-xl font-bold mb-6">Consultation Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <InfoCard icon={Stethoscope} title="Symptoms">
+                            <p className="font-semibold">{details.symptoms}</p>
+                            <p>Started: {details.symptomsStartDate}</p>
+                        </InfoCard>
+                        <InfoCard icon={Heart} title="Existing Conditions">
+                            <p>{details.existingConditions}</p>
+                        </InfoCard>
+                         <InfoCard icon={Pill} title="Current Medications">
+                            <p>{details.currentMedications}</p>
+                        </InfoCard>
+                        <InfoCard icon={ShieldAlert} title="Allergies">
+                            <p>{details.allergies}</p>
+                        </InfoCard>
+                         <InfoCard icon={GitBranch} title="Seen Another Doctor?">
+                            <p>{details.seenDoctorBefore}</p>
+                        </InfoCard>
+                    </div>
+                </div>
+            )}
+
 
             <div className="flex justify-end pt-6">
                  <Badge className={`${

@@ -157,6 +157,15 @@ export interface PatientProfile extends UserProfile {
     dateOfBirth?: string;
 }
 
+export type ConsultationDetails = {
+    symptoms: string;
+    symptomsStartDate: string;
+    existingConditions: string;
+    currentMedications: string;
+    allergies: string;
+    seenDoctorBefore: 'Yes' | 'No';
+};
+
 export type Appointment = {
   id: string;
   patientId: string;
@@ -176,4 +185,5 @@ export type Appointment = {
   isPaid: boolean;
   cancellationReason?: string;
   duration?: string;
+  consultationDetails?: ConsultationDetails;
 };
