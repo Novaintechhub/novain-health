@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import type { DoctorProfile } from "@/lib/types";
+import type { DoctorProfile, Appointment } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +28,7 @@ function CheckoutContent() {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Params for booking/rescheduling
   const doctorId = searchParams.get("doctorId");
   const date = searchParams.get("date");
   const time = searchParams.get("time");
@@ -36,37 +37,65 @@ function CheckoutContent() {
   const duration = searchParams.get("duration");
   const appointmentIdToEdit = searchParams.get("edit");
 
+  // Param for payment
+  const appointmentIdForPayment = searchParams.get("appointmentId");
+
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'booking' | 'payment' | null>(null);
 
   const bookingFee = 10;
   const discount = 5;
 
   useEffect(() => {
-    if (!doctorId) {
-      setError("Doctor information is missing.");
-      setLoading(false);
-      return;
-    }
+    const initialize = async () => {
+        if (!user) return;
+        const idToken = await user.getIdToken();
 
-    async function fetchDoctor() {
-      try {
-        const response = await fetch(`/api/doctors/${doctorId}`);
-        if (!response.ok) throw new Error("Could not fetch doctor details.");
-        const data = await response.json();
-        setDoctor(data);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    }
+        if (appointmentIdForPayment) {
+            setMode('payment');
+            try {
+                // Fetch appointment and doctor details for payment
+                const apptRes = await fetch(`/api/appointments/${appointmentIdForPayment}`, {
+                    headers: { 'Authorization': `Bearer ${idToken}` }
+                });
+                if (!apptRes.ok) throw new Error("Could not fetch appointment details.");
+                const apptData: Appointment = await apptRes.json();
+                setAppointment(apptData);
 
-    fetchDoctor();
-  }, [doctorId]);
+                const docRes = await fetch(`/api/doctors/${apptData.doctorId}`);
+                if (!docRes.ok) throw new Error("Could not fetch doctor details.");
+                const docData = await docRes.json();
+                setDoctor(docData);
+            } catch (e: any) {
+                setError(e.message);
+            } finally {
+                setLoading(false);
+            }
+        } else if (doctorId) {
+            setMode('booking');
+            try {
+                // Fetch doctor details for booking
+                const docRes = await fetch(`/api/doctors/${doctorId}`);
+                if (!docRes.ok) throw new Error("Could not fetch doctor details.");
+                const docData = await docRes.json();
+                setDoctor(docData);
+            } catch (e: any) {
+                setError(e.message);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            setError("Required information is missing.");
+            setLoading(false);
+        }
+    };
+    if(user) initialize();
+  }, [user, appointmentIdForPayment, doctorId]);
 
   const handleRequestAppointment = async () => {
     if (!user || !doctor || !date || !time || !method || price === null || !duration) {
@@ -122,10 +151,25 @@ function CheckoutContent() {
         setIsSubmitting(false);
     }
   };
+  
+  const handlePayment = async () => {
+      setIsSubmitting(true);
+      // In a real app, this would integrate with a payment gateway like Stripe or Paystack
+      // For this demo, we'll just simulate a successful payment.
+      setTimeout(() => {
+        toast({
+            title: "Payment Successful",
+            description: "Your appointment is confirmed. You can join the call at the scheduled time."
+        });
+        setIsSubmitting(false);
+        router.push('/patients/appointments');
+      }, 2000);
+  }
 
-  const consultationFee = price ? parseFloat(price) : 0;
-  const totalAmount = consultationFee + bookingFee - discount;
   const isEditing = !!appointmentIdToEdit;
+  
+  const consultationFee = mode === 'payment' && appointment ? parseFloat(appointment.amount) : (price ? parseFloat(price) : 0);
+  const totalAmount = consultationFee + bookingFee - discount;
 
   if (loading) {
     return (
@@ -179,7 +223,7 @@ function CheckoutContent() {
   return (
     <>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">{isEditing ? 'Confirm Reschedule' : 'Confirm Appointment Request'}</h1>
+        <h1 className="text-2xl font-bold">{isEditing ? 'Confirm Reschedule' : mode === 'payment' ? 'Complete Your Payment' : 'Confirm Appointment Request'}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Card>
@@ -201,15 +245,15 @@ function CheckoutContent() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Date</span>
-                    <span>{date ? format(new Date(date), 'do MMM yyyy') : 'N/A'}</span>
+                    <span>{mode === 'payment' && appointment ? format(new Date(appointment.appointmentDate), 'do MMM yyyy') : (date ? format(new Date(date), 'do MMM yyyy') : 'N/A')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Time</span>
-                    <span>{time}</span>
+                    <span>{mode === 'payment' && appointment ? format(new Date(appointment.appointmentDate), 'p') : time}</span>
                   </div>
                    <div className="flex justify-between">
                     <span className="text-muted-foreground">Consultation Method</span>
-                    <span>{method} ({duration} mins)</span>
+                    <span>{mode === 'payment' && appointment ? appointment.type : method} ({mode === 'payment' && appointment ? appointment.duration : duration} mins)</span>
                   </div>
                 </div>
               </CardContent>
@@ -218,7 +262,7 @@ function CheckoutContent() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Estimated Cost</CardTitle>
+                <CardTitle>{mode === 'payment' ? 'Payment Summary' : 'Estimated Cost'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
@@ -242,10 +286,13 @@ function CheckoutContent() {
                 </div>
                 <Button 
                   className="w-full bg-cyan-500 hover:bg-cyan-600 text-white" 
-                  onClick={handleRequestAppointment}
+                  onClick={mode === 'payment' ? handlePayment : handleRequestAppointment}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : isEditing ? "Confirm Reschedule" : "Request an Appointment"}
+                  {isSubmitting 
+                    ? (mode === 'payment' ? 'Processing...' : 'Submitting...') 
+                    : (mode === 'payment' ? 'Pay Now' : (isEditing ? "Confirm Reschedule" : "Request an Appointment"))
+                  }
                 </Button>
               </CardContent>
             </Card>

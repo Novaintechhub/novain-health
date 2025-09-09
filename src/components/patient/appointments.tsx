@@ -196,7 +196,7 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
                     </AlertDialogContent>
                 </AlertDialog>
                 <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                    <Link href="/patients/checkout">
+                    <Link href={`/patients/checkout?appointmentId=${appointment.id}`}>
                         <CreditCard className="w-4 h-4 mr-1"/> Make Payment
                     </Link>
                 </Button>
