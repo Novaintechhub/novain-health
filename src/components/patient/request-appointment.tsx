@@ -5,7 +5,7 @@ import * as React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, MapPin, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Upload, X, File as FileIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { DoctorProfile, ConsultationDetails } from "@/lib/types";
@@ -16,18 +16,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+
+type FilePreview = {
+  name: string;
+  size: number;
+  type: string;
+  dataUri: string;
+};
 
 function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: ConsultationDetails) => void; isSubmitting: boolean; }) {
-    const [formData, setFormData] = React.useState<ConsultationDetails>({
+    const [formData, setFormData] = React.useState<Omit<ConsultationDetails, 'medicalRecordUris'>>({
         symptoms: '',
         symptomsStartDate: '',
         existingConditions: '',
         currentMedications: '',
         allergies: '',
         seenDoctorBefore: 'No',
-        medicalRecordUri: '',
     });
+    const [filePreviews, setFilePreviews] = React.useState<FilePreview[]>([]);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const { toast } = useToast();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,20 +47,52 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
+        const files = Array.from(event.target.files || []);
+        if (!files.length) return;
+
+        const totalFiles = filePreviews.length + files.length;
+        if (totalFiles > 10) {
+            toast({ variant: "destructive", title: "Too many files", description: "You can upload a maximum of 10 files." });
+            return;
+        }
+
+        const totalSize = filePreviews.reduce((acc, file) => acc + file.size, 0) + files.reduce((acc, file) => acc + file.size, 0);
+        if (totalSize > 10 * 1024 * 1024) { // 10MB
+            toast({ variant: "destructive", title: "Files too large", description: "Total file size cannot exceed 10MB." });
+            return;
+        }
+
+        files.forEach(file => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const result = reader.result as string;
-                setFormData(prev => ({ ...prev, medicalRecordUri: result }));
+                setFilePreviews(prev => [...prev, {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    dataUri: result
+                }]);
             };
             reader.readAsDataURL(file);
+        });
+
+        // Reset file input to allow re-selection of the same file
+        if(fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
+    };
+    
+    const removeFile = (index: number) => {
+        setFilePreviews(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        const finalData: ConsultationDetails = {
+            ...formData,
+            medicalRecordUris: filePreviews.map(f => f.dataUri),
+        }
+        onSubmit(finalData);
     };
 
     return (
@@ -78,7 +119,7 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
                 </div>
                  <div>
                     <Label htmlFor="allergies">Do you have any allergies?</Label>
-                    <Input id="allergies" name="allergies" value={formData.allergies} onChange={handleChange} placeholder="E.g. Penicillin, nuts" required />
+                    <Input id="allergies" name="allergies" value={formData.allergies} placeholder="E.g. Penicillin, nuts" required />
                 </div>
                 <div>
                     <Label>Have you seen another doctor about this before?</Label>
@@ -95,20 +136,44 @@ function ConsultationForm({ onSubmit, isSubmitting }: { onSubmit: (data: Consult
                 </div>
 
                 <div>
-                    <Label>Upload recent medical records (optional)</Label>
+                    <Label>Upload recent medical records (optional, max 10 files, 10MB total)</Label>
                     <div
                         className="mt-2 flex justify-center items-center w-full border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-cyan-400 hover:bg-cyan-50"
                         onClick={() => fileInputRef.current?.click()}
                     >
-                         <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} accept="image/*,.pdf,.doc,.docx"/>
+                         <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} accept="image/*,.pdf" multiple />
                          <div className="text-center">
                             <Upload className="mx-auto h-8 w-8 text-gray-400" />
                             <p className="mt-2 text-sm text-cyan-500">
-                                {formData.medicalRecordUri ? "File Selected" : "Upload recent medical records"}
+                                Click to upload documents or images
                             </p>
-                            {formData.medicalRecordUri && <p className="text-xs text-muted-foreground">Click to change file</p>}
+                            <p className="text-xs text-muted-foreground">Drag and drop also works</p>
                          </div>
                     </div>
+                    {filePreviews.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                            {filePreviews.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between p-2 border rounded-md">
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        {file.type.startsWith('image/') ? (
+                                            <img src={file.dataUri} alt={file.name} className="h-10 w-10 rounded object-cover" />
+                                        ) : (
+                                            <div className="h-10 w-10 flex items-center justify-center bg-gray-100 rounded">
+                                                <FileIcon className="h-5 w-5 text-gray-500" />
+                                            </div>
+                                        )}
+                                        <div className="truncate">
+                                            <p className="text-sm font-medium truncate">{file.name}</p>
+                                            <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                                        </div>
+                                    </div>
+                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -125,6 +190,7 @@ function RequestAppointmentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
   const doctorId = searchParams.get("doctorId");
   const method = searchParams.get("method");
   const duration = searchParams.get("duration");
@@ -182,8 +248,8 @@ function RequestAppointmentContent() {
     setSelectedTime(null); // Reset time when date changes
   };
   
-  const handleProceedToCheckout = (consultationDetails: ConsultationDetails) => {
-    if (!selectedDate || !selectedTime || !doctor || !method || !duration || price === null) {
+ const handleProceed = async (consultationDetails: ConsultationDetails) => {
+    if (!selectedDate || !selectedTime || !doctor || !method || !duration || price === null || !user) {
         toast({
             variant: "destructive",
             title: "Error",
@@ -192,27 +258,47 @@ function RequestAppointmentContent() {
         return;
     }
     
-    // Here we will call the API directly instead of going to checkout
-    // as the checkout is now for payment.
-    const payload = {
-      doctorId,
-      date: selectedDate.toISOString().split('T')[0],
-      time: selectedTime,
-      method,
-      duration,
-      price: parseFloat(price),
-      consultationDetails,
-    };
+    setIsSubmitting(true);
     
-    // TODO: Send this payload to the booking API
-    console.log("Submitting appointment request:", payload);
-    
-    // For now, let's just show a success message and redirect
-     toast({
-      title: "Appointment Requested",
-      description: "Your request has been sent to the doctor.",
-    });
-    router.push('/patients/appointments');
+    try {
+        const idToken = await user.getIdToken();
+        const apiPath = appointmentIdToEdit ? `/api/appointments/${appointmentIdToEdit}/update` : '/api/appointments/book';
+        const payload = {
+            doctorId: doctorId,
+            date: format(selectedDate, 'yyyy-MM-dd'),
+            time: selectedTime,
+            method,
+            price: parseFloat(price),
+            duration,
+            consultationDetails,
+        };
+
+        const response = await fetch(apiPath, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Failed to ${appointmentIdToEdit ? 'update' : 'request'} appointment.`);
+        }
+
+        toast({
+            title: appointmentIdToEdit ? "Appointment Rescheduled!" : "Appointment Requested!",
+            description: `Your request has been sent to ${doctor.doctorName}. You will be notified of its status.`,
+        });
+        router.push('/patients/appointments');
+        
+    } catch (err: any) {
+        toast({
+            variant: "destructive",
+            title: "Request Failed",
+            description: err.message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const firstDayOfMonth = getDay(startOfMonth(currentDate));
@@ -368,7 +454,7 @@ function RequestAppointmentContent() {
                 </div>
             )}
              {selectedDate && selectedTime && (
-                <ConsultationForm onSubmit={handleProceedToCheckout} isSubmitting={isSubmitting} />
+                <ConsultationForm onSubmit={handleProceed} isSubmitting={isSubmitting} />
              )}
           </div>
         </CardContent>
