@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CheckCircle } from "lucide-react";
+import { usePaystackPayment } from "react-paystack";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -28,7 +29,6 @@ function CheckoutContent() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Params for booking/rescheduling
   const doctorId = searchParams.get("doctorId");
   const date = searchParams.get("date");
   const time = searchParams.get("time");
@@ -36,8 +36,6 @@ function CheckoutContent() {
   const price = searchParams.get("price");
   const duration = searchParams.get("duration");
   const appointmentIdToEdit = searchParams.get("edit");
-
-  // Param for payment
   const appointmentIdForPayment = searchParams.get("appointmentId");
 
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
@@ -50,6 +48,66 @@ function CheckoutContent() {
 
   const bookingFee = 10;
   const discount = 5;
+  
+  const consultationFee = mode === 'payment' && appointment ? parseFloat(appointment.amount) : (price ? parseFloat(price) : 0);
+  const totalAmount = consultationFee + bookingFee - discount;
+
+  const paystackConfig = {
+    reference: (new Date()).getTime().toString(),
+    email: user?.email || '',
+    amount: Math.round(totalAmount * 100), // Amount in kobo
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+  };
+
+  const initializePayment = usePaystackPayment(paystackConfig);
+
+  const verifyPayment = async (reference: string) => {
+    if (!user || !appointmentIdForPayment) return;
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/payments/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ reference, appointmentId: appointmentIdForPayment, amount: totalAmount }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Payment verification failed.');
+        return result;
+    } catch (err: any) {
+        throw err;
+    }
+  }
+
+
+  const onPaymentSuccess = async (response: any) => {
+    toast({ title: "Processing", description: "Verifying your payment..." });
+    try {
+        await verifyPayment(response.reference);
+        toast({
+            title: "Payment Successful!",
+            description: "Your appointment is confirmed. You can join the call at the scheduled time."
+        });
+        router.push('/patients/appointments');
+    } catch (err: any) {
+        toast({
+            variant: "destructive",
+            title: "Verification Failed",
+            description: err.message,
+        });
+    }
+  };
+
+  const onPaymentClose = () => {
+    toast({
+        variant: "destructive",
+        title: "Payment Closed",
+        description: "You closed the payment modal without completing the payment.",
+    });
+  };
+
 
   useEffect(() => {
     const initialize = async () => {
@@ -59,7 +117,6 @@ function CheckoutContent() {
         if (appointmentIdForPayment) {
             setMode('payment');
             try {
-                // Fetch appointment and doctor details for payment
                 const apptRes = await fetch(`/api/appointments/${appointmentIdForPayment}`, {
                     headers: { 'Authorization': `Bearer ${idToken}` }
                 });
@@ -79,7 +136,6 @@ function CheckoutContent() {
         } else if (doctorId) {
             setMode('booking');
             try {
-                // Fetch doctor details for booking
                 const docRes = await fetch(`/api/doctors/${doctorId}`);
                 if (!docRes.ok) throw new Error("Could not fetch doctor details.");
                 const docData = await docRes.json();
@@ -117,7 +173,7 @@ function CheckoutContent() {
             : '/api/appointments/book';
 
         const payload = {
-            doctorId: isEditing ? undefined : doctor.uid, // Only send doctorId for new bookings
+            doctorId: isEditing ? undefined : doctor.uid,
             date,
             time,
             method,
@@ -152,25 +208,12 @@ function CheckoutContent() {
     }
   };
   
-  const handlePayment = async () => {
-      setIsSubmitting(true);
-      // In a real app, this would integrate with a payment gateway like Stripe or Paystack
-      // For this demo, we'll just simulate a successful payment.
-      setTimeout(() => {
-        toast({
-            title: "Payment Successful",
-            description: "Your appointment is confirmed. You can join the call at the scheduled time."
-        });
-        setIsSubmitting(false);
-        router.push('/patients/appointments');
-      }, 2000);
+  const handlePayment = () => {
+      initializePayment({ onSuccess: onPaymentSuccess, onClose: onPaymentClose });
   }
 
   const isEditing = !!appointmentIdToEdit;
   
-  const consultationFee = mode === 'payment' && appointment ? parseFloat(appointment.amount) : (price ? parseFloat(price) : 0);
-  const totalAmount = consultationFee + bookingFee - discount;
-
   if (loading) {
     return (
        <div className="space-y-6">
