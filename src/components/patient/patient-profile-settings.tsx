@@ -146,15 +146,15 @@ export default function PatientProfileSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" value={profile.firstName || ''} onChange={handleChange} disabled />
+                        <Input id="firstName" defaultValue={profile.firstName || ''} disabled />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" value={profile.lastName || ''} onChange={handleChange} disabled />
+                        <Input id="lastName" defaultValue={profile.lastName || ''} disabled />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                        <Input id="dateOfBirth" type="date" value={profile.dateOfBirth || '1983-07-24'} onChange={handleChange}/>
+                        <Input id="dateOfBirth" type="date" value={profile.dateOfBirth || ''} onChange={handleChange}/>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="bloodGroup">Blood Group</Label>
@@ -176,7 +176,7 @@ export default function PatientProfileSettings() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" value={profile.email || ''} disabled />
+                        <Input id="email" type="email" defaultValue={profile.email || ''} disabled />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="mobileNumber">Phone Number</Label>
