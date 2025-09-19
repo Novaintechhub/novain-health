@@ -329,7 +329,7 @@ function CheckoutContent() {
                 </div>
                 <Button 
                   className="w-full bg-cyan-500 hover:bg-cyan-600 text-white" 
-                  onClick={mode === 'payment' ? handlePayment : handleRequestAppointment}
+                  onClick={mode === 'payment' ? () => initializePayment({onSuccess: onPaymentSuccess, onClose: onPaymentClose}) : handleRequestAppointment}
                   disabled={isSubmitting}
                 >
                   {isSubmitting 
