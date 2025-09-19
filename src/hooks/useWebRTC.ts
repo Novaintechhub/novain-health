@@ -69,7 +69,21 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
       type: offerDescription.type,
     };
 
-    await setDoc(callDoc, { offer, callerId });
+    // This now happens via API
+    // await setDoc(callDoc, { offer, callerId });
+
+    // Instead of direct setDoc, call the API
+    const response = await fetch(`/api/calls/${appointmentId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offer, callerId }),
+    });
+
+    if (!response.ok) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to start the call.' });
+        return;
+    }
+
 
     const unsubscribe = onSnapshot(callDoc, (snapshot) => {
       const data = snapshot.data();
@@ -94,7 +108,7 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
         unsubscribeCandidates();
     }
 
-  }, [appointmentId, setupPeerConnection, callerId, localStream]);
+  }, [appointmentId, setupPeerConnection, callerId, localStream, toast]);
   
   const joinCall = useCallback(async () => {
     if (!localStream || !appointmentId) return;
