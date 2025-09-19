@@ -15,7 +15,8 @@ const InitializePaymentSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const headersList = headers();
+    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -44,7 +45,12 @@ export async function POST(request: Request) {
         throw new Error("Paystack secret key is not configured.");
     }
     
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}patients/appointments`;
+    // Dynamically determine the base URL
+    const host = headersList.get('x-forwarded-host') || headersList.get('host');
+    const protocol = headersList.get('x-forwarded-proto') || 'http';
+    const baseUrl = `${protocol}://${host}`;
+    
+    const callbackUrl = `${baseUrl}/patients/appointments`;
 
     const paystackResponse = await fetch('https://api.paystack.co/transaction/initialize', {
         method: 'POST',
