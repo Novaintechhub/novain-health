@@ -4,7 +4,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
-import { appointmentConverter, patientConverter, doctorConverter } from '@/lib/firestore-converters';
+import { appointmentConverter, patientConverter } from '@/lib/firestore-converters';
 import { sendAppointmentCancelledEmail } from '@/services/emailService';
 import { z } from 'zod';
 

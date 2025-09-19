@@ -111,6 +111,8 @@ export default function Dashboard() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   useEffect(() => {
     async function fetchStats() {
@@ -152,7 +154,7 @@ export default function Dashboard() {
 
   const handleConfirmSchedule = async () => {
     if (!selectedAppointment || !user) return;
-    
+    setIsActionLoading(true);
     try {
         const idToken = await user.getIdToken();
         const response = await fetch(`/api/doctor/appointments/${selectedAppointment.id}/approve`, {
@@ -165,7 +167,6 @@ export default function Dashboard() {
             throw new Error(errorData.error || "Failed to approve appointment");
         }
         
-        // Update local state to reflect the change
         setAppointments(prev => prev.map(appt => 
             appt.id === selectedAppointment.id ? { ...appt, status: 'Approved' } : appt
         ));
@@ -175,18 +176,51 @@ export default function Dashboard() {
 
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+        setIsActionLoading(false);
     }
   };
 
   const handleCancelClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
+    setCancellationReason(""); // Reset reason
     setShowCancelDialog(true);
   };
   
-  const handleCancelSubmit = () => {
-    // Here you would typically make an API call to cancel the appointment
-    setShowCancelDialog(false);
-    setShowCancelSuccessDialog(true);
+  const handleCancelSubmit = async () => {
+    if (!selectedAppointment || !user || !cancellationReason.trim()) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Cancellation reason is required.' });
+        return;
+    };
+    setIsActionLoading(true);
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/doctor/appointments/${selectedAppointment.id}/cancel`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ reason: cancellationReason }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to cancel appointment");
+        }
+        
+        setAppointments(prev => prev.map(appt => 
+            appt.id === selectedAppointment.id ? { ...appt, status: 'Cancelled' } : appt
+        ));
+
+        setShowCancelDialog(false);
+        setShowCancelSuccessDialog(true);
+
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+        setIsActionLoading(false);
+    }
   };
 
   const TotalPatientIcon = () => (
@@ -308,10 +342,10 @@ export default function Dashboard() {
                                 </Button>
                                 {appt.status === 'Pending' && (
                                   <>
-                                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleApproveClick(appt)}>
+                                    <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200" onClick={() => handleApproveClick(appt)} disabled={isActionLoading}>
                                         <Check className="h-4 w-4 mr-1"/> Approve
                                     </Button>
-                                    <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200" onClick={() => handleCancelClick(appt)}>
+                                    <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200" onClick={() => handleCancelClick(appt)} disabled={isActionLoading}>
                                         <X className="h-4 w-4 mr-1"/> Cancel
                                     </Button>
                                   </>
@@ -359,10 +393,10 @@ export default function Dashboard() {
                           </Button>
                           {appt.status === 'Pending' && (
                             <>
-                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleApproveClick(appt)}>
+                              <Button variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200 flex-1" onClick={() => handleApproveClick(appt)} disabled={isActionLoading}>
                                   <Check className="h-4 w-4 mr-1"/> Approve
                               </Button>
-                              <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1" onClick={() => handleCancelClick(appt)}>
+                              <Button variant="outline" size="sm" className="bg-red-100 text-red-600 border-none hover:bg-red-200 flex-1" onClick={() => handleCancelClick(appt)} disabled={isActionLoading}>
                                   <X className="h-4 w-4 mr-1"/> Cancel
                               </Button>
                             </>
@@ -392,8 +426,8 @@ export default function Dashboard() {
                 <DialogClose asChild>
                     <Button type="button" variant="outline" className="border-cyan-400 text-cyan-400">Cancel</Button>
                 </DialogClose>
-                <Button type="button" className="bg-cyan-400 hover:bg-cyan-500" onClick={handleConfirmSchedule}>
-                    Confirm and Schedule
+                <Button type="button" className="bg-cyan-400 hover:bg-cyan-500" onClick={handleConfirmSchedule} disabled={isActionLoading}>
+                    {isActionLoading ? "Confirming..." : "Confirm and Schedule"}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -422,25 +456,24 @@ export default function Dashboard() {
       </Dialog>
       
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-          <DialogContent className="sm:max-w-md text-center p-8">
-              <DialogHeader className="items-center">
-                  <div className="p-3 bg-pink-600 rounded-full w-fit mb-4">
-                      <Check className="w-8 h-8 text-white" />
-                  </div>
-                  <DialogTitle className="text-2xl">Appointment canceled successfully</DialogTitle>
-                  {selectedAppointment && (
-                    <DialogDescription>
-                        Appointment with {selectedAppointment.patientName} has been <br/>
-                        canceled on {new Date(selectedAppointment.appointmentDate).toLocaleDateString()} at {new Date(selectedAppointment.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </DialogDescription>
-                  )}
+          <DialogContent className="sm:max-w-md p-8">
+              <DialogHeader className="text-center">
+                  <DialogTitle className="text-2xl">Cancel Appointment</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to cancel this appointment? Please provide a reason.
+                  </DialogDescription>
               </DialogHeader>
               <div className="space-y-2 text-left mt-6">
                 <Label htmlFor="cancellation-reason">Reason for canceling appointment</Label>
-                <Textarea id="cancellation-reason" />
+                <Textarea id="cancellation-reason" value={cancellationReason} onChange={(e) => setCancellationReason(e.target.value)} />
               </div>
               <DialogFooter className="sm:justify-center mt-6">
-                 <Button type="button" className="bg-cyan-400 hover:bg-cyan-500 w-full" onClick={handleCancelSubmit}>Submit</Button>
+                 <DialogClose asChild>
+                    <Button type="button" variant="outline">Back</Button>
+                 </DialogClose>
+                 <Button type="button" className="bg-red-500 hover:bg-red-600" onClick={handleCancelSubmit} disabled={isActionLoading || !cancellationReason.trim()}>
+                    {isActionLoading ? "Submitting..." : "Submit"}
+                 </Button>
               </DialogFooter>
           </DialogContent>
       </Dialog>
@@ -451,7 +484,8 @@ export default function Dashboard() {
                   <div className="p-3 bg-green-100 rounded-full w-fit mb-4">
                       <ThumbsUp className="w-8 h-8 text-green-600" />
                   </div>
-                  <DialogTitle className="text-2xl">Thank you for your feedback</DialogTitle>
+                  <DialogTitle className="text-2xl">Appointment Cancelled</DialogTitle>
+                  <DialogDescription>The patient has been notified of the cancellation.</DialogDescription>
               </DialogHeader>
               <DialogFooter className="sm:justify-center mt-6">
                  <DialogClose asChild>
@@ -464,5 +498,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    
