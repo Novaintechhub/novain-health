@@ -12,7 +12,8 @@ const CheckCallSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const headersList = headers();
+    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
