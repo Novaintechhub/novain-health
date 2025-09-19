@@ -7,13 +7,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft, Heart, Pill, ShieldAlert, GitBranch } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { Appointment } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns';
+
+const InfoCard = ({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
+    <div className="flex items-start gap-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted shrink-0">
+            <Icon className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <div>
+            <h4 className="font-semibold">{title}</h4>
+            <div className="text-muted-foreground text-sm">{children}</div>
+        </div>
+    </div>
+);
+
 
 export default function ViewAppointment() {
   const router = useRouter();
@@ -24,6 +37,7 @@ export default function ViewAppointment() {
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSymptomsExpanded, setIsSymptomsExpanded] = useState(false);
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -91,6 +105,11 @@ export default function ViewAppointment() {
       </div>
     );
   }
+  
+  const details = appointment.consultationDetails;
+  const symptomsText = details?.symptoms || '';
+  const canTruncateSymptoms = symptomsText.length > 150;
+  const truncatedSymptoms = canTruncateSymptoms ? `${symptomsText.substring(0, 150)}...` : symptomsText;
 
   return (
     <div className="space-y-6">
@@ -141,45 +160,54 @@ export default function ViewAppointment() {
                 </div>
             </div>
 
-            <div className="py-6 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><Stethoscope className="w-5 h-5"/> Diagnosis</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">{"Common cold with mild fatigue. Advised rest and hydration."}</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><FileText className="w-5 h-5"/> Prescriptions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                            <li><strong>Paracetamol:</strong> 500mg, twice a day for 3 days</li>
-                            <li><strong>Vitamin C:</strong> 1000mg, once a day for 7 days</li>
-                        </ul>
-                    </CardContent>
-                </Card>
-
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><Download className="w-5 h-5"/> Consultation Report</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50/50">
-                            <div className="flex items-center gap-4">
-                                <FileText className="h-6 w-6 text-primary"/>
-                                <p className="font-semibold">Consultation_Report.pdf</p>
-                            </div>
-                            <Button variant="ghost" size="icon">
-                                <Download className="h-5 w-5"/>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            {details && (
+                <div className="py-6 border-b">
+                    <h3 className="text-xl font-bold mb-6">Your Consultation Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <InfoCard icon={Stethoscope} title="What are you experiencing right now?">
+                            <p className="whitespace-pre-line">
+                                {isSymptomsExpanded ? symptomsText : truncatedSymptoms}
+                            </p>
+                            {canTruncateSymptoms && (
+                                <Button
+                                    variant="link"
+                                    className="p-0 h-auto text-primary"
+                                    onClick={() => setIsSymptomsExpanded(!isSymptomsExpanded)}
+                                >
+                                    {isSymptomsExpanded ? "Read Less" : "Read More"}
+                                </Button>
+                            )}
+                        </InfoCard>
+                        <InfoCard icon={Clock} title="When did your symptoms start?">
+                            <p>{details.symptomsStartDate}</p>
+                        </InfoCard>
+                        <InfoCard icon={Heart} title="Do you have any existing medical conditions?">
+                            <p>{details.existingConditions}</p>
+                        </InfoCard>
+                         <InfoCard icon={Pill} title="Are you currently taking any medications?">
+                            <p>{details.currentMedications}</p>
+                        </InfoCard>
+                        <InfoCard icon={ShieldAlert} title="Do you have any allergies?">
+                            <p>{details.allergies}</p>
+                        </InfoCard>
+                         <InfoCard icon={GitBranch} title="Have you seen another doctor about this before?">
+                            <p>{details.seenDoctorBefore}</p>
+                        </InfoCard>
+                        {details.medicalRecordUris && details.medicalRecordUris.length > 0 && (
+                             <InfoCard icon={FileText} title="Uploaded Medical Records">
+                                <div className="space-y-2">
+                                    {details.medicalRecordUris.map((url, index) => (
+                                        <a href={url} target="_blank" rel="noopener noreferrer" key={index} className="flex items-center gap-2 text-primary hover:underline">
+                                            <Download className="w-4 h-4" />
+                                            <span>Medical Document {index + 1}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            </InfoCard>
+                        )}
+                    </div>
+                </div>
+            )}
             
             <div className="flex justify-end pt-6 border-t">
                  <Badge className={`${
