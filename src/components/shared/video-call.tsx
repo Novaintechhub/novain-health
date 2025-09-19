@@ -8,14 +8,49 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Mic, MicOff, Video, VideoOff, PhoneOff, User, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import type { Appointment } from '@/lib/types';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function VideoCall() {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [callDuration, setCallDuration] = useState(0);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user, role } = useAuth();
+  const appointmentId = searchParams.get('appointmentId');
+
+  useEffect(() => {
+    const fetchAppointment = async () => {
+        if (!appointmentId || !user) {
+            setLoading(false);
+            return;
+        }
+        try {
+            const idToken = await user.getIdToken();
+            const response = await fetch(`/api/appointments/${appointmentId}`, {
+                headers: { 'Authorization': `Bearer ${idToken}` }
+            });
+            if (!response.ok) throw new Error("Failed to fetch appointment details.");
+            const data = await response.json();
+            setAppointment(data);
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Error", description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchAppointment();
+  }, [appointmentId, user, toast]);
 
   useEffect(() => {
     const getMediaStream = async () => {
@@ -40,13 +75,17 @@ export default function VideoCall() {
 
     getMediaStream();
     
-    // Cleanup function to stop media tracks when component unmounts
     return () => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
+        stream?.getTracks().forEach(track => track.stop());
     }
   }, [toast]);
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCallDuration(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const toggleMute = () => {
     if (stream) {
@@ -65,6 +104,45 @@ export default function VideoCall() {
       setIsCameraOff(!isCameraOff);
     }
   };
+  
+  const handleEndCall = () => {
+    stream?.getTracks().forEach(track => track.stop());
+    const redirectPath = role === 'doctor' ? '/doctor/appointments' : '/patients/appointments';
+    router.push(redirectPath);
+  };
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${secs} minutes`;
+  };
+
+  const otherParticipant = role === 'doctor' 
+    ? { name: appointment?.patientName, avatar: appointment?.patientAvatar, hint: appointment?.patientAvatarHint }
+    : { name: appointment?.doctorName, avatar: appointment?.doctorAvatar, hint: appointment?.doctorAvatarHint };
+
+  if (loading) {
+    return (
+        <div className="flex flex-col h-full bg-gray-900 text-white rounded-lg overflow-hidden">
+            <div className="flex-1 relative flex items-center justify-center">
+                <Skeleton className="h-48 w-48 rounded-full bg-gray-700" />
+            </div>
+            <div className="bg-gray-800/50 p-4">
+                 <div className="flex justify-between items-center max-w-md mx-auto">
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-48 bg-gray-700" />
+                        <Skeleton className="h-4 w-24 bg-gray-700" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                         <Skeleton className="h-10 w-10 rounded-full bg-gray-700" />
+                         <Skeleton className="h-10 w-10 rounded-full bg-gray-700" />
+                         <Skeleton className="h-12 w-12 rounded-full bg-gray-700" />
+                    </div>
+                 </div>
+            </div>
+        </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white rounded-lg overflow-hidden">
@@ -72,11 +150,11 @@ export default function VideoCall() {
         {/* Remote participant view */}
         <div className="absolute inset-0 bg-black flex items-center justify-center">
            <Avatar className="h-48 w-48 border-4 border-gray-700">
-                <AvatarImage src="https://placehold.co/192x192.png" alt="Doctor" data-ai-hint="male doctor" />
-                <AvatarFallback className="text-6xl bg-gray-800 text-gray-500">DE</AvatarFallback>
+                <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} data-ai-hint={otherParticipant.hint} />
+                <AvatarFallback className="text-6xl bg-gray-800 text-gray-500">{otherParticipant.name?.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
             </Avatar>
             <div className="absolute bottom-4 left-4 bg-black/50 p-2 rounded-lg">
-                Dr. Darren Elder
+                {otherParticipant.name || "Participant"}
             </div>
         </div>
         
@@ -113,8 +191,8 @@ export default function VideoCall() {
         <div className="flex justify-between items-center max-w-md mx-auto">
             <div className="flex items-center gap-2">
                 <div className="text-center">
-                    <p className="font-semibold">In call with Dr. Darren Elder</p>
-                    <p className="text-sm text-gray-400">10:23 minutes</p>
+                    <p className="font-semibold">In call with {otherParticipant.name || "Participant"}</p>
+                    <p className="text-sm text-gray-400">{formatDuration(callDuration)}</p>
                 </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
@@ -127,7 +205,7 @@ export default function VideoCall() {
                  <Button variant="ghost" size="icon" className="rounded-full bg-white/10 hover:bg-white/20">
                     <Plus className="h-6 w-6" />
                 </Button>
-                <Button variant="destructive" size="icon" className="rounded-full h-12 w-12">
+                <Button variant="destructive" size="icon" className="rounded-full h-12 w-12" onClick={handleEndCall}>
                     <PhoneOff className="h-6 w-6" />
                 </Button>
             </div>
