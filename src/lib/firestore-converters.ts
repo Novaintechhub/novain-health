@@ -103,7 +103,8 @@ export const appointmentConverter: FirestoreDataConverter<Appointment> = {
             amount: data.amount,
             isPaid: data.isPaid || false,
             cancellationReason: data.cancellationReason || '',
-            // You'll need to fetch these separately
+            duration: data.duration,
+            consultationDetails: data.consultationDetails,
             doctorName: data.doctorName || 'Dr. Placeholder',
             doctorAvatar: data.doctorAvatar || 'https://placehold.co/40x40.png',
             doctorAvatarHint: data.doctorAvatarHint || 'doctor portrait',

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, ChevronLeft, MessageSquare, Phone, Check, X, User, Heart, Pill, ShieldAlert, GitBranch } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, ChevronLeft, MessageSquare, Phone, Check, X, User, Heart, Pill, ShieldAlert, GitBranch, Download } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Appointment } from "@/lib/types";
@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 
 const InfoCard = ({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
     <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted shrink-0">
             <Icon className="h-6 w-6 text-muted-foreground" />
         </div>
         <div>
@@ -235,22 +235,36 @@ export default function DoctorViewAppointment() {
                 <div className="py-6 border-b">
                     <h3 className="text-xl font-bold mb-6">Consultation Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                        <InfoCard icon={Stethoscope} title="Symptoms">
-                            <p className="font-semibold">{details.symptoms}</p>
-                            <p>Started: {details.symptomsStartDate}</p>
+                        <InfoCard icon={Stethoscope} title="What are you experiencing right now?">
+                            <p className="whitespace-pre-line">{details.symptoms}</p>
                         </InfoCard>
-                        <InfoCard icon={Heart} title="Existing Conditions">
+                        <InfoCard icon={Clock} title="When did your symptoms start?">
+                            <p>{details.symptomsStartDate}</p>
+                        </InfoCard>
+                        <InfoCard icon={Heart} title="Do you have any existing medical conditions?">
                             <p>{details.existingConditions}</p>
                         </InfoCard>
-                         <InfoCard icon={Pill} title="Current Medications">
+                         <InfoCard icon={Pill} title="Are you currently taking any medications?">
                             <p>{details.currentMedications}</p>
                         </InfoCard>
-                        <InfoCard icon={ShieldAlert} title="Allergies">
+                        <InfoCard icon={ShieldAlert} title="Do you have any allergies?">
                             <p>{details.allergies}</p>
                         </InfoCard>
-                         <InfoCard icon={GitBranch} title="Seen Another Doctor?">
+                         <InfoCard icon={GitBranch} title="Have you seen another doctor about this before?">
                             <p>{details.seenDoctorBefore}</p>
                         </InfoCard>
+                        {details.medicalRecordUris && details.medicalRecordUris.length > 0 && (
+                             <InfoCard icon={FileText} title="Uploaded Medical Records">
+                                <div className="space-y-2">
+                                    {details.medicalRecordUris.map((url, index) => (
+                                        <a href={url} target="_blank" rel="noopener noreferrer" key={index} className="flex items-center gap-2 text-primary hover:underline">
+                                            <Download className="w-4 h-4" />
+                                            <span>Medical Document {index + 1}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            </InfoCard>
+                        )}
                     </div>
                 </div>
             )}
