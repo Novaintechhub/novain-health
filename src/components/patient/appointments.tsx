@@ -78,7 +78,6 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
   const { toast } = useToast();
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const appointmentDate = new Date(appointment.appointmentDate);
@@ -161,41 +160,12 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
         
         {appointment.status === 'Approved' && !isAppointmentPast && (
             <>
-                <AlertDialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Upcoming Appointment</AlertDialogTitle>
-                            <AlertDialogDescription>
-                            Here are the details for your upcoming appointment.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="flex items-center gap-4">
-                            <Avatar className="h-16 w-16">
-                                    <AvatarImage src={appointment.doctorAvatar} alt={appointment.doctorName} data-ai-hint={appointment.doctorAvatarHint} />
-                                    <AvatarFallback>{appointment.doctorName?.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <h3 className="font-bold">{appointment.doctorName}</h3>
-                                </div>
-                            </div>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span>{format(new Date(appointment.appointmentDate), 'do MMM yyyy')}</span></div>
-                                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-muted-foreground"/><span>{format(new Date(appointment.appointmentDate), 'p')}</span></div>
-                                <div className="flex items-center gap-2"><Video className="w-4 h-4 text-muted-foreground"/><span>{appointment.type}</span></div>
-                            </div>
-                        </div>
-                        <AlertDialogFooter>
-                            <AlertDialogAction>Close</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <Button asChild variant="outline" size="sm" className="bg-blue-100 text-blue-600 border-none hover:bg-blue-200">
+                    <Link href={`/patients/view-appointment?id=${appointment.id}`}>
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                    </Link>
+                </Button>
                 {appointment.isPaid ? (
                     <Button variant="outline" size="sm" disabled className="bg-green-100 text-green-800 border-green-200">
                         <CheckCircle className="w-4 h-4 mr-1" /> Paid
