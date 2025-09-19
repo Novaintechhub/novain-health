@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus, Clock, Calendar, CreditCard, Star } from "lucide-react";
+import { Video, Phone, MessageSquare, Printer, Eye, AlertCircle, Edit, XCircle, CalendarPlus, Clock, Calendar, CreditCard, Star, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -196,11 +196,17 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                    <Link href={`/patients/checkout?appointmentId=${appointment.id}`}>
-                        <CreditCard className="w-4 h-4 mr-1"/> Make Payment
-                    </Link>
-                </Button>
+                {appointment.isPaid ? (
+                    <Button variant="outline" size="sm" disabled className="bg-green-100 text-green-800 border-green-200">
+                        <CheckCircle className="w-4 h-4 mr-1" /> Paid
+                    </Button>
+                ) : (
+                    <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
+                        <Link href={`/patients/checkout?appointmentId=${appointment.id}`}>
+                            <CreditCard className="w-4 h-4 mr-1"/> Make Payment
+                        </Link>
+                    </Button>
+                )}
             </>
         )}
 
@@ -220,13 +226,13 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
                     Print
                 </Button>
                 <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                    <Link href="/patients/view-appointment">
+                    <Link href={`/patients/view-appointment?id=${appointment.id}`}>
                         <Eye className="w-4 h-4 mr-1" />
                         View
                     </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                    <Link href="/patients/request-appointment">
+                    <Link href={`/patients/doctor-profile?id=${appointment.doctorId}`}>
                         <CalendarPlus className="w-4 h-4 mr-1" />
                         Follow-up
                     </Link>
