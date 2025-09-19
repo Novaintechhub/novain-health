@@ -12,22 +12,27 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import type { Appointment } from '@/lib/types';
 import { Skeleton } from "@/components/ui/skeleton";
+import { useWebRTC } from '@/hooks/useWebRTC';
 
 export default function VideoCall() {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [hasMediaPermission, setHasMediaPermission] = useState<boolean | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, role } = useAuth();
   const appointmentId = searchParams.get('appointmentId');
+
+  const { remoteStream, startCall, joinCall, hangUp } = useWebRTC(appointmentId || '', localStream, user?.uid || '');
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -49,22 +54,20 @@ export default function VideoCall() {
             setLoading(false);
         }
     };
-    fetchAppointment();
+    if (user) {
+      fetchAppointment();
+    }
   }, [appointmentId, user, toast]);
 
   useEffect(() => {
     const getMediaStream = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        setStream(mediaStream);
-        setHasCameraPermission(true);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
+        setLocalStream(mediaStream);
+        setHasMediaPermission(true);
       } catch (error) {
         console.error('Error accessing media devices:', error);
-        setHasCameraPermission(false);
+        setHasMediaPermission(false);
         toast({
           variant: 'destructive',
           title: 'Media Access Denied',
@@ -76,9 +79,34 @@ export default function VideoCall() {
     getMediaStream();
     
     return () => {
-        stream?.getTracks().forEach(track => track.stop());
+        localStream?.getTracks().forEach(track => track.stop());
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+  
+  useEffect(() => {
+    // Logic to decide whether to start or join a call
+    if (localStream && appointment && user) {
+        // Simple logic: the doctor always starts the call.
+        // In a real app, this would be more robust (e.g., based on who joins first).
+        if (role === 'doctor') {
+            startCall();
+        } else {
+            joinCall();
+        }
+    }
+  }, [localStream, appointment, user, role, startCall, joinCall]);
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -88,8 +116,8 @@ export default function VideoCall() {
   }, []);
 
   const toggleMute = () => {
-    if (stream) {
-      stream.getAudioTracks().forEach(track => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
         track.enabled = !track.enabled;
       });
       setIsMuted(!isMuted);
@@ -97,8 +125,8 @@ export default function VideoCall() {
   };
 
   const toggleCamera = () => {
-    if (stream) {
-      stream.getVideoTracks().forEach(track => {
+    if (localStream) {
+      localStream.getVideoTracks().forEach(track => {
         track.enabled = !track.enabled;
       });
       setIsCameraOff(!isCameraOff);
@@ -106,7 +134,7 @@ export default function VideoCall() {
   };
   
   const handleEndCall = () => {
-    stream?.getTracks().forEach(track => track.stop());
+    hangUp();
     const redirectPath = role === 'doctor' ? '/doctor/appointments' : '/patients/appointments';
     router.push(redirectPath);
   };
@@ -149,10 +177,14 @@ export default function VideoCall() {
       <div className="flex-1 relative flex items-center justify-center">
         {/* Remote participant view */}
         <div className="absolute inset-0 bg-black flex items-center justify-center">
-           <Avatar className="h-48 w-48 border-4 border-gray-700">
-                <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} data-ai-hint={otherParticipant.hint} />
-                <AvatarFallback className="text-6xl bg-gray-800 text-gray-500">{otherParticipant.name?.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
-            </Avatar>
+           {remoteStream ? (
+                <video ref={remoteVideoRef} autoPlay className="w-full h-full object-cover" />
+           ) : (
+             <Avatar className="h-48 w-48 border-4 border-gray-700">
+                  <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} data-ai-hint={otherParticipant.hint} />
+                  <AvatarFallback className="text-6xl bg-gray-800 text-gray-500">{otherParticipant.name?.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
+              </Avatar>
+           )}
             <div className="absolute bottom-4 left-4 bg-black/50 p-2 rounded-lg">
                 {otherParticipant.name || "Participant"}
             </div>
@@ -161,23 +193,23 @@ export default function VideoCall() {
         {/* Local participant view (PiP) */}
         <Card className="absolute top-4 right-4 w-48 h-36 bg-black border-2 border-gray-700 overflow-hidden">
           <CardContent className="p-0 h-full">
-            {isCameraOff ? (
+            {(isCameraOff || !hasMediaPermission) ? (
                 <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                     <User className="h-16 w-16 text-gray-600"/>
                 </div>
             ) : (
-                <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted />
+                <video ref={localVideoRef} className="w-full h-full object-cover" autoPlay muted />
             )}
-             {hasCameraPermission === false && (
+             {hasMediaPermission === false && (
                  <div className="absolute inset-0 w-full h-full bg-black/70 flex items-center justify-center text-center p-2">
-                    <p className="text-xs text-destructive-foreground">Camera permission denied</p>
+                    <p className="text-xs text-destructive-foreground">Permission denied</p>
                 </div>
              )}
             <div className="absolute bottom-1 left-2 bg-black/50 p-1 rounded-md text-xs">You</div>
           </CardContent>
         </Card>
 
-         {hasCameraPermission === false && (
+         {hasMediaPermission === false && (
             <Alert variant="destructive" className="absolute top-4 left-4 max-w-sm">
               <AlertTitle>Camera and Microphone Access Required</AlertTitle>
               <AlertDescription>
