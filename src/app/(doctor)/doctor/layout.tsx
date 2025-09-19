@@ -119,6 +119,8 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
     if (!user || appointments.length === 0) return;
 
     const appointmentIds = appointments.map(a => a.id);
+    if (appointmentIds.length === 0) return;
+
     const callsQuery = query(collection(db, 'calls'), where('__name__', 'in', appointmentIds));
 
     const unsubscribe = onSnapshot(callsQuery, (snapshot) => {
