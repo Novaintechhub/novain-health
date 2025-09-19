@@ -3,7 +3,7 @@
 
 import LandingHeader from "./landing-header";
 import LandingFooter from "./landing-footer";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, ShieldAlert, Ambulance } from "lucide-react";
 
 export default function EmergencyResponseInfo() {
