@@ -164,6 +164,8 @@ export default function ScheduleTimings() {
     }
   }
   
+  const timeStepInSeconds = parseInt(slotDuration) * 60;
+
   if (loading) {
     return (
         <div className="space-y-6">
@@ -249,6 +251,7 @@ export default function ScheduleTimings() {
                     type="time" 
                     value={newTimeSlot.from} 
                     onChange={(e) => setNewTimeSlot({...newTimeSlot, from: e.target.value})}
+                    step={timeStepInSeconds}
                   />
                 </div>
                 <div className="flex-1 space-y-2">
@@ -258,6 +261,7 @@ export default function ScheduleTimings() {
                     type="time" 
                     value={newTimeSlot.to} 
                     onChange={(e) => setNewTimeSlot({...newTimeSlot, to: e.target.value})}
+                    step={timeStepInSeconds}
                   />
                 </div>
               </div>
