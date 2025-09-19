@@ -41,6 +41,7 @@ export default function DoctorViewAppointment() {
   const [loading, setLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [isSymptomsExpanded, setIsSymptomsExpanded] = useState(false);
 
   const fetchAppointment = async () => {
     if (!appointmentId || !user) {
@@ -155,6 +156,10 @@ export default function DoctorViewAppointment() {
   const totalAmount = parseFloat(appointment.amount || '0');
   const details = appointment.consultationDetails;
 
+  const symptomsText = details?.symptoms || '';
+  const canTruncateSymptoms = symptomsText.length > 150;
+  const truncatedSymptoms = canTruncateSymptoms ? `${symptomsText.substring(0, 150)}...` : symptomsText;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -236,7 +241,18 @@ export default function DoctorViewAppointment() {
                     <h3 className="text-xl font-bold mb-6">Consultation Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <InfoCard icon={Stethoscope} title="What are you experiencing right now?">
-                            <p className="whitespace-pre-line">{details.symptoms}</p>
+                            <p className="whitespace-pre-line">
+                                {isSymptomsExpanded ? symptomsText : truncatedSymptoms}
+                            </p>
+                            {canTruncateSymptoms && (
+                                <Button
+                                    variant="link"
+                                    className="p-0 h-auto text-primary"
+                                    onClick={() => setIsSymptomsExpanded(!isSymptomsExpanded)}
+                                >
+                                    {isSymptomsExpanded ? "Read Less" : "Read More"}
+                                </Button>
+                            )}
                         </InfoCard>
                         <InfoCard icon={Clock} title="When did your symptoms start?">
                             <p>{details.symptomsStartDate}</p>
