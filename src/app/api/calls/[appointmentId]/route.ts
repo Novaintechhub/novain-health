@@ -12,10 +12,15 @@ export async function POST(request: Request, { params }: { params: { appointment
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // Verify the token to ensure the user is authenticated
     await getAdminAuth().verifyIdToken(idToken);
 
     const { appointmentId } = params;
     const { offer, callerId } = await request.json();
+
+    if (!offer || !callerId) {
+        return NextResponse.json({ error: 'Offer and callerId are required.' }, { status: 400 });
+    }
 
     const db = getAdminDb();
     const callRef = db.collection('calls').doc(appointmentId);
