@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft, Heart, Pill, ShieldAlert, GitBranch, CreditCard } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft, Heart, Pill, ShieldAlert, GitBranch, CreditCard, Phone } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -68,6 +68,30 @@ export default function ViewAppointment() {
     
     fetchAppointment();
   }, [appointmentId, user, toast]);
+  
+  const getJoinCallButton = () => {
+    if (!appointment) return null;
+    let href = `/patients/messages?appointmentId=${appointment.id}`;
+    let icon = <MessageSquare className="mr-2 h-4 w-4" />;
+    let text = "Start Chat";
+
+    if (appointment.type === "Video Call") {
+        href = `/patients/video-call?appointmentId=${appointment.id}`;
+        icon = <Video className="mr-2 h-4 w-4" />;
+        text = "Start Video Call";
+    } else if (appointment.type === "Voice Call") {
+        href = `/patients/voice-call?appointmentId=${appointment.id}`;
+        icon = <Phone className="mr-2 h-4 w-4" />;
+        text = "Start Voice Call";
+    }
+
+    return (
+        <Button asChild className="bg-green-500 hover:bg-green-600 text-white">
+            <Link href={href}>{icon} {text}</Link>
+        </Button>
+    )
+  }
+
 
   if (loading) {
     return (
@@ -144,9 +168,7 @@ export default function ViewAppointment() {
                      {appointment.isPaid && (
                         <>
                             <Button variant="outline"><Printer className="mr-2 h-4 w-4"/> Print Invoice</Button>
-                            <Button asChild className="bg-cyan-500 hover:bg-cyan-600 text-white">
-                                <Link href="/patients/messages"><MessageSquare className="mr-2 h-4 w-4"/> Follow Up</Link>
-                            </Button>
+                            {getJoinCallButton()}
                         </>
                     )}
                 </div>
