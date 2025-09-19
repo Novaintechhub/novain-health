@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, onSnapshot, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useToast } from './use-toast';
 
@@ -25,6 +25,7 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
   const [isConnected, setIsConnected] = useState(false);
   const pc = useRef<RTCPeerConnection | null>(null);
   const cleanupPerformed = useRef(false);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const setupPeerConnection = useCallback(() => {
@@ -51,17 +52,43 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
 
   }, [localStream]);
 
+  const pollForUpdates = useCallback(async (isCaller: boolean) => {
+      const user = getAuth().currentUser;
+      if (!user) return;
+      
+      const idToken = await user.getIdToken();
+      const response = await fetch(`/api/calls/${appointmentId}/poll`, {
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      
+      if (!response.ok) return;
+
+      const { answer, candidates } = await response.json();
+
+      if (!pc.current) return;
+
+      if (isCaller && !pc.current.currentRemoteDescription && answer) {
+          await pc.current.setRemoteDescription(new RTCSessionDescription(answer));
+      }
+
+      candidates.forEach((candidate: RTCIceCandidateInit) => {
+          pc.current?.addIceCandidate(new RTCIceCandidate(candidate));
+      });
+
+  }, [appointmentId]);
+
+
   const startCall = useCallback(async () => {
     if (!localStream || !callerId || !appointmentId) return;
 
     setupPeerConnection();
     if (!pc.current) return;
-
-    const callDoc = doc(db, 'calls', appointmentId);
     
+    const user = getAuth().currentUser;
+    if (!user) return;
+
     pc.current.onicecandidate = async (event) => {
-        const user = getAuth().currentUser;
-        if (event.candidate && user) {
+        if (event.candidate) {
             await fetch(`/api/calls/${appointmentId}/ice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user.getIdToken()}` },
@@ -77,9 +104,6 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
       sdp: offerDescription.sdp,
       type: offerDescription.type,
     };
-    
-    const user = getAuth().currentUser;
-    if (!user) return;
 
     const response = await fetch(`/api/calls/${appointmentId}`, {
         method: 'POST',
@@ -92,31 +116,9 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
         return;
     }
 
+    pollIntervalRef.current = setInterval(() => pollForUpdates(true), 3000);
 
-    const unsubscribe = onSnapshot(callDoc, (snapshot) => {
-      const data = snapshot.data();
-      if (!pc.current?.currentRemoteDescription && data?.answer) {
-        const answerDescription = new RTCSessionDescription(data.answer);
-        pc.current?.setRemoteDescription(answerDescription);
-      }
-    });
-    
-    const calleeCandidates = collection(callDoc, 'calleeCandidates');
-    const unsubscribeCandidates = onSnapshot(calleeCandidates, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            if (change.type === 'added') {
-                const candidate = new RTCIceCandidate(change.doc.data());
-                pc.current?.addIceCandidate(candidate).catch(e => console.error("Error adding ICE candidate:", e));
-            }
-        });
-    });
-    
-    return () => {
-        unsubscribe();
-        unsubscribeCandidates();
-    }
-
-  }, [appointmentId, setupPeerConnection, callerId, localStream, toast]);
+  }, [appointmentId, setupPeerConnection, callerId, localStream, toast, pollForUpdates]);
   
   const joinCall = useCallback(async () => {
     if (!localStream || !appointmentId) return;
@@ -126,8 +128,6 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
     const user = getAuth().currentUser;
     if (!user) return;
 
-    const callDoc = doc(db, 'calls', appointmentId);
-    
     pc.current.onicecandidate = async (event) => {
         if (event.candidate) {
             await fetch(`/api/calls/${appointmentId}/ice`, {
@@ -138,7 +138,8 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
         }
     };
 
-    const callSnapshot = await getDoc(callDoc);
+    const callDocRef = doc(db, 'calls', appointmentId);
+    const callSnapshot = await getDoc(callDocRef);
     
     if (callSnapshot.exists()) {
         const offerDescription = callSnapshot.data().offer;
@@ -152,43 +153,38 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
             sdp: answerDescription.sdp,
         };
 
-        await updateDoc(callDoc, { answer });
+        await updateDoc(callDocRef, { answer });
         
-        const callerCandidates = collection(callDoc, 'callerCandidates');
-        const unsubscribe = onSnapshot(callerCandidates, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'added') {
-                    const candidate = new RTCIceCandidate(change.doc.data());
-                    pc.current?.addIceCandidate(candidate).catch(e => console.error("Error adding ICE candidate:", e));
-                }
-            });
-        });
-        return () => unsubscribe();
+        pollIntervalRef.current = setInterval(() => pollForUpdates(false), 3000);
     } else {
         toast({ variant: 'destructive', title: 'Call not found', description: 'The other user may not have started the call yet.'})
     }
-  }, [appointmentId, setupPeerConnection, localStream, toast]);
+  }, [appointmentId, setupPeerConnection, localStream, toast, pollForUpdates]);
 
   const hangUp = useCallback(async () => {
     if (cleanupPerformed.current) return;
     cleanupPerformed.current = true;
+    
+    if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+    }
 
     localStream?.getTracks().forEach((track) => track.stop());
     pc.current?.close();
 
     if (appointmentId) {
         try {
-            const callDoc = doc(db, 'calls', appointmentId);
-            const callSnap = await getDoc(callDoc);
+            const callDocRef = doc(db, 'calls', appointmentId);
+            const callSnap = await getDoc(callDocRef);
 
             if (callSnap.exists()) {
-                const callerCandidates = await getDocs(collection(callDoc, 'callerCandidates'));
+                const callerCandidates = await getDocs(collection(callDocRef, 'callerCandidates'));
                 callerCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
                 
-                const calleeCandidates = await getDocs(collection(callDoc, 'calleeCandidates'));
+                const calleeCandidates = await getDocs(collection(callDocRef, 'calleeCandidates'));
                 calleeCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
                 
-                await deleteDoc(callDoc);
+                await deleteDoc(callDocRef);
             }
         } catch (error) {
             console.error("Error during hangup cleanup:", error);
