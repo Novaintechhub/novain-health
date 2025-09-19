@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -22,6 +22,7 @@ export default function VideoCall() {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
+  const [isCallActive, setIsCallActive] = useState(false);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -32,7 +33,7 @@ export default function VideoCall() {
   const { user, role } = useAuth();
   const appointmentId = searchParams.get('appointmentId');
 
-  const { remoteStream, startCall, joinCall, hangUp } = useWebRTC(appointmentId || '', localStream, user?.uid || '');
+  const { remoteStream, startCall, joinCall, hangUp, isConnected } = useWebRTC(appointmentId || '', localStream, user?.uid || '');
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -77,10 +78,14 @@ export default function VideoCall() {
     };
 
     getMediaStream();
-    
+
     return () => {
-        localStream?.getTracks().forEach(track => track.stop());
-    }
+      // Ensure stream is stopped on component unmount
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
   useEffect(() => {
@@ -94,26 +99,34 @@ export default function VideoCall() {
       remoteVideoRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
+
+  useEffect(() => {
+    if (isConnected) {
+      setIsCallActive(true);
+    }
+  }, [isConnected]);
   
   useEffect(() => {
-    // Logic to decide whether to start or join a call
+    if (isCallActive) {
+      const timer = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isCallActive]);
+  
+  useEffect(() => {
     if (localStream && appointment && user) {
-        // Simple logic: the doctor always starts the call.
-        // In a real app, this would be more robust (e.g., based on who joins first).
         if (role === 'doctor') {
             startCall();
         } else {
+            // The patient should only join if the call document (offer) exists.
+            // useWebRTC handles this check internally.
             joinCall();
         }
     }
   }, [localStream, appointment, user, role, startCall, joinCall]);
   
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCallDuration(prev => prev + 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const toggleMute = () => {
     if (localStream) {
@@ -133,16 +146,26 @@ export default function VideoCall() {
     }
   };
   
-  const handleEndCall = () => {
+  const handleEndCall = useCallback(() => {
     hangUp();
     const redirectPath = role === 'doctor' ? '/doctor/appointments' : '/patients/appointments';
     router.push(redirectPath);
-  };
+  }, [hangUp, role, router]);
+  
+  // Clean up on unmount or tab close
+  useEffect(() => {
+    window.addEventListener('beforeunload', hangUp);
+    return () => {
+        window.removeEventListener('beforeunload', hangUp);
+        // Ensure hangup is called if the component unmounts for other reasons (e.g., navigation)
+        hangUp();
+    }
+  }, [hangUp]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secs = (seconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${secs} minutes`;
+    return `${minutes}:${secs}`;
   };
 
   const otherParticipant = role === 'doctor' 
@@ -180,10 +203,13 @@ export default function VideoCall() {
            {remoteStream ? (
                 <video ref={remoteVideoRef} autoPlay className="w-full h-full object-cover" />
            ) : (
+            <div className="flex flex-col items-center gap-4">
              <Avatar className="h-48 w-48 border-4 border-gray-700">
                   <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} data-ai-hint={otherParticipant.hint} />
                   <AvatarFallback className="text-6xl bg-gray-800 text-gray-500">{otherParticipant.name?.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
               </Avatar>
+              <p className="text-gray-400 text-lg">Waiting for {otherParticipant.name || "Participant"} to join...</p>
+            </div>
            )}
             <div className="absolute bottom-4 left-4 bg-black/50 p-2 rounded-lg">
                 {otherParticipant.name || "Participant"}

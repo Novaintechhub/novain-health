@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { useToast } from './use-toast';
 
 const servers = {
   iceServers: [
@@ -16,46 +17,61 @@ const servers = {
 
 export const useWebRTC = (appointmentId: string, localStream: MediaStream | null, callerId: string) => {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const pc = useRef<RTCPeerConnection | null>(null);
+  const cleanupPerformed = useRef(false);
+  const { toast } = useToast();
 
   const setupPeerConnection = useCallback(() => {
+    if (pc.current) return;
+    
     pc.current = new RTCPeerConnection(servers);
-
-    localStream?.getTracks().forEach((track) => {
-      pc.current?.addTrack(track, localStream);
-    });
+    
+    if (localStream) {
+        localStream.getTracks().forEach((track) => {
+          pc.current?.addTrack(track, localStream);
+        });
+    }
 
     pc.current.ontrack = (event) => {
-      setRemoteStream(event.streams[0]);
+        setRemoteStream(event.streams[0]);
+        setIsConnected(true);
     };
 
-    pc.current.onicecandidate = async (event) => {
-      if (event.candidate) {
-        const callDoc = doc(db, 'calls', appointmentId);
-        const candidatesCollection = collection(callDoc, 'callerCandidates');
-        await addDoc(candidatesCollection, event.candidate.toJSON());
+    pc.current.onconnectionstatechange = () => {
+      if(pc.current?.connectionState === 'disconnected' || pc.current?.connectionState === 'failed' || pc.current?.connectionState === 'closed') {
+        setIsConnected(false);
       }
-    };
+    }
 
-  }, [localStream, appointmentId]);
+  }, [localStream]);
 
   const startCall = useCallback(async () => {
-    if (!pc.current) {
-        setupPeerConnection();
-    }
-    
+    if (!localStream || !callerId || !appointmentId) return;
+
+    setupPeerConnection();
+    if (!pc.current) return;
+
     const callDoc = doc(db, 'calls', appointmentId);
-    const offerDescription = await pc.current?.createOffer();
-    await pc.current?.setLocalDescription(offerDescription);
+    
+    pc.current.onicecandidate = async (event) => {
+        if (event.candidate) {
+            const candidatesCollection = collection(callDoc, 'callerCandidates');
+            await addDoc(candidatesCollection, event.candidate.toJSON());
+        }
+    };
+    
+    const offerDescription = await pc.current.createOffer();
+    await pc.current.setLocalDescription(offerDescription);
 
     const offer = {
-      sdp: offerDescription?.sdp,
-      type: offerDescription?.type,
+      sdp: offerDescription.sdp,
+      type: offerDescription.type,
     };
 
     await setDoc(callDoc, { offer, callerId });
 
-    onSnapshot(callDoc, (snapshot) => {
+    const unsubscribe = onSnapshot(callDoc, (snapshot) => {
       const data = snapshot.data();
       if (!pc.current?.currentRemoteDescription && data?.answer) {
         const answerDescription = new RTCSessionDescription(data.answer);
@@ -64,75 +80,97 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
     });
     
     const calleeCandidates = collection(callDoc, 'calleeCandidates');
-    onSnapshot(calleeCandidates, (snapshot) => {
+    const unsubscribeCandidates = onSnapshot(calleeCandidates, (snapshot) => {
         snapshot.docChanges().forEach((change) => {
             if (change.type === 'added') {
                 const candidate = new RTCIceCandidate(change.doc.data());
-                pc.current?.addIceCandidate(candidate);
+                pc.current?.addIceCandidate(candidate).catch(e => console.error("Error adding ICE candidate:", e));
             }
         });
     });
+    
+    return () => {
+        unsubscribe();
+        unsubscribeCandidates();
+    }
 
-  }, [appointmentId, setupPeerConnection, callerId]);
+  }, [appointmentId, setupPeerConnection, callerId, localStream]);
   
   const joinCall = useCallback(async () => {
-    if (!pc.current) {
-        setupPeerConnection();
-    }
-    
+    if (!localStream || !appointmentId) return;
+    setupPeerConnection();
+    if (!pc.current) return;
+
     const callDoc = doc(db, 'calls', appointmentId);
+    
+    pc.current.onicecandidate = async (event) => {
+        if (event.candidate) {
+            const calleeCandidates = collection(callDoc, 'calleeCandidates');
+            await addDoc(calleeCandidates, event.candidate.toJSON());
+        }
+    };
+
     const callSnapshot = await getDoc(callDoc);
     
     if (callSnapshot.exists()) {
         const offerDescription = callSnapshot.data().offer;
-        await pc.current?.setRemoteDescription(new RTCSessionDescription(offerDescription));
+        await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-        const answerDescription = await pc.current?.createAnswer();
-        await pc.current?.setLocalDescription(answerDescription);
+        const answerDescription = await pc.current.createAnswer();
+        await pc.current.setLocalDescription(answerDescription);
 
         const answer = {
-            type: answerDescription?.type,
-            sdp: answerDescription?.sdp,
+            type: answerDescription.type,
+            sdp: answerDescription.sdp,
         };
 
         await updateDoc(callDoc, { answer });
         
         const callerCandidates = collection(callDoc, 'callerCandidates');
-        onSnapshot(callerCandidates, (snapshot) => {
+        const unsubscribe = onSnapshot(callerCandidates, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const candidate = new RTCIceCandidate(change.doc.data());
-                    pc.current?.addIceCandidate(candidate);
+                    pc.current?.addIceCandidate(candidate).catch(e => console.error("Error adding ICE candidate:", e));
                 }
             });
         });
-
-        // Listen for remote ICE candidates
-        pc.current.onicecandidate = async (event) => {
-            if (event.candidate) {
-                const calleeCandidates = collection(callDoc, 'calleeCandidates');
-                await addDoc(calleeCandidates, event.candidate.toJSON());
-            }
-        };
+        return () => unsubscribe();
+    } else {
+        toast({ variant: 'destructive', title: 'Call not found', description: 'The other user may not have started the call yet.'})
     }
-  }, [appointmentId, setupPeerConnection]);
+  }, [appointmentId, setupPeerConnection, localStream, toast]);
 
   const hangUp = useCallback(async () => {
-    pc.current?.close();
+    if (cleanupPerformed.current) return;
+    cleanupPerformed.current = true;
+
     localStream?.getTracks().forEach((track) => track.stop());
+    pc.current?.close();
 
     if (appointmentId) {
-        const callDoc = doc(db, 'calls', appointmentId);
-        const callerCandidates = await getDocs(collection(callDoc, 'callerCandidates'));
-        callerCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
-        
-        const calleeCandidates = await getDocs(collection(callDoc, 'calleeCandidates'));
-        calleeCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
+        try {
+            const callDoc = doc(db, 'calls', appointmentId);
+            const callSnap = await getDoc(callDoc);
 
-        await deleteDoc(callDoc);
+            if (callSnap.exists()) {
+                const callerCandidates = await getDocs(collection(callDoc, 'callerCandidates'));
+                callerCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
+                
+                const calleeCandidates = await getDocs(collection(callDoc, 'calleeCandidates'));
+                calleeCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
+                
+                // Only delete the call doc if it still exists
+                await deleteDoc(callDoc);
+            }
+        } catch (error) {
+            console.error("Error during hangup cleanup:", error);
+        }
     }
+    
     setRemoteStream(null);
+    pc.current = null;
   }, [appointmentId, localStream]);
 
-  return { remoteStream, startCall, joinCall, hangUp };
+  return { remoteStream, isConnected, startCall, joinCall, hangUp };
 };
