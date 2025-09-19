@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft, Heart, Pill, ShieldAlert, GitBranch } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Stethoscope, Video, Printer, Download, MessageSquare, ChevronLeft, Heart, Pill, ShieldAlert, GitBranch, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -134,10 +134,21 @@ export default function ViewAppointment() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline"><Printer className="mr-2 h-4 w-4"/> Print Invoice</Button>
-                    <Button asChild className="bg-cyan-500 hover:bg-cyan-600 text-white">
-                        <Link href="/patients/messages"><MessageSquare className="mr-2 h-4 w-4"/> Follow Up</Link>
-                    </Button>
+                    {appointment.status === 'Approved' && !appointment.isPaid && (
+                         <Button asChild className="bg-green-500 hover:bg-green-600 text-white">
+                            <Link href={`/patients/checkout?appointmentId=${appointment.id}`}>
+                                <CreditCard className="mr-2 h-4 w-4"/> Make Payment
+                            </Link>
+                        </Button>
+                    )}
+                     {appointment.isPaid && (
+                        <>
+                            <Button variant="outline"><Printer className="mr-2 h-4 w-4"/> Print Invoice</Button>
+                            <Button asChild className="bg-cyan-500 hover:bg-cyan-600 text-white">
+                                <Link href="/patients/messages"><MessageSquare className="mr-2 h-4 w-4"/> Follow Up</Link>
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
             
