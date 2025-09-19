@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, onSnapshot, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { useToast } from './use-toast';
 
 const servers = {
@@ -56,8 +56,11 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
     
     pc.current.onicecandidate = async (event) => {
         if (event.candidate) {
-            const candidatesCollection = collection(callDoc, 'callerCandidates');
-            await addDoc(candidatesCollection, event.candidate.toJSON());
+            await fetch(`/api/calls/${appointmentId}/ice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'caller' }),
+            });
         }
     };
     
@@ -69,10 +72,6 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
       type: offerDescription.type,
     };
 
-    // This now happens via API
-    // await setDoc(callDoc, { offer, callerId });
-
-    // Instead of direct setDoc, call the API
     const response = await fetch(`/api/calls/${appointmentId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,8 +118,11 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
     
     pc.current.onicecandidate = async (event) => {
         if (event.candidate) {
-            const calleeCandidates = collection(callDoc, 'calleeCandidates');
-            await addDoc(calleeCandidates, event.candidate.toJSON());
+            await fetch(`/api/calls/${appointmentId}/ice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'callee' }),
+            });
         }
     };
 
@@ -174,7 +176,6 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
                 const calleeCandidates = await getDocs(collection(callDoc, 'calleeCandidates'));
                 calleeCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
                 
-                // Only delete the call doc if it still exists
                 await deleteDoc(callDoc);
             }
         } catch (error) {
