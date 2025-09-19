@@ -65,7 +65,9 @@ export default function DoctorViewAppointment() {
   };
 
   useEffect(() => {
-    fetchAppointment();
+    if(appointmentId && user) {
+        fetchAppointment();
+    }
   }, [appointmentId, user]);
 
   const handleApprove = async () => {
@@ -109,16 +111,16 @@ export default function DoctorViewAppointment() {
 
   const getJoinCallButton = () => {
     if (!appointment) return null;
-    let href = "/doctor/messages";
+    let href = `/doctor/messages?appointmentId=${appointment.id}`;
     let icon = <MessageSquare className="mr-2 h-4 w-4" />;
     let text = "Start Chat";
 
     if (appointment.type === "Video Call") {
-        href = "/doctor/video-call";
+        href = `/doctor/video-call?appointmentId=${appointment.id}`;
         icon = <Video className="mr-2 h-4 w-4" />;
         text = "Start Video Call";
     } else if (appointment.type === "Voice Call") {
-        href = "/doctor/voice-call";
+        href = `/doctor/voice-call?appointmentId=${appointment.id}`;
         icon = <Phone className="mr-2 h-4 w-4" />;
         text = "Start Voice Call";
     }
