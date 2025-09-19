@@ -7,9 +7,11 @@ import { headers } from 'next/headers';
 import type { Appointment } from '@/lib/types';
 import { appointmentConverter } from '@/lib/firestore-converters';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const idToken = headers().get('Authorization')?.split('Bearer ')[1];
+    const headersList = headers();
+    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
