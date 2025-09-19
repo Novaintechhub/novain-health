@@ -83,17 +83,39 @@ export default function ScheduleTimings() {
 
     return () => unsubscribe();
   }, [toast]);
+  
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const startTime = e.target.value;
+    if (!startTime) {
+      setNewTimeSlot({ from: startTime, to: "" });
+      return;
+    }
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setHours(hours, minutes, 0, 0);
+
+    const durationInMinutes = parseInt(slotDuration, 10);
+    const endDate = new Date(startDate.getTime() + durationInMinutes * 60000);
+
+    const endHours = endDate.getHours().toString().padStart(2, '0');
+    const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+    const endTime = `${endHours}:${endMinutes}`;
+
+    setNewTimeSlot({ from: startTime, to: endTime });
+  };
+
 
   const selectedDateString = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
   const timeSlotsForSelectedDate = availability[selectedDateString] || [];
 
   const handleAddTimeSlot = () => {
     if (!newTimeSlot.from || !newTimeSlot.to || !selectedDateString) {
-        toast({ variant: "destructive", title: "Error", description: "Please select both a start and end time." });
+        toast({ variant: "destructive", title: "Error", description: "Please select a start time." });
         return;
     }
     
     if (newTimeSlot.from >= newTimeSlot.to) {
+        // This should not happen with auto-calculation, but it's a good safeguard
         toast({ variant: "destructive", title: "Error", description: "Start time must be before end time." });
         return;
     }
@@ -250,7 +272,7 @@ export default function ScheduleTimings() {
                     id="from-time" 
                     type="time" 
                     value={newTimeSlot.from} 
-                    onChange={(e) => setNewTimeSlot({...newTimeSlot, from: e.target.value})}
+                    onChange={handleStartTimeChange}
                     step={timeStepInSeconds}
                   />
                 </div>
@@ -260,8 +282,9 @@ export default function ScheduleTimings() {
                     id="to-time" 
                     type="time" 
                     value={newTimeSlot.to} 
-                    onChange={(e) => setNewTimeSlot({...newTimeSlot, to: e.target.value})}
-                    step={timeStepInSeconds}
+                    readOnly
+                    disabled
+                    className="bg-gray-100"
                   />
                 </div>
               </div>
