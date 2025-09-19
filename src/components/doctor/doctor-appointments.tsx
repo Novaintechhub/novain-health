@@ -20,15 +20,16 @@ const TypeIcon = ({ type }: { type: string }) => {
     let icon;
     let href;
     let className;
+    let appointmentId = ''; // This should be passed if we want to link to a specific call
     switch (type) {
         case "Video Call":
             icon = <Video className="h-5 w-5 text-green-500" />;
-            href = "/doctor/video-call";
+            href = `/doctor/video-call?appointmentId=${appointmentId}`;
             className = "text-green-500";
             break;
-        case "Audio Call":
+        case "Voice Call":
             icon = <Phone className="h-5 w-5 text-blue-500" />;
-            href = "/doctor/voice-call";
+            href = `/doctor/voice-call?appointmentId=${appointmentId}`;
             className = "text-blue-500";
             break;
         case "Chat":
@@ -37,15 +38,13 @@ const TypeIcon = ({ type }: { type: string }) => {
             className = "text-purple-500";
             break;
         default:
-            return null;
+            return <span>{type}</span>;
     }
     return (
-        <Link href={href}>
-            <div className={`flex items-center gap-2 hover:underline ${className}`}>
-                {icon}
-                <span>{type}</span>
-            </div>
-        </Link>
+        <div className={`flex items-center gap-2 ${className}`}>
+            {icon}
+            <span>{type}</span>
+        </div>
     )
 };
 
@@ -200,7 +199,7 @@ export default function DoctorAppointments() {
                                 <div className="border-t pt-3 space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Appt Date:</span>
-                                    <span className="font-medium">{format(new Date(appointment.appointmentDate), 'PPp')}</span>
+                                    <span className="font-medium text-right">{format(new Date(appointment.appointmentDate), 'PPp')}</span>
                                 </div>
                                     <div className="flex justify-between">
                                     <span className="text-muted-foreground">Booking Date:</span>
