@@ -9,8 +9,9 @@ import { appointmentConverter } from '@/lib/firestore-converters';
 
 const VerifyPaymentSchema = z.object({
   reference: z.string(),
-  appointmentId: z.string(),
-  amount: z.number(),
+  // Appointment ID and amount are now optional, as we get them from Paystack's metadata
+  appointmentId: z.string().optional(), 
+  amount: z.number().optional(),
 });
 
 export async function POST(request: Request) {
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
 
-    const { reference, appointmentId, amount } = validation.data;
+    const { reference } = validation.data;
 
     // 1. Verify transaction with Paystack
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
@@ -53,7 +54,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Payment was not successful.' }, { status: 400 });
     }
 
-    // 2. Security Checks
+    // 2. Security Checks using Metadata from Paystack
+    const { appointmentId, patientId: metadataPatientId } = paystackData.data.metadata;
+    
+    if (patientId !== metadataPatientId) {
+        return NextResponse.json({ error: 'Forbidden. Payment metadata does not match logged-in user.'}, { status: 403 });
+    }
+
     const db = getAdminDb();
     const appointmentRef = db.collection('appointments').doc(appointmentId).withConverter(appointmentConverter);
     const appointmentDoc = await appointmentRef.get();
@@ -63,22 +70,21 @@ export async function POST(request: Request) {
     }
 
     const appointment = appointmentDoc.data()!;
-    if (appointment.patientId !== patientId) {
-        return NextResponse.json({ error: 'Forbidden. This appointment does not belong to you.' }, { status: 403 });
-    }
     
     // Check amount. Paystack returns amount in kobo.
-    const amountInKobo = Math.round(amount * 100);
-    if (paystackData.data.amount !== amountInKobo) {
-        // Here you might want to flag for manual review instead of just erroring
-        console.warn(`Amount mismatch for appointment ${appointmentId}. Paystack: ${paystackData.data.amount}, Expected: ${amountInKobo}`);
+    const expectedAmountInKobo = Math.round(parseFloat(appointment.amount) * 100);
+    // Allow for small discrepancies in total calculation if booking fees etc are involved
+    // Here we're using the amount stored in the appointment itself as the source of truth.
+    // If you add fees, calculate it here again.
+    // This is a simplified check:
+    if (paystackData.data.amount < expectedAmountInKobo) {
+        console.warn(`Amount mismatch for appointment ${appointmentId}. Paystack: ${paystackData.data.amount}, Expected: at least ${expectedAmountInKobo}`);
         return NextResponse.json({ error: 'Payment amount mismatch.' }, { status: 400 });
     }
 
     // 3. Update Firestore
     await appointmentRef.update({
         isPaid: true,
-        // you might want to store the payment reference as well
         paymentReference: reference,
     });
 

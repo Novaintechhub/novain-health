@@ -27,6 +27,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import type { Appointment } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const TypeIcon = ({ type }: { type: string }) => {
     let icon;
@@ -248,6 +249,9 @@ export default function Appointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
 
   const fetchAppointments = async () => {
     if (!user) {
@@ -256,6 +260,7 @@ export default function Appointments() {
     };
     
     try {
+      setLoading(true);
       const idToken = await user.getIdToken();
       const response = await fetch('/api/appointments', {
           headers: {
@@ -275,6 +280,61 @@ export default function Appointments() {
   useEffect(() => {
     fetchAppointments();
   }, [user]);
+
+  useEffect(() => {
+    const verifyAndClearParams = async () => {
+        if (!user) return;
+        const reference = searchParams.get('reference');
+        const trxref = searchParams.get('trxref');
+        
+        if (reference || trxref) {
+            const finalReference = reference || trxref;
+            if(!finalReference) return;
+
+            toast({ title: "Processing", description: "Verifying your payment..." });
+            try {
+                const idToken = await user.getIdToken();
+                // We don't have appointment ID in URL, so we can't send it.
+                // The verify endpoint will need to rely on the reference.
+                // Let's adapt the verify endpoint logic later if needed.
+                const response = await fetch('/api/payments/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`,
+                    },
+                    body: JSON.stringify({ reference: finalReference }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Payment verification failed.');
+                }
+                
+                toast({
+                    title: "Payment Successful!",
+                    description: "Your appointment is confirmed and paid."
+                });
+
+                await fetchAppointments(); // Refresh the appointments list
+
+            } catch (err: any) {
+                 toast({
+                    variant: "destructive",
+                    title: "Verification Failed",
+                    description: err.message,
+                });
+            } finally {
+                // Clean the URL
+                router.replace('/patients/appointments', undefined);
+            }
+        }
+    };
+
+    if(user) {
+        verifyAndClearParams();
+    }
+  }, [searchParams, user, toast, router]);
 
   const handleCancelSuccess = (cancelledId: string) => {
     setAppointments(prev => prev.map(appt => 

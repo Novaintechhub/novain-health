@@ -21,7 +21,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CheckCircle } from "lucide-react";
-import { usePaystackPayment } from "react-paystack";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -51,63 +50,6 @@ function CheckoutContent() {
   
   const consultationFee = mode === 'payment' && appointment ? parseFloat(appointment.amount) : (price ? parseFloat(price) : 0);
   const totalAmount = consultationFee + bookingFee - discount;
-
-  const paystackConfig = {
-    reference: (new Date()).getTime().toString(),
-    email: user?.email || '',
-    amount: Math.round(totalAmount * 100), // Amount in kobo
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
-  };
-
-  const initializePayment = usePaystackPayment(paystackConfig);
-
-  const verifyPayment = async (reference: string) => {
-    if (!user || !appointmentIdForPayment) return;
-    try {
-        const idToken = await user.getIdToken();
-        const response = await fetch('/api/payments/verify', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`,
-            },
-            body: JSON.stringify({ reference, appointmentId: appointmentIdForPayment, amount: totalAmount }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Payment verification failed.');
-        return result;
-    } catch (err: any) {
-        throw err;
-    }
-  }
-
-
-  const onPaymentSuccess = async (response: any) => {
-    toast({ title: "Processing", description: "Verifying your payment..." });
-    try {
-        await verifyPayment(response.reference);
-        toast({
-            title: "Payment Successful!",
-            description: "Your appointment is confirmed. You can join the call at the scheduled time."
-        });
-        router.push('/patients/appointments');
-    } catch (err: any) {
-        toast({
-            variant: "destructive",
-            title: "Verification Failed",
-            description: err.message,
-        });
-    }
-  };
-
-  const onPaymentClose = () => {
-    toast({
-        variant: "destructive",
-        title: "Payment Closed",
-        description: "You closed the payment modal without completing the payment.",
-    });
-  };
-
 
   useEffect(() => {
     const initialize = async () => {
@@ -208,8 +150,38 @@ function CheckoutContent() {
     }
   };
   
-  const handlePayment = () => {
-      initializePayment({ onSuccess: onPaymentSuccess, onClose: onPaymentClose });
+  const handlePayment = async () => {
+    if (!user || !appointmentIdForPayment) return;
+    setIsSubmitting(true);
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/payments/initialize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+                appointmentId: appointmentIdForPayment,
+                amount: totalAmount,
+                email: user.email,
+            }),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || "Failed to initialize payment.");
+        }
+        // Redirect to Paystack's payment page
+        router.push(result.authorization_url);
+
+    } catch(err: any) {
+        toast({
+            variant: "destructive",
+            title: "Payment Error",
+            description: err.message,
+        });
+        setIsSubmitting(false);
+    }
   }
 
   const isEditing = !!appointmentIdToEdit;
@@ -329,11 +301,11 @@ function CheckoutContent() {
                 </div>
                 <Button 
                   className="w-full bg-cyan-500 hover:bg-cyan-600 text-white" 
-                  onClick={mode === 'payment' ? () => initializePayment({onSuccess: onPaymentSuccess, onClose: onPaymentClose}) : handleRequestAppointment}
+                  onClick={mode === 'payment' ? handlePayment : handleRequestAppointment}
                   disabled={isSubmitting}
                 >
                   {isSubmitting 
-                    ? (mode === 'payment' ? 'Processing...' : 'Submitting...') 
+                    ? (mode === 'payment' ? 'Redirecting...' : 'Submitting...') 
                     : (mode === 'payment' ? 'Pay Now' : (isEditing ? "Confirm Reschedule" : "Request an Appointment"))
                   }
                 </Button>
