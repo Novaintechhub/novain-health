@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovainHealth Payment Successful</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f7;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #00A76F; /* Green for success */
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 40px;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .details-box {
+            background-color: #f9f9f9;
+            border: 1px solid #eeeeee;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .details-box p {
+            margin: 5px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #D90067;
+            color: #ffffff;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+        .footer {
+            background-color: #f4f4f7;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #888888;
+        }
+        .footer a {
+            color: #46C8F5;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{appLogoUrl}}" alt="NovainHealth Logo" style="width: 150px; height: auto; margin-bottom: 20px;">
+            <h1>Payment Successful!</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{patientName}},</p>
+            <p>Your payment has been successfully processed, and your appointment with <strong>{{doctorName}}</strong> is now fully booked and confirmed.</p>
+            
+            <div class="details-box">
+                <p><strong>Doctor:</strong> {{doctorName}}</p>
+                <p><strong>Date:</strong> {{appointmentDate}}</p>
+                <p><strong>Time:</strong> {{appointmentTime}}</p>
+                <p><strong>Amount Paid:</strong> ₦{{amount}}</p>
+            </div>
+
+            <p>We look forward to your consultation. You can view the appointment details in your dashboard at any time.</p>
+             <a href="{{appUrl}}/patients/appointments" class="button" style="color: #ffffff;">View My Appointments</a>
+            <br><br>
+            <p>Best regards,<br>The NovainHealth Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 NovainHealth. All rights reserved.</p>
+            <p><a href="{{appUrl}}">Visit our website</a> | <a href="{{privacyPolicyUrl}}">Privacy Policy</a></p>
+        </div>
+    </div>
+</body>
+</html>

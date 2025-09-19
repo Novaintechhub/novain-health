@@ -5,7 +5,8 @@ import { NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { headers } from 'next/headers';
 import { z } from 'zod';
-import { appointmentConverter } from '@/lib/firestore-converters';
+import { appointmentConverter, doctorConverter, patientConverter } from '@/lib/firestore-converters';
+import { sendPaymentConfirmationEmails } from '@/services/emailService';
 
 const VerifyPaymentSchema = z.object({
   reference: z.string(),
@@ -88,14 +89,46 @@ export async function POST(request: Request) {
         paymentReference: reference,
     });
 
-    // Optionally create a notification for the doctor
-    await db.collection('notifications').add({
-        userId: appointment.doctorId,
-        message: `${appointment.patientName} has paid for the appointment.`,
-        link: `/doctor/appointments`,
-        createdAt: new Date().toISOString(),
-        read: false,
-    });
+    const patientRef = db.collection('patients').doc(appointment.patientId).withConverter(patientConverter);
+    const doctorRef = db.collection('doctors').doc(appointment.doctorId).withConverter(doctorConverter);
+
+    const [patientDoc, doctorDoc] = await Promise.all([patientRef.get(), doctorRef.get()]);
+
+    if(patientDoc.exists && doctorDoc.exists) {
+        const patientData = patientDoc.data()!;
+        const doctorData = doctorDoc.data()!;
+
+        // 4. Send Notifications
+        const notificationPromises = [];
+        // Doctor in-app notification
+        notificationPromises.push(db.collection('notifications').add({
+            userId: appointment.doctorId,
+            message: `${appointment.patientName} has paid for their appointment.`,
+            link: `/doctor/appointments`,
+            createdAt: new Date().toISOString(),
+            read: false,
+        }));
+        // Patient in-app notification
+        notificationPromises.push(db.collection('notifications').add({
+            userId: appointment.patientId,
+            message: `Your payment for the appointment with ${appointment.doctorName} was successful.`,
+            link: `/patients/appointments`,
+            createdAt: new Date().toISOString(),
+            read: false,
+        }));
+
+        await Promise.all(notificationPromises);
+        
+        // 5. Send Emails
+        await sendPaymentConfirmationEmails({
+            patient: { name: patientData.firstName, email: patientData.email! },
+            doctor: { name: `Dr. ${doctorData.firstName}`, email: doctorData.email! },
+            appointmentDate: new Date(appointment.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+            appointmentTime: new Date(appointment.appointmentDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+            amount: appointment.amount,
+        });
+
+    }
 
 
     return NextResponse.json({ message: 'Payment verified and appointment updated successfully' });
