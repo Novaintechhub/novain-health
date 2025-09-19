@@ -12,17 +12,9 @@ import { Video, Phone, MessageSquare, Printer, Eye } from "lucide-react";
 import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-
-type Appointment = {
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  date: string;
-  bookingDate: string;
-  type: string;
-  status: string;
-  amount: string;
-};
+import { useAuth } from "@/context/AuthContext";
+import type { Appointment } from "@/lib/types";
+import { format } from 'date-fns';
 
 const TypeIcon = ({ type }: { type: string }) => {
     let icon;
@@ -57,11 +49,12 @@ const TypeIcon = ({ type }: { type: string }) => {
     )
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
   const statusClasses: { [key: string]: string } = {
-    Confirm: 'bg-green-100 text-green-800',
+    Approved: 'bg-green-100 text-green-800',
     Cancelled: 'bg-red-100 text-red-800',
     Pending: 'bg-yellow-100 text-yellow-800',
+    Completed: 'bg-blue-100 text-blue-800',
   };
 
   return <Badge className={`capitalize ${statusClasses[status] || ''}`}>{status}</Badge>;
@@ -71,11 +64,22 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function DoctorAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchAppointments() {
+      if (!user) {
+          setLoading(false);
+          return;
+      }
       try {
-        const response = await fetch('/api/appointments');
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/doctor/appointments', {
+            headers: {
+                'Authorization': `Bearer ${idToken}`
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch appointments');
         const data = await response.json();
         setAppointments(data);
       } catch (error) {
@@ -85,7 +89,7 @@ export default function DoctorAppointments() {
       }
     }
     fetchAppointments();
-  }, []);
+  }, [user]);
 
   return (
     <div className="space-y-4">
@@ -134,26 +138,26 @@ export default function DoctorAppointments() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {appointments.map((appointment, index) => (
-                                        <TableRow key={index}>
+                                    {appointments.map((appointment) => (
+                                        <TableRow key={appointment.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-10 w-10">
-                                                        <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                                                        <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                                        <AvatarImage src={appointment.patientAvatar} alt={appointment.patientName} data-ai-hint={appointment.patientAvatarHint} />
+                                                        <AvatarFallback>{appointment.patientName.charAt(0)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="font-medium">{appointment.name}</span>
+                                                    <span className="font-medium">{appointment.patientName}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <div>{appointment.date.split(',')[0]}</div>
-                                                <div className="text-sm text-muted-foreground">{appointment.date.split(',')[1]}</div>
+                                                <div>{format(new Date(appointment.appointmentDate), 'do MMM yyyy')}</div>
+                                                <div className="text-sm text-muted-foreground">{format(new Date(appointment.appointmentDate), 'p')}</div>
                                             </TableCell>
-                                            <TableCell>{appointment.bookingDate}</TableCell>
+                                            <TableCell>{format(new Date(appointment.bookingDate), 'do MMM yyyy')}</TableCell>
                                             <TableCell>
                                                 <TypeIcon type={appointment.type} />
                                             </TableCell>
-                                            <TableCell>{appointment.amount}</TableCell>
+                                            <TableCell>₦{appointment.amount}</TableCell>
                                             <TableCell>
                                                 <StatusBadge status={appointment.status} />
                                             </TableCell>
@@ -164,7 +168,7 @@ export default function DoctorAppointments() {
                                                         Print
                                                     </Button>
                                                     <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                                        <Link href="/doctor/view-appointment">
+                                                        <Link href={`/doctor/view-appointment?id=${appointment.id}`}>
                                                             <Eye className="w-4 h-4 mr-1" />
                                                             View
                                                         </Link>
@@ -180,27 +184,27 @@ export default function DoctorAppointments() {
                     </div>
                     {/* Mobile View */}
                     <div className="md:hidden space-y-4">
-                        {appointments.map((appointment, index) => (
-                            <Card key={index} className="shadow-md">
+                        {appointments.map((appointment) => (
+                            <Card key={appointment.id} className="shadow-md">
                             <CardContent className="p-4 space-y-3">
                                 <div className="flex items-center gap-3">
                                 <Avatar className="h-12 w-12">
-                                    <AvatarImage src={appointment.avatarUrl} alt={appointment.name} data-ai-hint={appointment.avatarHint} />
-                                    <AvatarFallback>{appointment.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={appointment.patientAvatar} alt={appointment.patientName} data-ai-hint={appointment.patientAvatarHint} />
+                                    <AvatarFallback>{appointment.patientName.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-bold">{appointment.name}</p>
+                                    <p className="font-bold">{appointment.patientName}</p>
                                     <StatusBadge status={appointment.status} />
                                 </div>
                                 </div>
                                 <div className="border-t pt-3 space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Appt Date:</span>
-                                    <span className="font-medium">{appointment.date}</span>
+                                    <span className="font-medium">{format(new Date(appointment.appointmentDate), 'PPp')}</span>
                                 </div>
                                     <div className="flex justify-between">
                                     <span className="text-muted-foreground">Booking Date:</span>
-                                    <span className="font-medium">{appointment.bookingDate}</span>
+                                    <span className="font-medium">{format(new Date(appointment.bookingDate), 'PP')}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">Type:</span>
@@ -208,7 +212,7 @@ export default function DoctorAppointments() {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Amount:</span>
-                                    <span className="font-medium">{appointment.amount}</span>
+                                    <span className="font-medium">₦{appointment.amount}</span>
                                 </div>
                                 </div>
                                 <div className="flex gap-2 justify-end border-t pt-3">
@@ -217,7 +221,7 @@ export default function DoctorAppointments() {
                                         Print
                                     </Button>
                                     <Button asChild variant="outline" size="sm" className="bg-green-100 text-green-600 border-none hover:bg-green-200">
-                                        <Link href="/doctor/view-appointment">
+                                        <Link href={`/doctor/view-appointment?id=${appointment.id}`}>
                                             <Eye className="w-4 h-4 mr-1" />
                                             View
                                         </Link>
