@@ -57,45 +57,98 @@ import {
   FileText,
   Briefcase,
   FlaskConical,
+  Video,
 } from "lucide-react";
 import Link from "next/link";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
-import type { DoctorProfile } from '@/lib/types';
+import type { DoctorProfile, Appointment } from '@/lib/types';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 
 function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, handleSignOut, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndAppointments = async () => {
       if (!user) return;
+      setLoading(true);
       try {
         const idToken = await user.getIdToken();
-        const response = await fetch('/api/doctor/profile', {
-          headers: { 'Authorization': `Bearer ${idToken}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
+        const [profileRes, appointmentsRes] = await Promise.all([
+           fetch('/api/doctor/profile', {
+            headers: { 'Authorization': `Bearer ${idToken}` },
+          }),
+          fetch('/api/doctor/appointments', {
+            headers: { 'Authorization': `Bearer ${idToken}` },
+          })
+        ]);
+        
+        if (profileRes.ok) {
+          const data = await profileRes.json();
           setProfile(data);
         }
+        if (appointmentsRes.ok) {
+            const data = await appointmentsRes.json();
+            setAppointments(data);
+        }
       } catch (error) {
-        console.error("Failed to fetch doctor profile:", error);
+        console.error("Failed to fetch doctor data:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (user) {
-      fetchProfile();
+      fetchProfileAndAppointments();
     } else if (!authLoading) {
       setLoading(false);
     }
   }, [user, authLoading]);
+
+  useEffect(() => {
+    if (!user || appointments.length === 0) return;
+
+    const appointmentIds = appointments.map(a => a.id);
+    const callsQuery = query(collection(db, 'calls'), where('__name__', 'in', appointmentIds));
+
+    const unsubscribe = onSnapshot(callsQuery, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const callData = change.doc.data();
+                if (callData.callerId !== user.uid) {
+                    const appointment = appointments.find(a => a.id === change.doc.id);
+                    if (appointment) {
+                        toast({
+                            title: "Incoming Video Call",
+                            description: `${appointment.patientName} is calling you.`,
+                            duration: 30000, // 30 seconds
+                            action: (
+                                <Link href={`/doctor/video-call?appointmentId=${appointment.id}`}>
+                                    <ToastAction altText="Join call" className="bg-green-500 hover:bg-green-600">
+                                        <Video className="mr-2"/>
+                                        Join
+                                    </ToastAction>
+                                </Link>
+                            )
+                        });
+                    }
+                }
+            }
+        });
+    });
+
+    return () => unsubscribe();
+  }, [user, appointments, toast]);
 
   const LogoutDialog = ({ trigger }: { trigger: React.ReactNode }) => (
     <AlertDialog>
