@@ -15,7 +15,11 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 
-export const useWebRTC = (appointmentId: string, localStream: MediaStream | null, callerId: string) => {
+type WebRTCOptions = {
+  video: boolean;
+};
+
+export const useWebRTC = (appointmentId: string, localStream: MediaStream | null, callerId: string, options: WebRTCOptions = { video: true }) => {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const pc = useRef<RTCPeerConnection | null>(null);
@@ -58,7 +62,7 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
         if (event.candidate) {
             await fetch(`/api/calls/${appointmentId}/ice`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user?.getIdToken()}` },
                 body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'caller' }),
             });
         }
@@ -71,10 +75,12 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
       sdp: offerDescription.sdp,
       type: offerDescription.type,
     };
+    
+    const user = (await import('firebase/auth')).getAuth().currentUser;
 
     const response = await fetch(`/api/calls/${appointmentId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user?.getIdToken()}` },
         body: JSON.stringify({ offer, callerId }),
     });
 
@@ -113,6 +119,8 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
     if (!localStream || !appointmentId) return;
     setupPeerConnection();
     if (!pc.current) return;
+    
+    const user = (await import('firebase/auth')).getAuth().currentUser;
 
     const callDoc = doc(db, 'calls', appointmentId);
     
@@ -120,7 +128,7 @@ export const useWebRTC = (appointmentId: string, localStream: MediaStream | null
         if (event.candidate) {
             await fetch(`/api/calls/${appointmentId}/ice`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user?.getIdToken()}` },
                 body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'callee' }),
             });
         }

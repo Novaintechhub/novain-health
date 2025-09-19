@@ -33,7 +33,7 @@ export default function VideoCall() {
   const { user, role } = useAuth();
   const appointmentId = searchParams.get('appointmentId');
 
-  const { remoteStream, startCall, joinCall, hangUp, isConnected } = useWebRTC(appointmentId || '', localStream, user?.uid || '');
+  const { remoteStream, startCall, joinCall, hangUp, isConnected } = useWebRTC(appointmentId || '', localStream, user?.uid || '', { video: true });
 
   useEffect(() => {
     const fetchAppointment = async () => {
