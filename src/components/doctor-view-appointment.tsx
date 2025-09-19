@@ -116,7 +116,7 @@ export default function DoctorViewAppointment() {
         href = "/doctor/video-call";
         icon = <Video className="mr-2 h-4 w-4" />;
         text = "Start Video Call";
-    } else if (appointment.type === "Audio Call") {
+    } else if (appointment.type === "Voice Call") {
         href = "/doctor/voice-call";
         icon = <Phone className="mr-2 h-4 w-4" />;
         text = "Start Voice Call";
