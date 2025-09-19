@@ -109,8 +109,8 @@ export default function PatientDashboard() {
             </TableHeader>
             <TableBody>
               {upcomingAppointments.length > 0 ? (
-                upcomingAppointments.map((appt, index) => (
-                    <TableRow key={index}>
+                upcomingAppointments.map((appt) => (
+                    <TableRow key={appt.id}>
                     <TableCell>
                         <div className="flex items-center gap-3">
                         <Avatar>
@@ -127,7 +127,7 @@ export default function PatientDashboard() {
                     <TableCell>{format(new Date(appt.appointmentDate), 'p')}</TableCell>
                     <TableCell className="text-right">
                         <Button asChild variant="outline">
-                            <Link href="/patients/appointments">View</Link>
+                            <Link href={`/patients/view-appointment?id=${appt.id}`}>View</Link>
                         </Button>
                     </TableCell>
                     </TableRow>
