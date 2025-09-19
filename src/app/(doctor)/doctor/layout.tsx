@@ -65,8 +65,6 @@ import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import type { DoctorProfile, Appointment } from '@/lib/types';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 
@@ -115,25 +113,32 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
     }
   }, [user, authLoading]);
 
-  useEffect(() => {
+   useEffect(() => {
     if (!user || appointments.length === 0) return;
 
     const appointmentIds = appointments.map(a => a.id);
-    if (appointmentIds.length === 0) return;
 
-    const callsQuery = query(collection(db, 'calls'), where('__name__', 'in', appointmentIds));
+    const checkCall = async () => {
+        try {
+            const idToken = await user.getIdToken();
+            const response = await fetch('/api/calls/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ appointmentIds })
+            });
 
-    const unsubscribe = onSnapshot(callsQuery, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
-                const callData = change.doc.data();
-                if (callData.callerId !== user.uid) {
-                    const appointment = appointments.find(a => a.id === change.doc.id);
+            if (response.ok) {
+                const { incomingCall } = await response.json();
+                if (incomingCall) {
+                    const appointment = appointments.find(a => a.id === incomingCall.appointmentId);
                     if (appointment) {
                         toast({
                             title: "Incoming Video Call",
                             description: `${appointment.patientName} is calling you.`,
-                            duration: 30000, // 30 seconds
+                            duration: 30000,
                             action: (
                                 <Link href={`/doctor/video-call?appointmentId=${appointment.id}`}>
                                     <ToastAction altText="Join call" className="bg-green-500 hover:bg-green-600">
@@ -146,10 +151,15 @@ function DoctorDashboardLayout({ children }: { children: React.ReactNode }) {
                     }
                 }
             }
-        });
-    });
+        } catch (error) {
+            console.error("Error checking for calls:", error);
+        }
+    };
+    
+    const interval = setInterval(checkCall, 5000); // Poll every 5 seconds
 
-    return () => unsubscribe();
+    return () => clearInterval(interval);
+
   }, [user, appointments, toast]);
 
   const LogoutDialog = ({ trigger }: { trigger: React.ReactNode }) => (
