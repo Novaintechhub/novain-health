@@ -47,14 +47,14 @@ const sendEmail = async (mailOptions: nodemailer.SendMailOptions) => {
 
 export const sendVerificationEmail = async (email: string, name: string, otp: string) => {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const appLogoUrl = `${appUrl}/logo.png`;
+    const appLogoUrl = `${appUrl}logo.png`;
 
     let htmlContent = readEmailTemplate('otp.html');
     htmlContent = htmlContent.replace(/{{name}}/g, name)
                                 .replace(/{{otp}}/g, otp)
                                 .replace(/{{appUrl}}/g, appUrl)
                                 .replace(/{{appLogoUrl}}/g, appLogoUrl)
-                                .replace(/{{privacyPolicyUrl}}/g, `${appUrl}/privacy-policy`);
+                                .replace(/{{privacyPolicyUrl}}/g, `${appUrl}privacy-policy`);
 
     await sendEmail({
         to: email,
@@ -73,11 +73,11 @@ type AppointmentEmailPayload = {
 
 export const sendAppointmentRequestEmails = async (payload: AppointmentEmailPayload) => {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const appLogoUrl = `${appUrl}/logo.png`;
+    const appLogoUrl = `${appUrl}logo.png`;
     const commonValues = {
         appUrl,
         appLogoUrl,
-        privacyPolicyUrl: `${appUrl}/privacy-policy`,
+        privacyPolicyUrl: `${appUrl}privacy-policy`,
         appointmentDate: payload.appointmentDate,
         appointmentTime: payload.appointmentTime,
     };
@@ -102,7 +102,7 @@ export const sendAppointmentRequestEmails = async (payload: AppointmentEmailPayl
     let doctorHtml = readEmailTemplate('appointment-request-doctor.html');
     doctorHtml = doctorHtml.replace(/{{doctorName}}/g, payload.doctor.name)
                            .replace(/{{patientName}}/g, payload.patient.name)
-                           .replace(/{{dashboardUrl}}/g, `${appUrl}/doctor/appointments`)
+                           .replace(/{{dashboardUrl}}/g, `${appUrl}doctor/appointments`)
                            .replace(/{{appUrl}}/g, commonValues.appUrl)
                            .replace(/{{appLogoUrl}}/g, commonValues.appLogoUrl)
                            .replace(/{{privacyPolicyUrl}}/g, commonValues.privacyPolicyUrl)
@@ -131,8 +131,8 @@ export const sendAppointmentConfirmedEmail = async (payload: AppointmentConfirme
                              .replace(/{{appointmentDate}}/g, payload.appointmentDate)
                              .replace(/{{appointmentTime}}/g, payload.appointmentTime)
                              .replace(/{{appUrl}}/g, appUrl)
-                             .replace(/{{appLogoUrl}}/g, `${appUrl}/logo.png`)
-                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}/privacy-policy`);
+                             .replace(/{{appLogoUrl}}/g, `${appUrl}logo.png`)
+                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}privacy-policy`);
 
     await sendEmail({
         to: payload.patient.email,
@@ -156,8 +156,8 @@ export const sendAppointmentRescheduledEmail = async (payload: AppointmentResche
                              .replace(/{{appointmentDate}}/g, payload.appointmentDate)
                              .replace(/{{appointmentTime}}/g, payload.appointmentTime)
                              .replace(/{{appUrl}}/g, appUrl)
-                             .replace(/{{appLogoUrl}}/g, `${appUrl}/logo.png`)
-                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}/privacy-policy`);
+                             .replace(/{{appLogoUrl}}/g, `${appUrl}logo.png`)
+                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}privacy-policy`);
 
     await sendEmail({
         to: payload.patient.email,
@@ -184,8 +184,8 @@ export const sendAppointmentCancelledEmail = async (payload: AppointmentCancelle
                              .replace(/{{appointmentTime}}/g, payload.appointmentTime)
                              .replace(/{{reason}}/g, payload.reason)
                              .replace(/{{appUrl}}/g, appUrl)
-                             .replace(/{{appLogoUrl}}/g, `${appUrl}/logo.png`)
-                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}/privacy-policy`);
+                             .replace(/{{appLogoUrl}}/g, `${appUrl}logo.png`)
+                             .replace(/{{privacyPolicyUrl}}/g, `${appUrl}privacy-policy`);
 
     await sendEmail({
         to: payload.patient.email,
