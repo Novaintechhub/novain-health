@@ -9,7 +9,7 @@ import { appointmentConverter } from '@/lib/firestore-converters';
 
 export async function GET(request: Request) {
   try {
-    const headersList = headers();
+    const headersList = request.headers;
     const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
     
     if (!idToken) {

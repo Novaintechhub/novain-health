@@ -1,199 +1,262 @@
-
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { useToast } from './use-toast';
-
-const servers = {
-  iceServers: [
-    {
-      urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
+import { useToast } from '@/hooks/use-toast';
 
 type WebRTCOptions = {
   video: boolean;
 };
 
-export const useWebRTC = (appointmentId: string, localStream: MediaStream | null, callerId: string, options: WebRTCOptions = { video: true }) => {
+const servers: RTCConfiguration = {
+  iceServers: [
+    { urls: ['stun:stun.l.google.com:19302'] },
+    ...(process.env.NEXT_PUBLIC_TURN_URL
+      ? [{
+          urls: process.env.NEXT_PUBLIC_TURN_URL as string,
+          username: process.env.NEXT_PUBLIC_TURN_USERNAME as string,
+          credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL as string,
+        } as RTCIceServer]
+      : []),
+  ],
+  iceCandidatePoolSize: 10,
+};
+
+export const useWebRTC = (
+  appointmentId: string,
+  localStream: MediaStream | null,
+  callerId: string,
+  _options: WebRTCOptions = { video: true }
+) => {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isCaller, setIsCaller] = useState<boolean | null>(null);
+
   const pc = useRef<RTCPeerConnection | null>(null);
   const cleanupPerformed = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSeenWatermark = useRef<number>(Date.now() - 10_000); // for /poll?since=
   const { toast } = useToast();
 
-  const setupPeerConnection = useCallback(() => {
+  const ensurePC = useCallback(() => {
     if (pc.current) return;
-    
+
     pc.current = new RTCPeerConnection(servers);
-    
+
     if (localStream) {
-        localStream.getTracks().forEach((track) => {
-          pc.current?.addTrack(track, localStream);
-        });
+      localStream.getTracks().forEach((track) => {
+        pc.current?.addTrack(track, localStream);
+      });
     }
 
     pc.current.ontrack = (event) => {
-        setRemoteStream(event.streams[0]);
-        setIsConnected(true);
+      // Use the first stream (typical SFU/mesh)
+      setRemoteStream(event.streams[0]);
+      setIsConnected(true);
     };
 
     pc.current.onconnectionstatechange = () => {
-      if(pc.current?.connectionState === 'disconnected' || pc.current?.connectionState === 'failed' || pc.current?.connectionState === 'closed') {
-        setIsConnected(false);
-      }
-    }
-
+      const s = pc.current?.connectionState;
+      if (s === 'connected' || s === 'completed') setIsConnected(true);
+      if (s === 'disconnected' || s === 'failed' || s === 'closed') setIsConnected(false);
+    };
   }, [localStream]);
 
-  const pollForUpdates = useCallback(async (isCaller: boolean) => {
-      const user = getAuth().currentUser;
-      if (!user) return;
-      
+  const pollForUpdates = useCallback(async (callerPerspective: boolean) => {
+    const user = getAuth().currentUser;
+    if (!user || !pc.current) return;
+
+    try {
       const idToken = await user.getIdToken();
-      const response = await fetch(`/api/calls/${appointmentId}/poll`, {
-        headers: { 'Authorization': `Bearer ${idToken}` }
+      const res = await fetch(`/api/calls/${appointmentId}/poll?since=${lastSeenWatermark.current}`, {
+        headers: { 'Authorization': `Bearer ${idToken}` },
+        cache: 'no-store',
       });
-      
-      if (!response.ok) return;
+      if (!res.ok) return;
 
-      const { answer, candidates } = await response.json();
+      const { answer, candidates } = await res.json();
 
-      if (!pc.current) return;
-
-      if (isCaller && !pc.current.currentRemoteDescription && answer) {
-          await pc.current.setRemoteDescription(new RTCSessionDescription(answer));
+      // Caller receives answer
+      if (callerPerspective && answer && !pc.current.currentRemoteDescription) {
+        await pc.current.setRemoteDescription(new RTCSessionDescription(answer));
       }
 
-      candidates.forEach((candidate: RTCIceCandidateInit) => {
-          pc.current?.addIceCandidate(new RTCIceCandidate(candidate));
-      });
-
+      // Both sides consume the other party's ICE
+      if (Array.isArray(candidates)) {
+        for (const c of candidates) {
+          try {
+            await pc.current.addIceCandidate(new RTCIceCandidate(c));
+          } catch (e) {
+            console.warn('addIceCandidate failed', e);
+          }
+        }
+      }
+      lastSeenWatermark.current = Date.now();
+    } catch (e) {
+      console.error('pollForUpdates error:', e);
+    }
   }, [appointmentId]);
 
+  const startCall = useCallback(async (): Promise<boolean> => {
+    if (!localStream || !callerId || !appointmentId) return false;
 
-  const startCall = useCallback(async () => {
-    if (!localStream || !callerId || !appointmentId) return;
+    ensurePC();
+    if (!pc.current) return false;
 
-    setupPeerConnection();
-    if (!pc.current) return;
-    
     const user = getAuth().currentUser;
-    if (!user) return;
+    if (!user) return false;
 
     pc.current.onicecandidate = async (event) => {
-        if (event.candidate) {
-            await fetch(`/api/calls/${appointmentId}/ice`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user.getIdToken()}` },
-                body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'caller' }),
-            });
-        }
-    };
-    
-    const offerDescription = await pc.current.createOffer();
-    await pc.current.setLocalDescription(offerDescription);
-
-    const offer = {
-      sdp: offerDescription.sdp,
-      type: offerDescription.type,
+      if (event.candidate) {
+        await fetch(`/api/calls/${appointmentId}/ice`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await user.getIdToken()}`,
+          },
+          body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'caller' }),
+        }).catch(() => {});
+      }
     };
 
-    const response = await fetch(`/api/calls/${appointmentId}`, {
+    try {
+      const offerDescription = await pc.current.createOffer();
+      await pc.current.setLocalDescription(offerDescription);
+
+      const offer = { sdp: offerDescription.sdp!, type: offerDescription.type };
+
+      const response = await fetch(`/api/calls/${appointmentId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user.getIdToken()}` },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`,
+        },
         body: JSON.stringify({ offer, callerId }),
-    });
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to start the call.' });
-        return;
+        return false;
+      }
+
+      setIsCaller(true);
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = setInterval(() => pollForUpdates(true), 3000);
+      return true;
+    } catch (e) {
+      console.error('startCall error:', e);
+      return false;
     }
+  }, [appointmentId, callerId, ensurePC, localStream, pollForUpdates, toast]);
 
-    pollIntervalRef.current = setInterval(() => pollForUpdates(true), 3000);
+  const joinCall = useCallback(async (): Promise<boolean> => {
+    if (!localStream || !appointmentId) return false;
 
-  }, [appointmentId, setupPeerConnection, callerId, localStream, toast, pollForUpdates]);
-  
-  const joinCall = useCallback(async () => {
-    if (!localStream || !appointmentId) return;
-    setupPeerConnection();
-    if (!pc.current) return;
-    
+    ensurePC();
+    if (!pc.current) return false;
+
     const user = getAuth().currentUser;
-    if (!user) return;
+    if (!user) return false;
 
     pc.current.onicecandidate = async (event) => {
-        if (event.candidate) {
-            await fetch(`/api/calls/${appointmentId}/ice`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await user.getIdToken()}` },
-                body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'callee' }),
-            });
-        }
+      if (event.candidate) {
+        await fetch(`/api/calls/${appointmentId}/ice`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await user.getIdToken()}`,
+          },
+          body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'callee' }),
+        }).catch(() => {});
+      }
     };
 
-    const callDocRef = doc(db, 'calls', appointmentId);
-    const callSnapshot = await getDoc(callDocRef);
-    
-    if (callSnapshot.exists()) {
-        const offerDescription = callSnapshot.data().offer;
-        await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
+    try {
+      const callDocRef = doc(db, 'calls', appointmentId);
+      const callSnapshot = await getDoc(callDocRef);
 
-        const answerDescription = await pc.current.createAnswer();
-        await pc.current.setLocalDescription(answerDescription);
+      if (!callSnapshot.exists()) {
+        // No offer yet — not an error; let the caller be whoever starts first.
+        return false;
+      }
 
-        const answer = {
-            type: answerDescription.type,
-            sdp: answerDescription.sdp,
-        };
+      const offerDescription = callSnapshot.data().offer;
+      if (!offerDescription) return false;
 
-        await updateDoc(callDocRef, { answer });
-        
-        pollIntervalRef.current = setInterval(() => pollForUpdates(false), 3000);
-    } else {
-        toast({ variant: 'destructive', title: 'Call not found', description: 'The other user may not have started the call yet.'})
+      await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
+
+      const answerDescription = await pc.current.createAnswer();
+      await pc.current.setLocalDescription(answerDescription);
+
+      const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
+      await updateDoc(callDocRef, { answer });
+
+      setIsCaller(false);
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = setInterval(() => pollForUpdates(false), 3000);
+      return true;
+    } catch (e) {
+      console.error('joinCall error:', e);
+      return false;
     }
-  }, [appointmentId, setupPeerConnection, localStream, toast, pollForUpdates]);
+  }, [appointmentId, ensurePC, localStream, pollForUpdates]);
+
+  /**
+   * Initiate or join depending on whether the call doc exists.
+   * Whoever arrives first becomes caller; the other joins.
+   */
+  const startOrJoin = useCallback(async () => {
+    // Try to join first (if an offer already exists)
+    const joined = await joinCall();
+    if (joined) return 'joined';
+
+    // Otherwise, become the caller
+    const started = await startCall();
+    if (started) return 'started';
+
+    // If neither worked, let the UI handle it (permissions, etc.)
+    return 'idle';
+  }, [joinCall, startCall]);
 
   const hangUp = useCallback(async () => {
     if (cleanupPerformed.current) return;
     cleanupPerformed.current = true;
-    
+
     if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
+      clearInterval(pollIntervalRef.current);
     }
 
-    localStream?.getTracks().forEach((track) => track.stop());
+    localStream?.getTracks().forEach((t) => t.stop());
     pc.current?.close();
 
+    // Caller cleans up the call doc; callee tries as well but may no-op if already removed.
     if (appointmentId) {
-        try {
-            const callDocRef = doc(db, 'calls', appointmentId);
-            const callSnap = await getDoc(callDocRef);
+      try {
+        const callDocRef = doc(db, 'calls', appointmentId);
+        const callSnap = await getDoc(callDocRef);
 
-            if (callSnap.exists()) {
-                const callerCandidates = await getDocs(collection(callDocRef, 'callerCandidates'));
-                callerCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
-                
-                const calleeCandidates = await getDocs(collection(callDocRef, 'calleeCandidates'));
-                calleeCandidates.forEach(async (candidate) => await deleteDoc(candidate.ref));
-                
-                await deleteDoc(callDocRef);
-            }
-        } catch (error) {
-            console.error("Error during hangup cleanup:", error);
+        if (callSnap.exists()) {
+          const callerCandidates = await getDocs(collection(callDocRef, 'callerCandidates'));
+          for (const c of callerCandidates.docs) await deleteDoc(c.ref);
+
+          const calleeCandidates = await getDocs(collection(callDocRef, 'calleeCandidates'));
+          for (const c of calleeCandidates.docs) await deleteDoc(c.ref);
+
+          await deleteDoc(callDocRef);
         }
+      } catch (error) {
+        // Ignore—other side may have cleaned up.
+        console.warn("hangUp cleanup:", error);
+      }
     }
-    
+
     setRemoteStream(null);
     pc.current = null;
+    setIsCaller(null);
+    setIsConnected(false);
   }, [appointmentId, localStream]);
 
-  return { remoteStream, isConnected, startCall, joinCall, hangUp };
+  return { remoteStream, isConnected, isCaller, startCall, joinCall, startOrJoin, hangUp };
 };
