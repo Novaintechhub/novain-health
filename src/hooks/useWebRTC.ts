@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -110,11 +111,12 @@ export const useWebRTC = (
 
     pc.current.onicecandidate = async (event) => {
       if (event.candidate) {
+        const idToken = await user.getIdToken();
         await fetch(`/api/calls/${appointmentId}/ice`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await user.getIdToken()}`,
+            'Authorization': `Bearer ${idToken}`,
           },
           body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'caller' }),
         }).catch(() => {});
@@ -127,11 +129,12 @@ export const useWebRTC = (
 
       const offer = { sdp: offerDescription.sdp!, type: offerDescription.type };
 
+      const idToken = await user.getIdToken();
       const response = await fetch(`/api/calls/${appointmentId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`,
+          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({ offer, callerId }),
       });
@@ -162,11 +165,12 @@ export const useWebRTC = (
 
     pc.current.onicecandidate = async (event) => {
       if (event.candidate) {
+        const idToken = await user.getIdToken();
         await fetch(`/api/calls/${appointmentId}/ice`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await user.getIdToken()}`,
+            'Authorization': `Bearer ${idToken}`,
           },
           body: JSON.stringify({ candidate: event.candidate.toJSON(), type: 'callee' }),
         }).catch(() => {});
@@ -178,20 +182,32 @@ export const useWebRTC = (
       const callSnapshot = await getDoc(callDocRef);
 
       if (!callSnapshot.exists()) {
-        // No offer yet — not an error; let the caller be whoever starts first.
         return false;
       }
 
       const offerDescription = callSnapshot.data().offer;
       if (!offerDescription) return false;
 
+      // Check state before setting remote description
+      if (pc.current.signalingState !== 'stable') {
+          console.log('joinCall: Connection not stable, cannot join yet.');
+          return false;
+      }
+
       await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-      const answerDescription = await pc.current.createAnswer();
-      await pc.current.setLocalDescription(answerDescription);
+      // Check state before creating answer
+      if (pc.current.signalingState === 'have-remote-offer') {
+          const answerDescription = await pc.current.createAnswer();
+          await pc.current.setLocalDescription(answerDescription);
 
-      const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
-      await updateDoc(callDocRef, { answer });
+          const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
+          await updateDoc(callDocRef, { answer });
+      } else {
+          console.warn(`joinCall: Cannot create answer in state ${pc.current.signalingState}`);
+          return false;
+      }
+
 
       setIsCaller(false);
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
