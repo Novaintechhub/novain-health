@@ -113,11 +113,10 @@ function PatientDashboardLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user || appointments.length === 0) return;
 
-    const appointmentIds = appointments.map(a => a.id);
-
     const checkCall = async () => {
         try {
             const idToken = await user.getIdToken();
+            const appointmentIds = appointments.map(a => a.id);
             const response = await fetch('/api/calls/check', {
                 method: 'POST',
                 headers: {
