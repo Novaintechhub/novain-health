@@ -148,19 +148,27 @@ export default function VideoCall() {
   
   const handleEndCall = useCallback(() => {
     hangUp();
+     if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
     const redirectPath = role === 'doctor' ? '/doctor/appointments' : '/patients/appointments';
     router.push(redirectPath);
-  }, [hangUp, role, router]);
+  }, [hangUp, role, router, localStream]);
   
   // Clean up on unmount or tab close
   useEffect(() => {
-    window.addEventListener('beforeunload', hangUp);
-    return () => {
-        window.removeEventListener('beforeunload', hangUp);
-        // Ensure hangup is called if the component unmounts for other reasons (e.g., navigation)
+    const cleanup = () => {
         hangUp();
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+    };
+    window.addEventListener('beforeunload', cleanup);
+    return () => {
+        window.removeEventListener('beforeunload', cleanup);
+        cleanup();
     }
-  }, [hangUp]);
+  }, [hangUp, localStream]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
