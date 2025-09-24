@@ -1,16 +1,13 @@
-
 'use server';
 
 import { NextResponse } from 'next/server';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
-import { headers } from 'next/headers';
 import type { Appointment } from '@/lib/types';
 import { appointmentConverter } from '@/lib/firestore-converters';
 
 export async function GET(request: Request) {
   try {
-    const headersList = request.headers;
-    const idToken = headersList.get('Authorization')?.split('Bearer ')[1];
+    const idToken = request.headers.get('Authorization')?.split('Bearer ')[1];
     
     if (!idToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

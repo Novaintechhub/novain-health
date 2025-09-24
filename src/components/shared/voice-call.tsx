@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -18,7 +17,6 @@ export default function VoiceCall() {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
-  const [isCallActive, setIsCallActive] = useState(false);
 
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
 
@@ -26,9 +24,9 @@ export default function VoiceCall() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, role } = useAuth();
-  const appointmentId = searchParams.get('appointmentId');
+  const appointmentId = searchParams.get('appointmentId') || '';
 
-  const { remoteStream, startCall, joinCall, hangUp, isConnected } = useWebRTC(appointmentId || '', localStream, user?.uid || '', { video: false });
+  const { remoteStream, startOrJoin, hangUp, isConnected } = useWebRTC(appointmentId, localStream, user?.uid || '', { video: false });
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -87,36 +85,36 @@ export default function VoiceCall() {
   }, [remoteStream]);
   
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (isConnected) {
-      setIsCallActive(true);
-    }
-  }, [isConnected]);
-  
-  useEffect(() => {
-    if (isCallActive) {
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
         setCallDuration(prev => prev + 1);
       }, 1000);
-      return () => clearInterval(timer);
     }
-  }, [isCallActive]);
+    return () => clearInterval(timer);
+  }, [isConnected]);
 
   useEffect(() => {
-    if (localStream && appointment && user) {
-        if (role === 'doctor') {
-            startCall();
-        } else {
-            joinCall();
-        }
-    }
-  }, [localStream, appointment, user, role, startCall, joinCall]);
+    if (!localStream || !appointment || !user || !appointmentId) return;
+    
+    startOrJoin().then(status => {
+      if (status === 'idle') {
+        toast({
+          variant: 'destructive',
+          title: 'Call not ready',
+          description: 'Could not start or join the call. Please check microphone permissions and try again.',
+        });
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localStream, appointment, user, appointmentId, startOrJoin, toast]);
 
   const toggleMute = () => {
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
         track.enabled = !track.enabled;
       });
-      setIsMuted(!isMuted);
+      setIsMuted(prev => !prev);
     }
   };
   
@@ -127,11 +125,14 @@ export default function VoiceCall() {
   }, [hangUp, role, router]);
   
   useEffect(() => {
-    window.addEventListener('beforeunload', hangUp);
+    const cleanup = () => {
+      hangUp();
+    };
+    window.addEventListener('beforeunload', cleanup);
     return () => {
-        window.removeEventListener('beforeunload', hangUp);
-        hangUp();
-    }
+      window.removeEventListener('beforeunload', cleanup);
+      cleanup();
+    };
   }, [hangUp]);
 
   const formatDuration = (seconds: number) => {

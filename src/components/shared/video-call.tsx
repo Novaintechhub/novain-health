@@ -12,8 +12,6 @@ import { useAuth } from '@/context/AuthContext';
 import type { Appointment } from '@/lib/types';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWebRTC } from '@/hooks/useWebRTC';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
 
 export default function VideoCall() {
   const [isMuted, setIsMuted] = useState(false);
@@ -23,7 +21,6 @@ export default function VideoCall() {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
-  const [isCallActive, setIsCallActive] = useState(false);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -36,7 +33,7 @@ export default function VideoCall() {
 
   const { remoteStream, startOrJoin, hangUp, isConnected } =
     useWebRTC(appointmentId, localStream, user?.uid || '', { video: true });
-
+    
   useEffect(() => {
     const fetchAppointment = async () => {
       if (!appointmentId || !user) {
@@ -83,11 +80,12 @@ export default function VideoCall() {
     getMediaStream();
 
     return () => {
+      // This cleanup runs when the component unmounts
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
   useEffect(() => {
@@ -103,35 +101,26 @@ export default function VideoCall() {
   }, [remoteStream]);
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (isConnected) {
-      setIsCallActive(true);
+      timer = setInterval(() => setCallDuration(prev => prev + 1), 1000);
     }
+    return () => clearInterval(timer);
   }, [isConnected]);
 
   useEffect(() => {
-    if (isCallActive) {
-      const timer = setInterval(() => setCallDuration(prev => prev + 1), 1000);
-      return () => clearInterval(timer);
-    }
-  }, [isCallActive]);
+    if (!localStream || !appointment || !user || !appointmentId) return;
 
-  // ★ Initiator-agnostic start: whoever opens first becomes caller; the other joins
-  useEffect(() => {
-    const go = async () => {
-      if (!localStream || !appointment || !user || !appointmentId) return;
-
-      // Try to join if an offer exists, else start as caller
-      const status = await startOrJoin();
-
+    startOrJoin().then(status => {
       if (status === 'idle') {
         toast({
           variant: 'destructive',
           title: 'Call not ready',
-          description: 'Could not start or join the call. Check media permissions and try again.',
+          description: 'Could not start or join the call. Please check media permissions and try again.',
         });
       }
-    };
-    go();
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStream, appointment, user, appointmentId, startOrJoin, toast]);
 
   const toggleMute = () => {
@@ -139,7 +128,7 @@ export default function VideoCall() {
       localStream.getAudioTracks().forEach(track => {
         track.enabled = !track.enabled;
       });
-      setIsMuted(!isMuted);
+      setIsMuted(prev => !prev);
     }
   };
 
@@ -148,33 +137,26 @@ export default function VideoCall() {
       localStream.getVideoTracks().forEach(track => {
         track.enabled = !track.enabled;
       });
-      setIsCameraOff(!isCameraOff);
+      setIsCameraOff(prev => !prev);
     }
   };
 
   const handleEndCall = useCallback(() => {
     hangUp();
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
     const redirectPath = role === 'doctor' ? '/doctor/appointments' : '/patients/appointments';
     router.push(redirectPath);
-  }, [hangUp, role, router, localStream]);
+  }, [hangUp, role, router]);
 
-  // Clean up on unmount or tab close
   useEffect(() => {
     const cleanup = () => {
       hangUp();
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-      }
     };
     window.addEventListener('beforeunload', cleanup);
     return () => {
       window.removeEventListener('beforeunload', cleanup);
       cleanup();
     };
-  }, [hangUp, localStream]);
+  }, [hangUp]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
