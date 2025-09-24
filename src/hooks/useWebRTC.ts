@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -183,23 +184,25 @@ export const useWebRTC = (
         const offerDescription = callSnapshot.data().offer;
         if (!offerDescription) return false;
 
-        if (pc.current.signalingState !== 'stable') {
-            await pc.current.setLocalDescription(null);
+        // Only proceed if we're in a stable state ready for an offer
+        if (pc.current.signalingState === 'stable') {
             await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
-        } else {
-             await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
-        }
 
-        if (pc.current.signalingState === 'have-remote-offer') {
-            const answerDescription = await pc.current.createAnswer();
-            await pc.current.setLocalDescription(answerDescription);
+            // Now, we must be in 'have-remote-offer' state to create an answer
+            if (pc.current.signalingState === 'have-remote-offer') {
+                const answerDescription = await pc.current.createAnswer();
+                await pc.current.setLocalDescription(answerDescription);
 
-            const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
-            // Update call status to connected to stop notifications
-            await updateDoc(callDocRef, { answer, status: 'connected' });
+                const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
+                // Update call status to connected to stop notifications
+                await updateDoc(callDocRef, { answer, status: 'connected' });
+            } else {
+                 console.warn(`joinCall: Cannot create answer in state ${pc.current.signalingState}`);
+                 return false;
+            }
         } else {
-             console.warn(`joinCall: Cannot create answer in state ${pc.current.signalingState}`);
-             return false;
+            console.warn(`joinCall: Cannot set remote description in state ${pc.current.signalingState}`);
+            return false;
         }
 
         setIsCaller(false);
