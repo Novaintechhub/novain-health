@@ -24,6 +24,7 @@ function RescheduleAppointmentContent() {
   const [appointment, setAppointment] = React.useState<Appointment | null>(null);
   const [doctor, setDoctor] = React.useState<DoctorProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
@@ -39,20 +40,17 @@ function RescheduleAppointmentContent() {
       try {
         setLoading(true);
         const idToken = await user.getIdToken();
-        // Step 1: Fetch the appointment
-        // NOTE: We need a new API route for this. For now, we'll assume one exists.
-        // Let's pretend it's /api/appointments/[id] for the patient
-        // Since it doesn't exist, I'll have to mock this for now, but will need to create it.
-        // For the purpose of this component, let's just fetch the doctor directly.
+        const apptRes = await fetch(`/api/appointments/${appointmentId}`, {
+             headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        if (!apptRes.ok) throw new Error("Could not fetch appointment details.");
+        const apptData: Appointment = await apptRes.json();
+        setAppointment(apptData);
         
-        // This is a placeholder. In a real app, you would fetch the appointment,
-        // get the doctorId from it, and then fetch the doctor.
-        const doctorId = "ElHdm63QB2Ucy8u7QLIMBPfZ3za2"; // Placeholder
-        
-        const response = await fetch(`/api/doctors/${doctorId}`);
-        if (!response.ok) throw new Error("Failed to fetch doctor profile.");
-        const data = await response.json();
-        setDoctor(data);
+        const docRes = await fetch(`/api/doctors/${apptData.doctorId}`);
+        if (!docRes.ok) throw new Error("Failed to fetch doctor profile.");
+        const docData = await docRes.json();
+        setDoctor(docData);
 
       } catch (err: any) {
         setError(err.message);
@@ -80,8 +78,8 @@ function RescheduleAppointmentContent() {
     setSelectedTime(null);
   };
   
-  const handleReschedule = () => {
-    if (!selectedDate || !selectedTime) {
+ const handleReschedule = async () => {
+    if (!selectedDate || !selectedTime || !appointment || !user) {
       toast({
         variant: "destructive",
         title: "Selection required",
@@ -89,13 +87,49 @@ function RescheduleAppointmentContent() {
       });
       return;
     }
-    // API call to reschedule would go here
-    toast({
-      title: "Appointment Rescheduled",
-      description: `Your appointment has been rescheduled to ${format(selectedDate, 'MMMM do')} at ${selectedTime}.`,
-    });
-    router.push('/patients/appointments');
+    setIsSubmitting(true);
+    try {
+        const idToken = await user.getIdToken();
+        const payload = {
+            date: format(selectedDate, 'yyyy-MM-dd'),
+            time: selectedTime,
+            // Carry over details from original appointment
+            method: appointment.type,
+            price: parseFloat(appointment.amount),
+            duration: appointment.duration
+        };
+
+        const response = await fetch(`/api/appointments/${appointment.id}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to reschedule appointment.");
+        }
+
+        toast({
+        title: "Appointment Rescheduled",
+        description: `Your appointment request has been updated to ${format(selectedDate, 'MMMM do')} at ${selectedTime}.`,
+        });
+        router.push('/patients/appointments');
+
+    } catch(err: any) {
+        toast({
+            variant: "destructive",
+            title: "Reschedule Failed",
+            description: err.message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
+
 
   const firstDayOfMonth = getDay(startOfMonth(currentDate));
   const daysInMonth = getDaysInMonth(currentDate);
@@ -136,8 +170,8 @@ function RescheduleAppointmentContent() {
       )
   }
 
-  if (error || !doctor) {
-      return <div className="text-center text-red-500 py-10">{error || "Doctor not found."}</div>
+  if (error || !doctor || !appointment) {
+      return <div className="text-center text-red-500 py-10">{error || "Could not load appointment details."}</div>
   }
 
   return (
@@ -218,8 +252,8 @@ function RescheduleAppointmentContent() {
       </Card>
       
       <div className="flex justify-end gap-4">
-        <Button size="lg" onClick={handleReschedule} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime}>
-            Confirm Reschedule
+        <Button size="lg" onClick={handleReschedule} className="bg-cyan-500 hover:bg-cyan-600 text-white" disabled={!selectedDate || !selectedTime || isSubmitting}>
+            {isSubmitting ? 'Rescheduling...' : 'Confirm Reschedule'}
         </Button>
       </div>
     </div>

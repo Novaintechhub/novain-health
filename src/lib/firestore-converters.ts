@@ -39,6 +39,7 @@ export const doctorConverter: FirestoreDataConverter<DoctorCoreProfile> = {
       lga: data.lga,
       language: data.language,
       mobileNumber: data.mobileNumber,
+      reliabilityScore: data.reliabilityScore ?? 100,
     };
   },
 };

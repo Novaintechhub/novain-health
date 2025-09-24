@@ -52,7 +52,7 @@ export interface DoctorCoreProfile extends UserProfile {
     lga?: string;
     language?: string;
     mobileNumber?: string;
-    reliabilityScore?: number; // New field for reliability
+    reliabilityScore?: number;
 }
 
 export interface DoctorDetails {

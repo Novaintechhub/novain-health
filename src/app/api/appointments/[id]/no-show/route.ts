@@ -63,13 +63,8 @@ export async function POST(
     const doctorRef = db.collection('doctors').doc(appointment.doctorId);
 
     if (action === 'refund') {
-      const patientDoc = await patientRef.get();
-      if (patientDoc.exists) {
-        const patientData = patientDoc.data()!;
-        const currentBalance = patientData.walletBalance || 0;
-        const refundAmount = parseFloat(appointment.amount);
-        await patientRef.update({ walletBalance: currentBalance + refundAmount });
-      }
+      const refundAmount = parseFloat(appointment.amount);
+      await patientRef.update({ walletBalance: FieldValue.increment(refundAmount) });
     }
     
     // Decrement doctor's reliability score by 5

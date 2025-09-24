@@ -57,6 +57,8 @@ export async function POST(
     if (ampm === 'AM' && hours === 12) hours = 0;
 
     const appointmentDate = new Date(`${date}T00:00:00.000Z`);
+    // Note: Using setUTCHours assumes the frontend sends times in a consistent timezone-agnostic way.
+    // Be mindful of this if you introduce timezones.
     appointmentDate.setUTCHours(hours, minutes, 0, 0);
     
     const updatedAppointmentData = {
@@ -66,6 +68,7 @@ export async function POST(
         amount: price.toString(),
         duration: duration,
         status: 'Pending', // Reset status to Pending for re-approval
+        // Note: isPaid status is preserved from the original booking.
     };
 
     await appointmentRef.update(updatedAppointmentData);
@@ -83,7 +86,7 @@ export async function POST(
 
         await db.collection('notifications').add({
             userId: doctorId,
-            message: `Appointment with ${patientData.firstName} ${patientData.lastName} has been rescheduled.`,
+            message: `Appointment with ${patientData.firstName} ${patientData.lastName} has been rescheduled. Please review.`,
             link: `/doctor/appointments`,
             createdAt: new Date().toISOString(),
             read: false,
