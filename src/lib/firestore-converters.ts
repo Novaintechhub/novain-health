@@ -80,6 +80,7 @@ export const patientConverter: FirestoreDataConverter<PatientProfile> = {
       genotype: data.genotype || 'N/A',
       bloodGroup: data.bloodGroup || 'N/A',
       dateOfBirth: data.dateOfBirth,
+      walletBalance: data.walletBalance || 0,
     };
   },
 };

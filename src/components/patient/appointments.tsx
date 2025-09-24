@@ -68,6 +68,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     Cancelled: 'bg-red-100 text-red-800',
     Pending: 'bg-yellow-100 text-yellow-800',
     Completed: 'bg-blue-100 text-blue-800',
+    'No-Show': 'bg-orange-100 text-orange-800',
   };
 
   return <Badge className={`capitalize ${statusClasses[status] || ''}`}>{status}</Badge>;
@@ -134,7 +135,7 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
         {appointment.status === 'Pending' && (
           <>
             <Button asChild variant="outline" size="sm">
-              <Link href={`/patients/doctor-profile?id=${appointment.doctorId}&edit=${appointment.id}`}><Edit className="w-4 h-4 mr-1" /> Edit</Link>
+              <Link href={`/patients/reschedule-appointment?id=${appointment.id}`}><Edit className="w-4 h-4 mr-1" /> Edit</Link>
             </Button>
             <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
                 <AlertDialogTrigger asChild>
@@ -182,7 +183,7 @@ const AppointmentActions = ({ appointment, onCancelSuccess }: { appointment: App
 
         {appointment.status === 'Approved' && isAppointmentPast && (
           <Button asChild variant="destructive" size="sm">
-            <Link href="/patients/report-no-show">
+            <Link href={`/patients/report-no-show?id=${appointment.id}`}>
               <AlertCircle className="w-4 h-4 mr-1" />
               Report No-Show
             </Link>
@@ -270,9 +271,6 @@ export default function Appointments() {
             toast({ title: "Processing", description: "Verifying your payment..." });
             try {
                 const idToken = await user.getIdToken();
-                // We don't have appointment ID in URL, so we can't send it.
-                // The verify endpoint will need to rely on the reference.
-                // Let's adapt the verify endpoint logic later if needed.
                 const response = await fetch('/api/payments/verify', {
                     method: 'POST',
                     headers: {

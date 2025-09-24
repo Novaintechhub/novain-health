@@ -155,6 +155,7 @@ export interface PatientProfile extends UserProfile {
     genotype?: string;
     bloodGroup?: string;
     dateOfBirth?: string;
+    walletBalance?: number;
 }
 
 export type ConsultationDetails = {
@@ -181,7 +182,7 @@ export type Appointment = {
   appointmentDate: string; // Stored as ISO string
   bookingDate: string;
   type: string;
-  status: "Approved" | "Cancelled" | "Pending" | "Completed";
+  status: "Approved" | "Cancelled" | "Pending" | "Completed" | "No-Show";
   amount: string;
   isPaid: boolean;
   cancellationReason?: string;
