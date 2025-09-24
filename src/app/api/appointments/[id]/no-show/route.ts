@@ -7,6 +7,7 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { appointmentConverter, patientConverter, doctorConverter } from '@/lib/firestore-converters';
 import { isPast } from 'date-fns';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const NoShowSchema = z.object({
   action: z.enum(['refund', 'reschedule']),
@@ -59,10 +60,9 @@ export async function POST(
     await appointmentRef.update({ status: 'No-Show' });
 
     const patientRef = db.collection('patients').doc(patientId).withConverter(patientConverter);
+    const doctorRef = db.collection('doctors').doc(appointment.doctorId);
 
     if (action === 'refund') {
-      // In a real app, this would be a transactional update.
-      // For now, we'll just update the patient's wallet balance if it exists.
       const patientDoc = await patientRef.get();
       if (patientDoc.exists) {
         const patientData = patientDoc.data()!;
@@ -72,10 +72,15 @@ export async function POST(
       }
     }
     
+    // Decrement doctor's reliability score by 5
+    await doctorRef.update({
+        reliabilityScore: FieldValue.increment(-5)
+    });
+    
     // Notify doctor
      await db.collection('notifications').add({
         userId: appointment.doctorId,
-        message: `Patient ${appointment.patientName} reported a no-show for your appointment.`,
+        message: `Patient ${appointment.patientName} reported a no-show for your appointment. Your reliability score has been updated.`,
         link: `/doctor/appointments`,
         createdAt: new Date().toISOString(),
         read: false,
