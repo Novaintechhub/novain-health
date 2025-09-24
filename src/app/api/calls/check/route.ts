@@ -32,7 +32,11 @@ export async function POST(request: Request) {
 
     const db = getAdminDb();
     const callsRef = db.collection('calls');
-    const snapshot = await callsRef.where('__name__', 'in', appointmentIds).get();
+    // Query for pending calls within the user's appointments
+    const snapshot = await callsRef
+        .where('__name__', 'in', appointmentIds)
+        .where('status', '==', 'pending')
+        .get();
 
     if (snapshot.empty) {
       return NextResponse.json({ incomingCall: null });

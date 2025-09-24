@@ -58,6 +58,10 @@ export const useWebRTC = (
         const state = pc.current?.connectionState;
         if (state === 'connected') {
             setIsConnected(true);
+            // Once connected, stop polling
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+            }
         } else if (['disconnected', 'failed', 'closed'].includes(state || '')) {
             setIsConnected(false);
         }
@@ -180,17 +184,19 @@ export const useWebRTC = (
         if (!offerDescription) return false;
 
         if (pc.current.signalingState !== 'stable') {
-          return false;
+            await pc.current.setLocalDescription(null);
+            await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
+        } else {
+             await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
         }
-
-        await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
         if (pc.current.signalingState === 'have-remote-offer') {
             const answerDescription = await pc.current.createAnswer();
             await pc.current.setLocalDescription(answerDescription);
 
             const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
-            await updateDoc(callDocRef, { answer });
+            // Update call status to connected to stop notifications
+            await updateDoc(callDocRef, { answer, status: 'connected' });
         } else {
              console.warn(`joinCall: Cannot create answer in state ${pc.current.signalingState}`);
              return false;

@@ -24,11 +24,12 @@ export async function POST(request: Request, { params }: { params: { appointment
     const db = getAdminDb();
     const callRef = db.collection('calls').doc(appointmentId);
     
-    // Create the call document with the offer
+    // Create the call document with the offer and a pending status
     await callRef.set({
       callerId,
       offer,
       createdAt: new Date().toISOString(),
+      status: 'pending', // Add status field
     });
     
     return NextResponse.json({ message: 'Call initiated successfully' });
