@@ -207,7 +207,7 @@ function RequestAppointmentContent() {
     const h = parseInt(hours, 10);
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
-    return `${h12}:${minutes} ${ampm}`;
+    return `${h12}:${minutes.padStart(2, '0')} ${ampm}`;
   };
   
   React.useEffect(() => {
@@ -330,22 +330,20 @@ function RequestAppointmentContent() {
   const approvedAppointmentTimes = React.useMemo(() => {
     if (!doctor?.approvedAppointments || !selectedDate) return new Set();
     
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    
     return new Set(
         doctor.approvedAppointments
-            .map(appt => new Date(appt.appointmentDate!))
-            .filter(apptDate => format(apptDate, 'yyyy-MM-dd') === selectedDateString)
-            .map(apptDate => formatTo12Hour(format(apptDate, 'HH:mm')))
+            .filter(appt => appt.appointmentDate && format(new Date(appt.appointmentDate), 'yyyy-MM-dd') === selectedDateStr)
+            .map(appt => format(new Date(appt.appointmentDate!), 'HH:mm'))
     );
-  }, [doctor?.approvedAppointments, selectedDate, selectedDateString]);
+  }, [doctor?.approvedAppointments, selectedDate]);
+  
   
   const isTimeSlotPast = (startTime: string): boolean => {
     if (!selectedDate || !isToday(selectedDate)) return false;
 
-    const [time, ampm] = startTime.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    if (ampm === 'PM' && hours < 12) hours += 12;
-    if (ampm === 'AM' && hours === 12) hours = 0;
-
+    const [hours, minutes] = startTime.split(':').map(Number);
     const slotDateTime = new Date(selectedDate);
     slotDateTime.setHours(hours, minutes, 0, 0);
 
@@ -447,10 +445,9 @@ function RequestAppointmentContent() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {availableSlots.length > 0 ? (
                     availableSlots.map((slot: {start: string, end: string}, index: number) => {
-                      const startTime12hr = formatTo12Hour(slot.start);
-                      const isBooked = approvedAppointmentTimes.has(startTime12hr);
-                      const isPastSlot = isTimeSlotPast(startTime12hr);
-                      const timeRange = `${startTime12hr} - ${formatTo12Hour(slot.end)}`;
+                      const isBooked = approvedAppointmentTimes.has(slot.start);
+                      const isPastSlot = isTimeSlotPast(slot.start);
+                      const timeRange = `${formatTo12Hour(slot.start)} - ${formatTo12Hour(slot.end)}`;
                       
                       return (
                         <Button
@@ -488,3 +485,4 @@ export default function RequestAppointment() {
         </React.Suspense>
     );
 }
+
