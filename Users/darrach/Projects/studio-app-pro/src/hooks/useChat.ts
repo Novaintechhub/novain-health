@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 import { useAuth } from './use-auth';
 import { useToast } from './use-toast';
+import { FirestorePermissionError, errorEmitter } from '@/lib/firebase-error-handling';
 
 export type Message = {
     id: string;
@@ -31,7 +32,8 @@ export function useChat(appointmentId: string | null) {
         setLoading(true);
         setError(null);
 
-        const messagesRef = collection(db, 'appointments', appointmentId, 'messages');
+        const messagesPath = `appointments/${appointmentId}/messages`;
+        const messagesRef = collection(db, messagesPath);
         const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -48,13 +50,18 @@ export function useChat(appointmentId: string | null) {
             setMessages(msgs);
             setLoading(false);
         }, (err) => {
-            console.error("Error fetching messages:", err);
-            setError("Could not load messages. Please check your connection or permissions.");
-            toast({
-                variant: 'destructive',
-                title: 'Error Loading Chat',
-                description: "Could not load messages."
-            });
+            if (err.code === 'permission-denied') {
+                const customError = new FirestorePermissionError(
+                    "Lacking permissions to read chat messages.",
+                    messagesPath,
+                    'list'
+                );
+                errorEmitter.emit('permission-error', customError);
+                setError("You don't have permission to view these messages.");
+            } else {
+                console.error("Error fetching messages:", err);
+                setError("Could not load messages.");
+            }
             setLoading(false);
         });
 
@@ -90,6 +97,15 @@ export function useChat(appointmentId: string | null) {
             return true;
 
         } catch (err: any) {
+             if (err.message.includes('permission-denied')) {
+                const customError = new FirestorePermissionError(
+                    "Lacking permissions to send a message.",
+                    `appointments/${appointmentId}/messages`,
+                    'write',
+                    { text }
+                );
+                errorEmitter.emit('permission-error', customError);
+            }
             toast({
                 variant: 'destructive',
                 title: 'Message failed',
