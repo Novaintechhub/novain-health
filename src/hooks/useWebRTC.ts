@@ -59,7 +59,6 @@ export const useWebRTC = (
         const state = pc.current?.connectionState;
         if (state === 'connected') {
             setIsConnected(true);
-            // Once connected, stop polling
             if (pollIntervalRef.current) {
                 clearInterval(pollIntervalRef.current);
             }
@@ -84,12 +83,10 @@ export const useWebRTC = (
 
         const { answer, candidates } = await res.json();
         
-        // Caller receives the answer from the callee
         if (callerPerspective && answer && !pc.current.currentRemoteDescription) {
             await pc.current.setRemoteDescription(new RTCSessionDescription(answer));
         }
         
-        // Both sides add ICE candidates from the other party
         if (Array.isArray(candidates)) {
             for (const c of candidates) {
                 try {
@@ -155,12 +152,11 @@ export const useWebRTC = (
   
   const joinCall = useCallback(async (): Promise<boolean> => {
     if (!localStream || !appointmentId) return false;
-
     ensurePC();
-    if (!pc.current) return false;
     
     const user = getAuth().currentUser;
     if (!user) return false;
+    if (!pc.current) return false;
 
     pc.current.onicecandidate = async (event) => {
       if (event.candidate) {
@@ -177,33 +173,34 @@ export const useWebRTC = (
         const callDocRef = doc(db, 'calls', appointmentId);
         const callSnapshot = await getDoc(callDocRef);
         
-        if (!callSnapshot.exists()) {
+        if (!callSnapshot.exists() || callSnapshot.data().status !== 'pending') {
             return false;
         }
 
         const offerDescription = callSnapshot.data().offer;
         if (!offerDescription) return false;
 
-        // Only proceed if we're in a stable state ready for an offer
-        if (pc.current.signalingState === 'stable') {
-            await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
-
-            // Now, we must be in 'have-remote-offer' state to create an answer
-            if (pc.current.signalingState === 'have-remote-offer') {
-                const answerDescription = await pc.current.createAnswer();
-                await pc.current.setLocalDescription(answerDescription);
-
-                const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
-                // Update call status to connected to stop notifications
-                await updateDoc(callDocRef, { answer, status: 'connected' });
-            } else {
-                 console.warn(`joinCall: Cannot create answer in state ${pc.current.signalingState}`);
-                 return false;
-            }
-        } else {
-            console.warn(`joinCall: Cannot set remote description in state ${pc.current.signalingState}`);
+        if (pc.current.signalingState !== 'stable') {
             return false;
         }
+
+        await pc.current.setRemoteDescription(new RTCSessionDescription(offerDescription));
+        
+        if (pc.current.signalingState !== 'have-remote-offer') {
+            return false;
+        }
+
+        const answerDescription = await pc.current.createAnswer();
+        await pc.current.setLocalDescription(answerDescription);
+
+        const answer = { type: answerDescription.type, sdp: answerDescription.sdp! };
+        
+        const idToken = await user.getIdToken();
+        await fetch(`/api/calls/${appointmentId}/connect`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify({ answer }),
+        });
 
         setIsCaller(false);
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
