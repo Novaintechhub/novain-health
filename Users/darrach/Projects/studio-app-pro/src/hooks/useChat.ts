@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect, useCallback } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { useAuth } from './use-auth';
 import { useToast } from './use-toast';
-import type { Timestamp } from 'firebase/firestore';
 
 export type Message = {
     id: string;
@@ -19,61 +20,47 @@ export function useChat(appointmentId: string | null) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const fetchMessages = useCallback(async () => {
+    useEffect(() => {
         if (!appointmentId || !user) {
             setLoading(false);
+            setMessages([]);
             return;
         }
-        
-        // Don't show loading skeleton on subsequent polls
-        if (messages.length === 0) {
-            setLoading(true);
-        }
+
+        setLoading(true);
         setError(null);
 
-        try {
-            const idToken = await user.getIdToken();
-            const response = await fetch(`/api/messages/${appointmentId}`, {
-                headers: { 'Authorization': `Bearer ${idToken}` },
-                cache: 'no-store', // Ensure fresh data
-            });
+        const messagesRef = collection(db, 'appointments', appointmentId, 'messages');
+        const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to fetch messages.');
-            }
-            const data: Message[] = await response.json();
-            setMessages(data);
-        } catch (err: any) {
-            setError(err.message);
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const msgs: Message[] = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                msgs.push({
+                    id: doc.id,
+                    text: data.text,
+                    senderId: data.senderId,
+                    timestamp: data.timestamp,
+                });
+            });
+            setMessages(msgs);
+            setLoading(false);
+        }, (err) => {
+            console.error("Error fetching messages:", err);
+            setError("Could not load messages. Please check your connection or permissions.");
             toast({
                 variant: 'destructive',
                 title: 'Error Loading Chat',
-                description: err.message
+                description: "Could not load messages."
             });
-            // Stop polling on error
-            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-        } finally {
-            if (loading) setLoading(false);
-        }
+            setLoading(false);
+        });
 
-    }, [appointmentId, user, toast, loading, messages.length]);
-
-
-    useEffect(() => {
-        fetchMessages(); // Initial fetch
-
-        // Set up polling
-        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = setInterval(fetchMessages, 5000); // Poll every 5 seconds
-
-        // Cleanup on unmount
-        return () => {
-            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-        };
-    }, [fetchMessages]);
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, [appointmentId, user, toast]);
 
     const sendMessage = useCallback(async (text: string): Promise<boolean> => {
         if (!appointmentId || !user) {
@@ -100,9 +87,6 @@ export function useChat(appointmentId: string | null) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to send message.');
             }
-            
-            // Immediately fetch messages after sending to get the latest update
-            await fetchMessages();
             return true;
 
         } catch (err: any) {
@@ -113,7 +97,7 @@ export function useChat(appointmentId: string | null) {
             });
             return false;
         }
-    }, [appointmentId, user, toast, fetchMessages]);
+    }, [appointmentId, user, toast]);
 
     return { messages, loading, error, sendMessage };
 }

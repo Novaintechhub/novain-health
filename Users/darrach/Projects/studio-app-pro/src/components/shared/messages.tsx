@@ -6,8 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Paperclip, Mic, Send, Bookmark, Phone, Video, ArrowLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Paperclip, Mic, Send, Bookmark, Phone, Video, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import type { Appointment } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -62,9 +61,16 @@ export default function Messages() {
   const handleSendMessage = async () => {
       if (newMessage.trim() && appointmentId && !isSending) {
           setIsSending(true);
+          // Add optimistic UI update
+          const tempId = Date.now().toString();
+          // setMessages(prev => [...prev, { id: tempId, text: newMessage, senderId: user!.uid, timestamp: null }]);
+          
           const success = await sendMessage(newMessage);
           if (success) {
             setNewMessage('');
+          } else {
+            // Revert optimistic update on failure
+            // setMessages(prev => prev.filter(msg => msg.id !== tempId));
           }
           setIsSending(false);
       }
