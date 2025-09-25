@@ -1,13 +1,19 @@
 
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from 'next/navigation';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Paperclip, Mic, Send, Bookmark, Phone, Video, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import type { Appointment } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { useChat, Message } from "@/hooks/useChat"; // We will create this hook
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 const conversations = [
   {
@@ -24,132 +30,138 @@ const conversations = [
     avatarHint: "doctor portrait",
     online: false,
   },
-  {
-    name: "Dr. Leke Alder",
-    status: "Active yesterday",
-    avatar: "https://placehold.co/40x40.png",
-    avatarHint: "female doctor",
-    online: false,
-  },
-  {
-    name: "Dr. Chisom Agu",
-    status: "Active 4 hours ago",
-    avatar: "https://placehold.co/40x40.png",
-    avatarHint: "female doctor glasses",
-    online: true,
-  },
 ];
 
-const initialMessages = [
-    {
-        sender: 'patient',
-        time: '8:46am',
-        text: 'Good morning, Doctor. I\'ve been experiencing persistent headaches for about a week now.'
-    },
-    {
-        sender: 'patient',
-        time: '8:46am',
-        text: 'They usually happen in the afternoons.'
-    },
-    {
-        sender: 'doctor',
-        time: '8:47am',
-        text: 'Good morning! I\'m sorry to hear that. Could you describe the nature of the headaches? Are they sharp, dull, or throbbing?'
-    },
-];
 
 export default function Messages() {
-  const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
-  const [messages, setMessages] = useState(initialMessages);
-  const [newMessage, setNewMessage] = useState('');
-  const [isChatActive, setIsChatActive] = useState(false);
+  const searchParams = useSearchParams();
+  const appointmentId = searchParams.get('appointmentId');
+  const { user, role } = useAuth();
+  const { toast } = useToast();
 
-  const handleSendMessage = () => {
-      if (newMessage.trim()) {
-          setMessages([...messages, { sender: 'patient', text: newMessage, time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) }]);
-          setNewMessage('');
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [loadingAppointment, setLoadingAppointment] = useState(true);
+  
+  const { messages, loading: loadingMessages, error, sendMessage } = useChat(appointmentId);
+  
+  const [newMessage, setNewMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    const fetchAppointment = async () => {
+      if (!appointmentId || !user) {
+        setLoadingAppointment(false);
+        return;
+      }
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/appointments/${appointmentId}`, {
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        if (!response.ok) throw new Error("Failed to fetch appointment details.");
+        const data = await response.json();
+        setAppointment(data);
+      } catch (err: any) {
+        toast({ variant: "destructive", title: "Error", description: err.message });
+      } finally {
+        setLoadingAppointment(false);
+      }
+    };
+    if (user) fetchAppointment();
+  }, [appointmentId, user, toast]);
+
+  const handleSendMessage = async () => {
+      if (newMessage.trim() && appointmentId && !isSending) {
+          setIsSending(true);
+          const success = await sendMessage(newMessage);
+          if (success) {
+            setNewMessage('');
+          }
+          setIsSending(false);
       }
   };
+  
+  const otherParticipant = role === 'doctor' 
+    ? { name: appointment?.patientName, avatar: appointment?.patientAvatar, hint: appointment?.patientAvatarHint }
+    : { name: appointment?.doctorName, avatar: appointment?.doctorAvatar, hint: appointment?.doctorAvatarHint };
 
-  const handleConversationSelect = (convo: typeof conversations[0]) => {
-    setSelectedConversation(convo);
-    setIsChatActive(true);
-  };
+  if (loadingAppointment) {
+      return (
+          <div className="flex h-[calc(100vh-10rem)] md:h-[calc(100vh-4rem)] bg-white rounded-lg border">
+              <div className="w-full md:w-80 border-r flex-col hidden md:flex p-4 space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+              </div>
+              <div className="flex-1 flex flex-col">
+                  <div className="p-4 border-b flex items-center gap-4">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="space-y-1">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-16" />
+                      </div>
+                  </div>
+                  <div className="flex-1 p-6 space-y-4">
+                      <Skeleton className="h-12 w-3/5" />
+                      <Skeleton className="h-12 w-3/5 ml-auto" />
+                  </div>
+              </div>
+          </div>
+      )
+  }
 
+  if (!appointmentId) {
+      // Show a list of conversations or a prompt to select one
+      return (
+          <div className="flex h-[calc(100vh-10rem)] md:h-[calc(100vh-4rem)] bg-white rounded-lg border items-center justify-center">
+              <p className="text-muted-foreground">Select a conversation to start messaging.</p>
+          </div>
+      )
+  }
 
   return (
     <div className="flex h-[calc(100vh-10rem)] md:h-[calc(100vh-4rem)] bg-white rounded-lg border">
-      <aside className={cn(
-        "w-full md:w-80 border-r flex-col",
-        isChatActive ? "hidden md:flex" : "flex"
-      )}>
-        <div className="p-4 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input placeholder="Search Conversations" className="pl-10" />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          {conversations.map((convo, index) => (
-            <div
-              key={index}
-              className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 ${selectedConversation.name === convo.name ? 'bg-blue-50' : ''}`}
-              onClick={() => handleConversationSelect(convo)}
-            >
-              <div className="relative">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={convo.avatar} alt={convo.name} data-ai-hint={convo.avatarHint} />
-                  <AvatarFallback>{convo.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                {convo.online && <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold">{convo.name}</p>
-                <p className="text-sm text-gray-500">{convo.status}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </aside>
-
-      <main className={cn(
-          "flex-1 flex-col",
-          isChatActive ? "flex" : "hidden md:flex"
-      )} style={{ backgroundImage: "url('/background-pattern.png')", backgroundRepeat: 'repeat' }}>
+      <main className="flex-1 flex flex-col" style={{ backgroundImage: "url('/background-pattern.png')", backgroundRepeat: 'repeat' }}>
         <header className="flex items-center justify-between p-4 border-b bg-white">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsChatActive(false)}>
-                <ArrowLeft className="h-5 w-5"/>
-            </Button>
+            <Link href={role === 'doctor' ? '/doctor/appointments' : '/patients/appointments'} className="md:hidden">
+              <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-5 w-5"/>
+              </Button>
+            </Link>
             <Avatar className="h-10 w-10">
-              <AvatarImage src={selectedConversation.avatar} alt={selectedConversation.name} data-ai-hint={selectedConversation.avatarHint} />
-              <AvatarFallback>{selectedConversation.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} data-ai-hint={otherParticipant.hint} />
+              <AvatarFallback>{otherParticipant.name?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold">{selectedConversation.name}</p>
+              <p className="font-semibold">{otherParticipant.name}</p>
               <p className="text-sm text-green-500">Online</p>
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-4 text-gray-500">
             <Button variant="ghost" size="icon"><Bookmark className="h-5 w-5"/></Button>
-            <Link href="/patients/voice-call">
-              <Button variant="ghost" size="icon"><Phone className="h-5 w-5"/></Button>
-            </Link>
-            <Link href="/patients/video-call">
-             <Button variant="ghost" size="icon"><Video className="h-5 w-5"/></Button>
-            </Link>
+            <Button variant="ghost" size="icon"><Phone className="h-5 w-5"/></Button>
+            <Button variant="ghost" size="icon"><Video className="h-5 w-5"/></Button>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((msg, index) => (
-            <div key={index} className={`flex flex-col ${msg.sender === 'patient' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-md p-3 rounded-lg ${msg.sender === 'patient' ? 'bg-cyan-400 text-white rounded-br-none' : 'bg-white rounded-bl-none'}`}>
+          {loadingMessages && <p>Loading messages...</p>}
+          {error && <p className="text-destructive text-center">{error}</p>}
+          {!loadingMessages && messages.map((msg) => (
+            <div key={msg.id} className={`flex flex-col ${msg.senderId === user?.uid ? 'items-end' : 'items-start'}`}>
+                <div className={`max-w-md p-3 rounded-lg ${msg.senderId === user?.uid ? 'bg-cyan-400 text-white rounded-br-none' : 'bg-white rounded-bl-none'}`}>
                     <p>{msg.text}</p>
                 </div>
-                <p className="text-xs text-gray-400 mt-1 px-1">{msg.time}</p>
+                <p className="text-xs text-gray-400 mt-1 px-1">{msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit'}) : 'sending...'}</p>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <footer className="p-4 bg-white border-t">
@@ -163,7 +175,9 @@ export default function Messages() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             />
-            <Button onClick={handleSendMessage}><Send className="h-5 w-5"/></Button>
+            <Button onClick={handleSendMessage} disabled={isSending}>
+                {isSending ? 'Sending...' : <Send className="h-5 w-5"/>}
+            </Button>
           </div>
         </footer>
       </main>
