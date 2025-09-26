@@ -7,13 +7,56 @@ import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/fire
 import { useAuth } from './use-auth';
 import { useToast } from './use-toast';
 import { FirestorePermissionError, errorEmitter } from '@/lib/firebase-error-handling';
+import { v4 as uuidv4 } from 'uuid';
 
 export type Message = {
     id: string;
-    text: string;
+    text?: string;
     senderId: string;
     timestamp: Timestamp | null;
+    audioUrl?: string;
+    fileUrl?: string;
+    fileName?: string;
 };
+
+export type SendMessagePayload = {
+  text?: string;
+  attachment?: File;
+  audio?: Blob;
+};
+
+async function uploadFile(file: File | Blob, uid: string, token: string): Promise<{ url: string, name: string }> {
+  const isAudio = file instanceof Blob && !(file instanceof File);
+  const fileName = isAudio ? `${uuidv4()}.webm` : (file as File).name;
+  
+  // Create a temporary data URI to pass to the upload endpoint
+  const reader = new FileReader();
+  const dataUriPromise = new Promise<string>((resolve, reject) => {
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const dataUri = await dataUriPromise;
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      files: [{ name: fileName, dataUri }]
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('File upload failed');
+  }
+
+  const result = await response.json();
+  return { url: result.urls[0], name: fileName };
+}
+
 
 export function useChat(appointmentId: string | null) {
     const { user } = useAuth();
@@ -45,6 +88,9 @@ export function useChat(appointmentId: string | null) {
                     text: data.text,
                     senderId: data.senderId,
                     timestamp: data.timestamp,
+                    audioUrl: data.audioUrl,
+                    fileUrl: data.fileUrl,
+                    fileName: data.fileName,
                 });
             });
             setMessages(msgs);
@@ -69,7 +115,7 @@ export function useChat(appointmentId: string | null) {
         return () => unsubscribe();
     }, [appointmentId, user, toast]);
 
-    const sendMessage = useCallback(async (text: string): Promise<boolean> => {
+    const sendMessage = useCallback(async (payload: SendMessagePayload): Promise<boolean> => {
         if (!appointmentId || !user) {
             toast({
                 variant: 'destructive',
@@ -81,13 +127,29 @@ export function useChat(appointmentId: string | null) {
 
         try {
             const idToken = await user.getIdToken();
+            const messageData: Partial<Message> = {
+                text: payload.text
+            };
+            let resourceDataForError = { text: payload.text };
+
+            if (payload.attachment) {
+                const { url, name } = await uploadFile(payload.attachment, user.uid, idToken);
+                messageData.fileUrl = url;
+                messageData.fileName = name;
+                resourceDataForError = { ...resourceDataForError, ...messageData };
+            } else if (payload.audio) {
+                const { url } = await uploadFile(payload.audio, user.uid, idToken);
+                messageData.audioUrl = url;
+                resourceDataForError = { ...resourceDataForError, ...messageData };
+            }
+
             const response = await fetch('/api/messages/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ appointmentId, text }),
+                body: JSON.stringify({ appointmentId, ...messageData }),
             });
             
             if (!response.ok) {
@@ -102,7 +164,7 @@ export function useChat(appointmentId: string | null) {
                     "Lacking permissions to send a message.",
                     `appointments/${appointmentId}/messages`,
                     'write',
-                    { text }
+                    { text: payload.text }
                 );
                 errorEmitter.emit('permission-error', customError);
             }
