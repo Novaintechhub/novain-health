@@ -25,11 +25,10 @@ export type SendMessagePayload = {
   audio?: Blob;
 };
 
-async function uploadFile(file: File | Blob, uid: string, token: string): Promise<{ url: string, name: string }> {
+async function uploadFile(file: File | Blob, token: string): Promise<{ url: string, name: string }> {
   const isAudio = file instanceof Blob && !(file instanceof File);
   const fileName = isAudio ? `${uuidv4()}.webm` : (file as File).name;
   
-  // Create a temporary data URI to pass to the upload endpoint
   const reader = new FileReader();
   const dataUriPromise = new Promise<string>((resolve, reject) => {
     reader.onloadend = () => resolve(reader.result as string);
@@ -50,10 +49,14 @@ async function uploadFile(file: File | Blob, uid: string, token: string): Promis
   });
 
   if (!response.ok) {
-    throw new Error('File upload failed');
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'File upload failed');
   }
 
   const result = await response.json();
+  if (!result.urls || result.urls.length === 0) {
+    throw new Error('File upload succeeded but did not return a URL.');
+  }
   return { url: result.urls[0], name: fileName };
 }
 
@@ -113,7 +116,7 @@ export function useChat(appointmentId: string | null) {
 
         // Cleanup subscription on unmount
         return () => unsubscribe();
-    }, [appointmentId, user, toast]);
+    }, [appointmentId, user]);
 
     const sendMessage = useCallback(async (payload: SendMessagePayload): Promise<boolean> => {
         if (!appointmentId || !user) {
@@ -124,22 +127,28 @@ export function useChat(appointmentId: string | null) {
             });
             return false;
         }
+        
+        if (!payload.text?.trim() && !payload.attachment && !payload.audio) {
+            return false;
+        }
 
         try {
             const idToken = await user.getIdToken();
-            const messageData: Partial<Message> = {
+            const messageData: Partial<Omit<Message, 'id' | 'senderId' | 'timestamp'>> = {
                 text: payload.text
             };
-            let resourceDataForError = { text: payload.text };
+            
+            let resourceDataForError: Record<string, any> = { text: payload.text };
 
             if (payload.attachment) {
-                const { url, name } = await uploadFile(payload.attachment, user.uid, idToken);
+                const { url, name } = await uploadFile(payload.attachment, idToken);
                 messageData.fileUrl = url;
                 messageData.fileName = name;
                 resourceDataForError = { ...resourceDataForError, ...messageData };
             } else if (payload.audio) {
-                const { url } = await uploadFile(payload.audio, user.uid, idToken);
+                const { url, name } = await uploadFile(payload.audio, idToken);
                 messageData.audioUrl = url;
+                messageData.fileName = name; // Store audio file name too
                 resourceDataForError = { ...resourceDataForError, ...messageData };
             }
 
