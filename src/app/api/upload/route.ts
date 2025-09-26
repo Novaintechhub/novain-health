@@ -11,22 +11,22 @@ const UploadRequestSchema = z.object({
   files: z.array(z.object({
     name: z.string(),
     dataUri: z.string(),
-  })),
+  })).min(1),
 });
 
 async function uploadFile(dataUri: string, uid: string, fileName: string): Promise<string> {
     const storage = getAdminStorage();
     const bucket = storage.bucket();
 
-    const match = dataUri.match(/^data:((image\/\w+)|(application\/pdf));base64,(.+)$/);
+    const match = dataUri.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
     if (!match) {
         throw new Error(`Invalid Data URI for file: ${fileName}`);
     }
     const contentType = match[1];
-    const base64Data = match[2] || match[4]; // Handle different regex group capture
+    const base64Data = match[2];
     const buffer = Buffer.from(base64Data, 'base64');
     
-    const filePath = `medical-records/${uid}/${uuidv4()}-${fileName}`;
+    const filePath = `chat-attachments/${uid}/${uuidv4()}-${fileName}`;
     const file = bucket.file(filePath);
 
     await file.save(buffer, {
@@ -59,7 +59,9 @@ export async function POST(request: Request) {
     const uploadPromises = files.map(file => uploadFile(file.dataUri, uid, file.name));
     const fileUrls = await Promise.all(uploadPromises);
 
-    return NextResponse.json({ urls: fileUrls });
+    // For simplicity, we'll return the URL and name of the first file.
+    // The schema enforces at least one file.
+    return NextResponse.json({ urls: fileUrls, name: files[0].name });
 
   } catch (error: any) {
     console.error('File upload error:', error);

@@ -9,7 +9,10 @@ import { appointmentConverter } from '@/lib/firestore-converters';
 
 const SendMessageSchema = z.object({
   appointmentId: z.string().min(1),
-  text: z.string().min(1),
+  text: z.string().optional(),
+  fileUrl: z.string().url().optional(),
+  fileName: z.string().optional(),
+  audioUrl: z.string().url().optional(),
 });
 
 export async function POST(request: Request) {
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
     if (!validation.success) {
       return NextResponse.json({ error: validation.error.format() }, { status: 400 });
     }
-    const { appointmentId, text } = validation.data;
+    const { appointmentId, ...messageData } = validation.data;
 
     const db = getAdminDb();
     
@@ -34,7 +37,7 @@ export async function POST(request: Request) {
     const appointmentRef = db.collection('appointments').doc(appointmentId).withConverter(appointmentConverter);
     const appointmentDoc = await appointmentRef.get();
 
-    if (!appointmentDoc.exists) {
+    if (!appointmentDoc.exists()) {
         return NextResponse.json({ error: 'Appointment not found.' }, { status: 404 });
     }
     
@@ -48,8 +51,8 @@ export async function POST(request: Request) {
     
     await messageRef.set({
         senderId: senderId,
-        text: text,
         timestamp: FieldValue.serverTimestamp(),
+        ...messageData
     });
     
     return NextResponse.json({ message: 'Message sent successfully', messageId: messageRef.id });
